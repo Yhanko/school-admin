@@ -65,7 +65,7 @@ export function ProcessPayment() {
               <SelectContent>
                 {students.map((student) => (
                   <SelectItem key={student.id} value={student.id}>
-                    {student.name}
+                    {student.fullName}
                   </SelectItem>
                 ))}
               </SelectContent>

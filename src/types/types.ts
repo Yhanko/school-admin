@@ -1,5 +1,15 @@
 ///Tipagens de acordo com os dados da API
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export type RelatorioProps = any;
+export type AccountPeriodType = any;
+export type webHookDataType = any;
+export type webHookAPILog = any;
+export type Paymentos = any;
+export type TableTypeProps = any;
+export type TableReportTypeProps = any;
+export type ReferencePayments = any;
+/* eslint-enable @typescript-eslint/no-explicit-any */
 // Define a interface para uma notificação
 export type Notification = {
   id_notficacao_entidade: number;
@@ -187,7 +197,7 @@ export interface Class {
   created_at: string;
 }
 
-export interface Student {
+export interface StudentRecord {
   id: string;
   name: string;
   email?: string;
@@ -209,7 +219,7 @@ export interface TuitionFee {
 export type PaymentType = 'enrollment' | 'tuition' | 'activity';
 export type PaymentStatus = 'pending' | 'confirmed' | 'cancelled';
 
-export interface Payment {
+export interface PaymentRecord {
   id: string;
   student_id: string;
   type: PaymentType;
@@ -232,8 +242,8 @@ export interface Receipt {
   description: string;
 }
 
-export interface PaymentWithStudent extends Payment {
-  students: Student | null;
+export interface PaymentWithStudent extends PaymentRecord {
+  students: StudentRecord | null;
 }
 
 export interface CashFlowSummary {

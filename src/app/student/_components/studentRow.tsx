@@ -46,7 +46,7 @@ export function StudentRow ({ student }: StudentRowProps) {
 
   return (
     <>
-      <TableRow className="hover:bg-gray-50 border-b border-gray-100">
+      <TableRow className="hover:bg-muted/50 border-b border-border">
         <TableCell className="px-6 py-4">
           <Checkbox checked={student.isSelected} />
         </TableCell>
@@ -104,20 +104,20 @@ export function StudentRow ({ student }: StudentRowProps) {
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-white border border-gray-200 shadow-lg">
+            <DropdownMenuContent align="end" className="bg-popover border-border shadow-lg">
               <Link href={"/students-details"}>
-                <DropdownMenuItem className="hover:bg-gray-50 hover:cursor-pointer">View Details</DropdownMenuItem>
+                <DropdownMenuItem className="hover:bg-muted cursor-pointer">View Details</DropdownMenuItem>
               </Link>
               <Link href={"/change-student"}>
-                <DropdownMenuItem className="hover:bg-gray-50 hover:cursor-pointer">Edit</DropdownMenuItem>
+                <DropdownMenuItem className="hover:bg-muted cursor-pointer">Edit</DropdownMenuItem>
               </Link>
               <DropdownMenuItem 
-                className="hover:bg-gray-50 hover:cursor-pointer"
+                className="hover:bg-muted cursor-pointer"
                 onClick={() => handleViewHistory(student.id)}
               >
                 View History
               </DropdownMenuItem>
-              <DropdownMenuItem className="hover:bg-gray-50 text-red-600 hover:cursor-pointer">Delete</DropdownMenuItem>
+              <DropdownMenuItem className="hover:bg-red-50 text-red-600 cursor-pointer">Delete</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </TableCell>

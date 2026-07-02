@@ -1,8 +1,10 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import Chart from "react-apexcharts";
-import { ApexOptions } from "apexcharts"
+import dynamic from 'next/dynamic';
+import { ApexOptions } from "apexcharts";
+
+const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
 export function PerformanceChart () {
   const chartOptions: ApexOptions = {

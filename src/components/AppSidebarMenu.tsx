@@ -21,7 +21,7 @@ export function AppSidebar() {
   return(
     <Sidebar
     className={`h-screen border-none`}>
-      <SidebarContent className="bg-[#4D44B5] h-full overflow-y-auto overflow-none">
+      <SidebarContent className="bg-[#4D44B5] h-full overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-black/20 [&::-webkit-scrollbar-thumb]:rounded-full">
         <SidebarGroup>
           {/* Dynamic Menu Sections */}
           <SidebarGroupContent>
@@ -31,7 +31,7 @@ export function AppSidebar() {
 
                 return (
                   <SidebarMenuItem key={item.id} className="w-[14rem]">
-                    <SidebarMenuButton asChild className="h-10 hover:text-[#4D44B5] cursor-pointer space-x-3 rounded-l-4xl">
+                    <SidebarMenuButton asChild className="h-10 hover:text-[#4D44B5] cursor-pointer space-x-3 rounded-l-4xl overflow-hidden text-ellipsis whitespace-nowrap">
                       <Link
                         href={item.url}
                         className={`flex hover:bg-[#F1F5F7] cursor-pointer h-10 hover:text-[#4D44B5] hover:font-semibold pl-5 transition-colors ${

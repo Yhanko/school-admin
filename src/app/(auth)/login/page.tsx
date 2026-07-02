@@ -141,7 +141,7 @@ const toggleCheck = () => {
             <Input
               id="floating-input"
               type="email"
-              className={`peer w-full h-12 lg:h-14 pl-6 pt-4 pb-2 border-[2px] border-[#E2E5F1] focus:border-[#E2E5F1] focus-visible:border-[#E2E5F1] focus-visible:text-[#717F96] placeholder-transparent focus:outline-none ${errors.email &&   'border-[#D03816]'}`}
+              className={`peer w-full h-12 lg:h-14 pl-6 pt-4 pb-2 rounded border-[2px] border-[#E2E5F1] focus:border-[#E2E5F1] focus-visible:border-[#E2E5F1] focus-visible:text-[#717F96] placeholder-transparent focus:outline-none ${errors.email &&   'border-[#D03816]'}`}
               placeholder=" " 
               {...register("email")}
             />
@@ -159,7 +159,7 @@ const toggleCheck = () => {
             <Input
               id="float-input"
               type={ isVisible ? "text" : "password"}
-              className={`peer w-full appearance-none h-12 lg:h-14 pl-6 pt-4 pb-2 border-[2px] border-[#E2E5F1] focus:border-[#E2E5F1] focus-visible:border-[#E2E5F1] focus-visible:text-[#717F96] placeholder-transparent focus:outline-none ${errors.senha &&   'border-[#D03816]'}`}
+              className={`peer w-full appearance-none h-12 lg:h-14 pl-6 pt-4 pb-2 rounded border-[2px] border-[#E2E5F1] focus:border-[#E2E5F1] focus-visible:border-[#E2E5F1] focus-visible:text-[#717F96] placeholder-transparent focus:outline-none ${errors.senha &&   'border-[#D03816]'}`}
               placeholder=" "
               {...register("senha")} 
             />
@@ -191,7 +191,7 @@ const toggleCheck = () => {
                     onChange={toggleCheck}
                   />
                   <div
-                    className={`w-5 h-5 border-[2px] border-[#E2E5F1] rounded-md flex items-center justify-center transition duration-300 ${
+                    className={`w-5 h-5 border-[2px] border-[#E2E5F1] rounded flex items-center justify-center transition duration-300 ${
                       isChecked ? "bg-[#217EFD] border-[#217EFD]" : ""
                     }`}
                   >
@@ -212,12 +212,12 @@ const toggleCheck = () => {
               <Button
                 onClick={goTo}
                 //type="submit"
-                className="bg-[#FF5777] shadow-none hover:bg-[#fc4667] hover:cursor-pointer text-white w-full h-12 lg:h-14 mb-10 rounded-md">
+                className="bg-[#FF5777] hover:bg-[#fc4667] hover:cursor-pointer hover:shadow-[0_0_12px_rgba(255,87,119,0.5)] text-white w-full h-12 lg:h-14 mb-10 rounded">
                 {isLoading ? <Loader2  className="animate-spin" /> : "Entrar"}
               </Button>
             
               <Link href="/afiliate">
-                <Button className="bg-[#a550f5] text-white hover:bg-[#823ef0] hover:text-white hover:cursor-pointer w-full h-12 lg:h-14 rounded-md shadow-none">
+                <Button className="bg-[#a550f5] text-white hover:bg-[#823ef0] hover:text-white hover:cursor-pointer hover:shadow-[0_0_12px_rgba(165,80,245,0.5)] w-full h-12 lg:h-14 rounded shadow-none">
                   Entrar como Secretário/a
                 </Button>
               </Link>

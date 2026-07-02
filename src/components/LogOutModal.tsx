@@ -12,49 +12,39 @@ import {
 } from "@/components/ui/dialog";
 //Hooks
 import { useState } from "react";
-//Configurações e bibliotecas
-//import SessionCookie  from '../config/SessionCookie';
-//import axiosInstance  from '../service/api';
-//import { useRouter } from 'next/navigation'
-//Hooks
-//import getCookie from "../hooks/Hooks/Login/useGetTokenLogin";
+import SessionCookie from '../config/SessionCookie';
+import axiosInstance from '../service/api';
+import { useRouter } from 'next/navigation';
 
 
 interface LogOutProps {
-  children: React.ReactNode,
-  //entidade?: string
+  children: React.ReactNode;
 }
 
-export function LogOutModal( {  children, /*entidade*/ }: LogOutProps ) {
+export function LogOutModal({ children }: LogOutProps) {
   const [close, setClosed] = useState(false);
-  //const router = useRouter();
-  //onst { master } = getCookie();
+  const router = useRouter();
 
   const closeDialog = (value: boolean) => setClosed(value);
 
-  /*const removeCookie = async function(entidade: string){
-    
-  
+  const removeCookie = async function() {
     try {
-      const {data:{status}} =  await axiosInstance.post(`/clientes/logout`,{entidade:entidade})
-        
-        if(status === "sucesso"){
-          const cookieToClear = master ? SessionCookie.CLIENT : SessionCookie.AFFILIATE;
-          document.cookie = `${cookieToClear}=; Max-Age=0; path=/`;
-          router.push("/")
-        }else{
-          const cookieToClear = master ? SessionCookie.CLIENT : SessionCookie.AFFILIATE;
-          document.cookie = `${cookieToClear}=; Max-Age=0; path=/`;
-          router.push("/")
-        }
-    } catch {
-      const cookieToClear = master ? SessionCookie.CLIENT : SessionCookie.AFFILIATE;
-      document.cookie = `${cookieToClear}=; Max-Age=0; path=/`;
-      router.push("/")
-    }  
-  
-  }
-*/
+      // Tenta fazer o logout na API, mas prossegue mesmo se falhar
+      await axiosInstance.post(`/clientes/logout`).catch(() => {});
+    } catch (e) {
+      console.error(e);
+    } finally {
+      // Limpa ambos os cookies possíveis
+      document.cookie = `${SessionCookie.CLIENT}=; Max-Age=0; path=/`;
+      document.cookie = `${SessionCookie.AFFILIATE}=; Max-Age=0; path=/`;
+      
+      // Também pode ser útil limpar o localStorage se a app usar
+      localStorage.clear();
+      
+      router.push("/");
+    }
+  };
+
   return (
     <Dialog onOpenChange={closeDialog} open={close} >
       <DialogTrigger asChild>
@@ -77,7 +67,7 @@ export function LogOutModal( {  children, /*entidade*/ }: LogOutProps ) {
           <Button
             variant="default"
             className="w-28 h-12 cursor-pointer shadow-none text-white hover:bg-[#EB5656] bg-[#EB5656]"
-            //onClick={() => removeCookie(entidade)}
+            onClick={() => removeCookie()}
             >
               Sair
           </Button>

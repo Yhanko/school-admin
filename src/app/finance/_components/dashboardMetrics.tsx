@@ -15,12 +15,12 @@ interface MetricCardProps {
 }
 
 const MetricCard = ({ title, value, change, changeType, icon, iconBg }: MetricCardProps) => (
-  <Card className="bg-white">
+  <Card className="bg-card">
     <CardContent className="p-6">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-gray-500 mb-1">{title}</p>
-          <p className="text-3xl font-bold text-gray-900">{value}</p>
+          <p className="text-sm text-muted-foreground mb-1">{title}</p>
+          <p className="text-3xl font-bold text-foreground">{value}</p>
           <p className={`text-sm mt-1 ${changeType === 'positive' ? 'text-green-600' : 'text-red-600'}`}>
             {change} than last month
           </p>
@@ -50,7 +50,7 @@ export function DashboardMetrics () {
     ]
   })
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       <MetricCard
         title="Total Students"
         value="932"
@@ -84,18 +84,18 @@ export function DashboardMetrics () {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+          <div className="flex justify-between items-center p-3 bg-green-500/10 rounded-lg">
             <span className="text-sm font-medium">Receitas</span>
-            <span className="text-lg font-bold text-green-600">
+            <span className="text-lg font-bold text-green-600 dark:text-green-400">
               {financialReport.income.toLocaleString()} Kz</span>
           </div>
-          <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+          <div className="flex justify-between items-center p-3 bg-red-500/10 rounded-lg">
             <span className="text-sm font-medium">Despesas</span>
-            <span className="text-lg font-bold text-red-600">{financialReport.expenses.toLocaleString()} Kz</span>
+            <span className="text-lg font-bold text-red-600 dark:text-red-400">{financialReport.expenses.toLocaleString()} Kz</span>
           </div>
-          <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+          <div className="flex justify-between items-center p-3 bg-blue-500/10 rounded-lg">
             <span className="text-sm font-medium">Saldo</span>
-            <span className="text-lg font-bold text-blue-600">
+            <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
                 {financialReport.balance.toLocaleString()} Kz</span>
           </div>
         </CardContent>

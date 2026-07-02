@@ -1,6 +1,7 @@
 "use client"
 //libs
 import { AnimatedSection } from "../utils/animations";
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 //Componentes
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,10 @@ import AboutSection from "../components/AboutSection";
 import ResponsiveHeader from "@/components/responsiveHeader";
 
 export default function Home() {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
    
   const router = useRouter();
 
@@ -35,7 +40,7 @@ export default function Home() {
 
           <p className="max-w-xl mx-auto text-white"> Imagine um futuro onde a tecnologia serve como um poderoso aliado na educação, conectando professores, alunos e pais numa experiência única e transformadora. Apresentamos uma plataforma inovadora, dedicada exclusivamente ao universo da educação. Uma plataforma que impulsionará a inclusão tecnológica e revolucionará a maneira como aprendemos e ensinamos.</p>
 
-          <Button className="px-10 py-5 text-sm font-medium animate-pulse text-white bg-[#FF5777] hover:bg-[#FF5777]  cursor-pointer">
+          <Button className="px-10 py-5 text-sm font-medium animate-pulse text-white bg-[#FF5777] hover:bg-[#FF5777] hover:shadow-[0_0_12px_rgba(255,87,119,0.5)] cursor-pointer rounded">
             Contactar
           </Button>
         </section>
@@ -57,7 +62,7 @@ export default function Home() {
 
         {/* Partículas flutuantes */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {[...Array(6)].map((_, i) => (
+          {mounted && [...Array(6)].map((_, i) => (
             <div
               key={i}
               className="absolute w-2 h-2 bg-[#FF5777]/30 rounded-full animate-float"
@@ -106,7 +111,7 @@ export default function Home() {
 
           {/* Partículas flutuantes */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {[...Array(8)].map((_, i) => (
+            {mounted && [...Array(8)].map((_, i) => (
               <div
                 key={i}
                 className="absolute w-1 h-1 bg-[#FF5777]/40 rounded-full animate-float"

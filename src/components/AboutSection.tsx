@@ -55,7 +55,7 @@ const AboutSection: React.FC<AboutSectionProps> = ({ className = '' }) => {
 
       {/* Partículas flutuantes */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(8)].map((_, i) => (
+        {isVisible && [...Array(8)].map((_, i) => (
           <div
             key={i}
             className="absolute w-1 h-1 bg-[#FF5777]/30 rounded-full animate-float"

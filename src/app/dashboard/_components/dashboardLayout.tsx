@@ -11,11 +11,11 @@ import { DashboardMetrics } from "./dashboardMetrics";
 export function DashboardLayout () {
   return (
     <div>
-      <div className="pl-4">
-        <h1 className="text-3xl font-bold text-foreground mb-2">Dashboar</h1>
+      <div className="pl-4 mb-4">
+        <h1 className="text-3xl font-bold text-foreground mb-2">Dashboard</h1>
         <p className="text-muted-foreground">Resumo sobre a instituição</p>
       </div>
-      <div className="flex h-screen bg-gray-50">  
+      <div className="flex bg-transparent">  
         {/* Main Content */}
         <div className="flex-1">
           {/* Dashboard Content */}
@@ -25,11 +25,11 @@ export function DashboardLayout () {
             <PerformanceChart  />
             
             {/* Main Grid */}
-            <div className="grid grid-cols-12 gap-6">
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
               {/* Left Column */}
-              <div className="col-span-8 space-y-6">
+              <div className="xl:col-span-8 space-y-6">
                 
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <SchoolCalendar />
                   <SchoolFinance />
                 </div>
@@ -38,7 +38,7 @@ export function DashboardLayout () {
               </div>
               
               {/* Right Column */}
-              <div className="col-span-4 space-y-6">
+              <div className="xl:col-span-4 space-y-6">
                 <RecentStudents />
                 <MessagesWidget />
               </div>

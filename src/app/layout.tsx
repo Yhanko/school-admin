@@ -1,20 +1,18 @@
 import type { Metadata } from "next";
-import { Montserrat } from "next/font/google";
+import { Hanken_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "./Providers";
 
-const montserrat = Montserrat({
+const hankenGrotesk = Hanken_Grotesk({
   subsets: ["latin"],
-  variable: "--font-montserrat",
+  variable: "--font-hanken-grotesk",
   display: "swap",
 });
 
-const montserratAlternates = Montserrat({
+const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
-  variable: "--font-montserrat-alternates",
+  variable: "--font-jetbrains-mono",
   display: "swap",
-  style: ["normal"],
-  weight: ["100", "200", "300","400", "500","600", "700"],
 });
 
 
@@ -30,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body className={`${montserrat.variable} ${montserratAlternates.variable} antialiased`}>
+      <body className={`${hankenGrotesk.variable} ${jetbrainsMono.variable} font-sans antialiased`}>
         <Providers>
           {children}
         </Providers>

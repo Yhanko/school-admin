@@ -1,100 +1,22 @@
 "use client"
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
-// Tipos TypeScript
-interface Plan {
-  id: string;
-  name: string;
-  description: string;
-  period: number;
-  discount: number;
-  popular: boolean;
-  features: string[];
-  color: string;
-}
-
-interface PriceCalculation {
-  originalTotal: number;
-  finalTotal: number;
-  monthlyEquivalent: number;
-  discountAmount: number;
-  savings: number;
-  annualEquivalent: number;
-  annualSavings: number;
-}
+import { Plan, plans, calculatePrices } from '@/lib/plans';
 
 const Plane: React.FC = () => {
+  const router = useRouter();
+
+  const handleProceed = (planId: string) => {
+    router.push(`/payment?plan=${planId}`);
+  };
 
   // Estados do componente
   const [selectedPlan, setSelectedPlan] = useState<string>('annual');
   const [isAnnualView, setIsAnnualView] = useState<boolean>(true);
   const [showSummary, setShowSummary] = useState<boolean>(false);
 
-  // Configuração dos planos
-  const basePrice: number = 29.90;
-  
-  const plans: Plan[] = [
-    {
-      id: 'monthly',
-      name: 'Mensal',
-      description: 'Flexibilidade máxima',
-      period: 1,
-      discount: 0,
-      popular: false,
-      features: ['Acesso completo', 'Suporte 24/7', 'Cancelamento livre'],
-      color: 'gray'
-    },
-    {
-      id: 'quarterly',
-      name: 'Trimestral',
-      description: 'Economia inteligente',
-      period: 3,
-      discount: 10,
-      popular: false,
-      features: ['Acesso completo', 'Suporte prioritário', 'Recursos extras'],
-      color: 'pink'
-    },
-    {
-      id: 'biannual',
-      name: 'Semestral',
-      description: 'Ótimo custo-benefício',
-      period: 6,
-      discount: 15,
-      popular: false,
-      features: ['Acesso completo', 'Suporte VIP', 'Recursos premium'],
-      color: 'pink'
-    },
-    {
-      id: 'annual',
-      name: 'Anual',
-      description: 'Máxima economia',
-      period: 12,
-      discount: 20,
-      popular: true,
-      features: ['Acesso completo', 'Suporte exclusivo', 'Todos os recursos', 'Acesso antecipado'],
-      color: 'primary'
-    }
-  ];
 
-  // Função para calcular preços
-  const calculatePrices = (plan: Plan): PriceCalculation => {
-    const originalTotal = basePrice * plan.period;
-    const discountAmount = originalTotal * (plan.discount / 100);
-    const finalTotal = originalTotal - discountAmount;
-    const monthlyEquivalent = finalTotal / plan.period;
-    const annualEquivalent = monthlyEquivalent * 12;
-    const annualSavings = (basePrice * 12) - annualEquivalent;
-    
-    return {
-      originalTotal,
-      finalTotal,
-      monthlyEquivalent,
-      discountAmount,
-      savings: originalTotal - finalTotal,
-      annualEquivalent,
-      annualSavings
-    };
-  };
 
   // Filtrar planos baseado na visualização
   const filteredPlans = isAnnualView ? plans : plans.filter(p => p.period <= 3);
@@ -141,12 +63,12 @@ const Plane: React.FC = () => {
     const isSelected = selectedPlan === plan.id;
 
     const cardClasses = `
-      relative overflow-hidden rounded-2xl p-8 cursor-pointer transition-all duration-500 transform hover:scale-105 hover:-translate-y-3
+      relative overflow-hidden rounded-lg p-8 cursor-pointer transition-all duration-500 transform hover:scale-105 hover:-translate-y-3
       ${plan.popular 
-        ? 'bg-gradient-to-br from-[#FF5777]/10 to-[#FF5777]/5 border-2 border-[#FF5777] shadow-2xl shadow-[#FF5777]/25' 
+        ? 'bg-gradient-to-br from-[#FF5777]/10 to-[#FF5777]/5 border border-[#FF5777] shadow-[0_0_15px_rgba(255,87,119,0.2)]' 
         : 'bg-gradient-to-br from-white to-gray-50 border border-gray-200 hover:border-[#FF5777]/30'
       }
-      ${isSelected ? 'ring-4 ring-[#FF5777]/50 scale-105 shadow-2xl shadow-[#FF5777]/30' : ''}
+      ${isSelected ? 'ring-1 ring-[#FF5777]/50 scale-105 shadow-[0_0_20px_rgba(255,87,119,0.3)]' : ''}
       animate-fade-in-up backdrop-blur-sm
     `;
 
@@ -157,11 +79,11 @@ const Plane: React.FC = () => {
     const featureClasses = `text-sm ${plan.popular ? 'text-[#1B191F] font-semibold' : 'text-gray-700'}`;
 
     const buttonClasses = `
-      w-full py-4 px-6 hover:cursor-pointer rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg
+      w-full py-4 px-6 hover:cursor-pointer rounded font-bold text-lg transition-all duration-300 transform hover:scale-105
       ${plan.popular 
-        ? 'bg-gradient-to-r from-[#FF5777] to-[#FF5777]/90 hover:from-[#FF5777]/90 hover:to-[#FF5777] text-white shadow-[#FF5777]/30 hover:shadow-[#FF5777]/50' 
+        ? 'bg-gradient-to-r from-[#FF5777] to-[#FF5777]/90 hover:from-[#FF5777]/90 hover:to-[#FF5777] text-white hover:shadow-[0_0_12px_rgba(255,87,119,0.5)]' 
         : plan.discount > 0 
-          ? 'bg-gradient-to-r from-[#FF5777]/80 to-[#FF5777]/70 hover:from-[#FF5777] hover:to-[#FF5777]/90 text-white shadow-[#FF5777]/20'
+          ? 'bg-gradient-to-r from-[#FF5777]/80 to-[#FF5777]/70 hover:from-[#FF5777] hover:to-[#FF5777]/90 text-white hover:shadow-[0_0_12px_rgba(255,87,119,0.5)]'
           : 'bg-gradient-to-r from-[#1B191F] to-[#1B191F]/90 hover:from-[#1B191F]/90 hover:to-[#1B191F] text-white'
       }
     `;
@@ -177,13 +99,13 @@ const Plane: React.FC = () => {
         
         {/* Badges */}
         {plan.popular && (
-          <div className="absolute top-4 left-4 bg-gradient-to-r from-[#FF5777] to-[#FF5777]/80 text-white px-4 py-2 rounded-full text-sm font-bold animate-pulse shadow-lg">
+          <div className="absolute top-4 left-4 bg-gradient-to-r from-[#FF5777] to-[#FF5777]/80 text-white px-4 py-2 rounded text-sm font-bold animate-pulse">
             ⭐ MAIS POPULAR
           </div>
         )}
         
         {plan.discount > 0 && (
-          <div className="absolute top-4 right-4 bg-gradient-to-r from-[#FF5777] to-[#FF5777]/80 text-white px-3 py-1 rounded-full text-sm font-bold animate-bounce shadow-lg">
+          <div className="absolute top-4 right-4 bg-gradient-to-r from-[#FF5777] to-[#FF5777]/80 text-white px-3 py-1 rounded text-sm font-bold animate-bounce">
             {plan.discount}% OFF
           </div>
         )}
@@ -236,7 +158,10 @@ const Plane: React.FC = () => {
           </div>
           
           {/* Botão */}
-          <button className={buttonClasses}>
+          <button 
+             onClick={(e) => { e.stopPropagation(); handleProceed(plan.id); }}
+             className={buttonClasses}
+          >
             {plan.discount > 0 ? `💸 Economiza ${plan.discount}%` : '🚀 Começar Agora'}
           </button>
         </div>
@@ -253,7 +178,7 @@ const Plane: React.FC = () => {
 
     return (
       <div className="max-w-4xl mx-auto mt-16 px-6">
-        <div className="bg-white backdrop-blur-md rounded-2xl p-8 shadow-2xl border border-[#FF5777]/20 animate-fade-in-up">
+        <div className="bg-white backdrop-blur-md rounded-lg p-8 border border-[#FF5777]/20 animate-fade-in-up">
           <h2 className="text-3xl font-bold text-center text-[#1B191F] mb-6">
             📋 Resumo do Plano Selecionado
           </h2>
@@ -275,6 +200,16 @@ const Plane: React.FC = () => {
               <p className="text-2xl font-bold text-[#1B191F]">{plan.discount}%</p>
               <p className="text-[#FF5777]/80">{prices.annualSavings.toFixed(2)}/ano KZ</p>
             </div>
+          </div>
+          
+          {/* Botão de Prosseguir */}
+          <div className="mt-8 flex justify-center">
+            <button 
+               onClick={() => handleProceed(plan.id)}
+               className="bg-[#FF5777] text-white px-8 py-4 rounded font-bold text-lg hover:bg-[#FF5777]/90 transition-all hover:shadow-[0_0_12px_rgba(255,87,119,0.5)] transform hover:-translate-y-1"
+            >
+              Prosseguir com {plan.name}
+            </button>
           </div>
         </div>
       </div>

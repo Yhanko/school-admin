@@ -88,7 +88,7 @@ const students: Student[] = [
 export function StudentTable (){
 
   return (
-    <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+    <div className="bg-card rounded-lg border border-border overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow className="bg-gray-50 border-[1px] border-gray-200">
@@ -112,7 +112,7 @@ export function StudentTable (){
         </TableBody>
       </Table>
       
-      <div className="flex items-center justify-between px-6 py-4 bg-white border-t border-gray-200">
+      <div className="flex items-center justify-between px-6 py-4 bg-transparent border-t border-border">
         <div className="text-sm text-gray-500">
           Showing 1-5 from 100 data
         </div>

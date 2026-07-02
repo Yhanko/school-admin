@@ -81,11 +81,11 @@ export function Teachears (){
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
+    <div className="bg-card rounded-lg border border-border p-6">
       {/* Grid of Students */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {students.map((student) => (
-          <div key={student.id} className="bg-gray-50 rounded-lg p-6 text-center relative">
+          <div key={student.id} className="bg-muted/30 border border-border rounded-lg p-6 text-center relative">
             {/* More Options */}
             <div className="absolute top-4 right-4">
               <DropdownMenu>
@@ -94,14 +94,14 @@ export function Teachears (){
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-white border border-gray-200 shadow-lg z-50">
+                <DropdownMenuContent align="end" className="bg-popover border-border shadow-lg z-50">
                   <Link href={"/teachear-deatils"}>
                     <DropdownMenuItem className="hover:bg-gray-50 hover:cursor-pointer">View Details</DropdownMenuItem>
                   </Link>
                   <Link href="/change-employee">
                     <DropdownMenuItem className="hover:bg-gray-50 hover:cursor-pointer">Editar</DropdownMenuItem>
                   </Link>
-                  <DropdownMenuItem className="hover:bg-gray-50 text-red-600 hover:cursor-pointer">Delete</DropdownMenuItem>
+                  <DropdownMenuItem className="hover:bg-red-50 text-red-600 cursor-pointer">Delete</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

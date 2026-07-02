@@ -114,7 +114,7 @@ export default function Payments() {
   ];
 
   const getStatusBadge = (status: string) => {
-    const statusConfig: Record<string, { bg: string; text: string; icon: any }> = {
+    const statusConfig: Record<string, { bg: string; text: string; icon: React.ElementType }> = {
       "Pago": {
         bg: "bg-green-100 dark:bg-green-900",
         text: "text-green-800 dark:text-green-100",
