@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,109 +13,35 @@ import {
   EyeOff,
   CheckCircle,
   XCircle,
+  Loader2,
 } from "@/lib/icons";
 import { AddNewUserPermission } from "./_components/add_permission";
+import axiosInstance from "@/service/api";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Permission(){
-  const [users, setUsers] = useState([
-    {
-      id: 1,
-      name: "Admin Sistema",
-      email: "admin@escola.com",
-      role: "Administrador",
-      status: "Ativo",
-      permissions: {
-        dashboard: true,
-        students: true,
-        teachers: true,
-        classes: true,
-        financial: true,
-        activities: true,
-        payments: true,
-        attendance: true,
-        discipline: true,
-        permissions: true,
-      },
-    },
-    {
-      id: 2,
-      name: "Prof. Carlos Silva",
-      email: "carlos.silva@escola.com",
-      role: "Professor",
-      status: "Ativo",
-      permissions: {
-        dashboard: true,
-        students: true,
-        teachers: false,
-        classes: true,
-        financial: false,
-        activities: true,
-        payments: false,
-        attendance: true,
-        discipline: true,
-        permissions: false,
-      },
-    },
-    {
-      id: 3,
-      name: "Secretária Maria",
-      email: "maria@escola.com",
-      role: "Secretária",
-      status: "Ativo",
-      permissions: {
-        dashboard: true,
-        students: true,
-        teachers: true,
-        classes: true,
-        financial: true,
-        activities: true,
-        payments: true,
-        attendance: false,
-        discipline: false,
-        permissions: false,
-      },
-    },
-    {
-      id: 4,
-      name: "Diretor João",
-      email: "joao@escola.com",
-      role: "Diretor",
-      status: "Ativo",
-      permissions: {
-        dashboard: true,
-        students: true,
-        teachers: true,
-        classes: true,
-        financial: true,
-        activities: true,
-        payments: true,
-        attendance: true,
-        discipline: true,
-        permissions: true,
-      },
-    },
-    {
-      id: 5,
-      name: "Assistente Pedro",
-      email: "pedro@escola.com",
-      role: "Assistente",
-      status: "Inativo",
-      permissions: {
-        dashboard: true,
-        students: true,
-        teachers: false,
-        classes: false,
-        financial: false,
-        activities: false,
-        payments: false,
-        attendance: false,
-        discipline: false,
-        permissions: false,
-      },
-    },
-  ]);
+  const { toast } = useToast();
+  const [users, setUsers] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showPermissionDetails, setShowPermissionDetails] = useState<string | null>(null);
 
-  const [showPermissionDetails, setShowPermissionDetails] = useState<number | null>(null);
+  useEffect(() => {
+    fetchPermissions();
+  }, []);
+
+  const fetchPermissions = async () => {
+    setIsLoading(true);
+    try {
+      const response = await axiosInstance.get('/permissions');
+      // A API retorna a lista de usuários junto com 'userPermission' dentro de cada usuário
+      setUsers(response.data);
+    } catch (error) {
+      console.error("Erro ao carregar permissões:", error);
+      toast({ title: 'Erro', description: 'Falha ao carregar permissões', variant: 'destructive' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const permissionLabels: Record<string, string> = {
     dashboard: "Dashboard",
@@ -130,47 +56,61 @@ export default function Permission(){
     permissions: "Gestão de Permissões",
   };
 
-  const togglePermission = (userId: number, permission: string) => {
-    setUsers(users.map(user => {
+  const togglePermission = async (userId: string, permission: string, currentValue: boolean) => {
+    // Atualizar no estado local primeiro para resposta rápida
+    const updatedUsers = users.map(user => {
       if (user.id === userId) {
         return {
           ...user,
-          permissions: {
-            ...user.permissions,
-            [permission]: !user.permissions[permission as keyof typeof user.permissions],
+          userPermission: {
+            ...user.userPermission,
+            [permission]: !currentValue,
           },
         };
       }
       return user;
-    }));
+    });
+    setUsers(updatedUsers);
+
+    try {
+      await axiosInstance.patch(`/permissions/${userId}`, {
+        [permission]: !currentValue
+      });
+      toast({ title: 'Sucesso', description: 'Permissão atualizada.' });
+    } catch (error) {
+      // Reverter em caso de erro
+      fetchPermissions();
+      toast({ title: 'Erro', description: 'Falha ao atualizar permissão', variant: 'destructive' });
+    }
   };
 
-  const toggleUserStatus = (userId: number) => {
-    setUsers(users.map(user => {
-      if (user.id === userId) {
-        return {
-          ...user,
-          status: user.status === "Ativo" ? "Inativo" : "Ativo",
-        };
-      }
-      return user;
-    }));
-  };
-
-  const countPermissions = (permissions: Record<string, boolean>) => {
-    return Object.values(permissions).filter(Boolean).length;
+  const countPermissions = (permissions: any) => {
+    if (!permissions) return 0;
+    // Removemos id, userId, createdAt, updatedAt da contagem
+    const { id, userId, createdAt, updatedAt, ...rest } = permissions;
+    return Object.values(rest).filter(Boolean).length;
   };
 
   const getRoleColor = (role: string) => {
     const colors: Record<string, string> = {
-      "Administrador": "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100",
-      "Diretor": "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100",
-      "Professor": "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100",
-      "Secretária": "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100",
-      "Assistente": "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100",
+      "SUPER_ADMIN": "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100",
+      "ADMIN": "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100",
+      "TEACHER": "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100",
+      "SECRETARY": "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100",
+      "STUDENT": "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100",
+      "PARENT": "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-100",
+      "ASSOCIATION_MEMBER": "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100",
     };
-    return colors[role] || colors["Assistente"];
+    return colors[role] || "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100";
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+      </div>
+    );
+  }
 
   return(
     <div className="space-y-8 p-8">
@@ -204,7 +144,7 @@ export default function Permission(){
               <div className="text-center">
                 <p className="text-sm text-muted-foreground mb-2">Usuários Ativos</p>
                 <p className="text-4xl font-bold text-green-600">
-                  {users.filter(u => u.status === "Ativo").length}
+                  {users.length}
                 </p>
               </div>
             </CardContent>
@@ -214,7 +154,7 @@ export default function Permission(){
               <div className="text-center">
                 <p className="text-sm text-muted-foreground mb-2">Administradores</p>
                 <p className="text-4xl font-bold text-red-600">
-                  {users.filter(u => u.role === "Administrador").length}
+                  {users.filter(u => u.role === "ADMIN" || u.role === "SUPER_ADMIN").length}
                 </p>
               </div>
             </CardContent>
@@ -224,7 +164,7 @@ export default function Permission(){
               <div className="text-center">
                 <p className="text-sm text-muted-foreground mb-2">Professores</p>
                 <p className="text-4xl font-bold text-blue-600">
-                  {users.filter(u => u.role === "Professor").length}
+                  {users.filter(u => u.role === "TEACHER").length}
                 </p>
               </div>
             </CardContent>
@@ -257,7 +197,6 @@ export default function Permission(){
                     <th className="text-left py-3 px-4 font-semibold text-foreground">Email</th>
                     <th className="text-left py-3 px-4 font-semibold text-foreground">Função</th>
                     <th className="text-center py-3 px-4 font-semibold text-foreground">Permissões</th>
-                    <th className="text-left py-3 px-4 font-semibold text-foreground">Status</th>
                     <th className="text-center py-3 px-4 font-semibold text-foreground">Ações</th>
                   </tr>
                 </thead>
@@ -274,7 +213,7 @@ export default function Permission(){
                       <td className="py-3 px-4 text-center">
                         <div className="flex items-center justify-center gap-2">
                           <span className="font-semibold text-foreground">
-                            {countPermissions(user.permissions)}/10
+                            {countPermissions(user.userPermission)}/10
                           </span>
                           <Button
                             variant="ghost"
@@ -293,33 +232,8 @@ export default function Permission(){
                           </Button>
                         </div>
                       </td>
-                      <td className="py-3 px-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          user.status === "Ativo"
-                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100"
-                            : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100"
-                        }`}>
-                          {user.status}
-                        </span>
-                      </td>
                       <td className="py-3 px-4 text-center">
                         <div className="flex gap-2 justify-center">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0"
-                            onClick={() => toggleUserStatus(user.id)}
-                            title={user.status === "Ativo" ? "Desativar" : "Ativar"}
-                          >
-                            {user.status === "Ativo" ? (
-                              <Unlock className="w-4 h-4 text-green-600" />
-                            ) : (
-                              <Lock className="w-4 h-4 text-red-600" />
-                            )}
-                          </Button>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <Edit className="w-4 h-4" />
-                          </Button>
                           <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-600">
                             <Trash2 className="w-4 h-4" />
                           </Button>
@@ -343,32 +257,34 @@ export default function Permission(){
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {Object.entries(
-                  users.find(u => u.id === showPermissionDetails)?.permissions || {}
-                ).map(([key, value]) => (
-                  <div
-                    key={key}
-                    className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-all"
-                  >
-                    <div className="flex items-center gap-3">
-                      {value ? (
-                        <CheckCircle className="w-5 h-5 text-green-600" />
-                      ) : (
-                        <XCircle className="w-5 h-5 text-red-600" />
-                      )}
-                      <span className="font-medium text-foreground">
-                        {permissionLabels[key] || key}
-                      </span>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => togglePermission(showPermissionDetails, key)}
+                {Object.entries(permissionLabels).map(([key, label]) => {
+                  const userPerms = users.find(u => u.id === showPermissionDetails)?.userPermission || {};
+                  const value = userPerms[key] || false;
+                  return (
+                    <div
+                      key={key}
+                      className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-all"
                     >
-                      {value ? "Revogar" : "Conceder"}
-                    </Button>
-                  </div>
-                ))}
+                      <div className="flex items-center gap-3">
+                        {value ? (
+                          <CheckCircle className="w-5 h-5 text-green-600" />
+                        ) : (
+                          <XCircle className="w-5 h-5 text-red-600" />
+                        )}
+                        <span className="font-medium text-foreground">
+                          {label}
+                        </span>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => togglePermission(showPermissionDetails, key, value)}
+                      >
+                        {value ? "Revogar" : "Conceder"}
+                      </Button>
+                    </div>
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
@@ -382,19 +298,8 @@ export default function Permission(){
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="border border-border rounded-lg p-4">
-                <h3 className="font-semibold text-foreground mb-3">Diretor</h3>
+                <h3 className="font-semibold text-foreground mb-3">ADMIN</h3>
                 <p className="text-sm text-muted-foreground mb-3">Acesso a gestão e relatórios</p>
-                <div className="space-y-1 text-xs text-muted-foreground">
-                  <p>✓ Dashboard</p>
-                  <p>✓ Gestão Completa</p>
-                  <p>✓ Relatórios</p>
-                  <p>✗ Permissões</p>
-                </div>
-              </div>
-
-              <div className="border border-border rounded-lg p-4">
-                <h3 className="font-semibold text-foreground mb-3">Director pedagógico</h3>
-                <p className="text-sm text-muted-foreground mb-3">Acesso total a todas as funcionalidades</p>
                 <div className="space-y-1 text-xs text-muted-foreground">
                   <p>✓ Dashboard</p>
                   <p>✓ Gestão Completa</p>
@@ -404,7 +309,7 @@ export default function Permission(){
               </div>
 
               <div className="border border-border rounded-lg p-4">
-                <h3 className="font-semibold text-foreground mb-3">Professor</h3>
+                <h3 className="font-semibold text-foreground mb-3">TEACHER</h3>
                 <p className="text-sm text-muted-foreground mb-3">Acesso limitado a turmas e frequência</p>
                 <div className="space-y-1 text-xs text-muted-foreground">
                   <p>✓ Dashboard</p>
@@ -415,24 +320,13 @@ export default function Permission(){
               </div>
 
               <div className="border border-border rounded-lg p-4">
-                <h3 className="font-semibold text-foreground mb-3">Secretária</h3>
+                <h3 className="font-semibold text-foreground mb-3">SECRETARY</h3>
                 <p className="text-sm text-muted-foreground mb-3">Acesso a gestão e pagamentos</p>
                 <div className="space-y-1 text-xs text-muted-foreground">
                   <p>✓ Dashboard</p>
                   <p>✓ Gestão de Alunos</p>
                   <p>✓ Pagamentos</p>
                   <p>✗ Frequência</p>
-                </div>
-              </div>
-
-              <div className="border border-border rounded-lg p-4">
-                <h3 className="font-semibold text-foreground mb-3">Assistente</h3>
-                <p className="text-sm text-muted-foreground mb-3">Acesso mínimo para suporte</p>
-                <div className="space-y-1 text-xs text-muted-foreground">
-                  <p>✓ Dashboard</p>
-                  <p>✓ Alunos</p>
-                  <p>✗ Financeiro</p>
-                  <p>✗ Permissões</p>
                 </div>
               </div>
             </div>

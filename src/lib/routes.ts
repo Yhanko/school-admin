@@ -1,4 +1,3 @@
-
 import { 
   Home, 
   HandCoins,  
@@ -14,9 +13,9 @@ import {
   PiFilesLight,
   LuUserCog,
   BsExclamationCircle,
-  BsCashCoin
+  BsCashCoin,
+  Clock
 } from "@/lib/icons";
-
 
 export const routes = [
   {
@@ -37,18 +36,18 @@ export const routes = [
     url: "/pedagogical",
     icon: University,
   },
-   {
+  {
     id: 4,
     title: "Associação",
     url: "/association",
     icon: UsersThree,
- },
-    {
+  },
+  {
     id: 5,
     title: "Turmas",
     url: "/turma",
     icon: SiGoogleclassroom,
- },
+  },
   {
     id: 6,
     title: "Eventos",
@@ -61,52 +60,58 @@ export const routes = [
     url: "/finance",
     icon: HandCoins,
   },
-    {
+  {
     id: 8,
     title: "Pagamentos",
     url: "/payments",
     icon: BsCashCoin,
   },
- {
-  id: 9,
+  {
+    id: 9,
     title: "Funcionários",
     url: "/employees",
     icon: SuitcaseSimple,
- },
+  },
   {
     id: 10,
     title: "Chat",
     url: "/chat",
     icon:  MessagesSquare,
- },
+  },
   {
     id: 11,
     title: "Perfil",
     url: "/profile",
     icon: UserCircle,
- },
-   {
+  },
+  {
     id: 12,
     title: "Relatórios",
     url: "/report",
     icon: FaRegFileAlt,
- },
+  },
   {
     id: 13,
     title: "Regulamento",
     url: "/schoolRules",
     icon: PiFilesLight,
- },
+  },
   {
     id: 14,
     title: "Disciplinar",
     url: "/disciplinar",
     icon: BsExclamationCircle,
- },
+  },
   {
     id: 15,
     title: "Permissões",
     url: "/permission",
     icon: LuUserCog,
- },
+  },
+  {
+    id: 16,
+    title: "Horários",
+    url: "/schedules",
+    icon: Clock,
+  }
 ]

@@ -3,6 +3,9 @@
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import {StudentRow} from "./studentRow";
+import { useState, useEffect } from "react";
+import axiosInstance from "@/service/api";
+import { Loader2 } from "lucide-react";
 
 interface Student {
   id: string;
@@ -16,79 +19,39 @@ interface Student {
   isSelected: boolean;
 }
 
-const students: Student[] = [
-  {
-    id: "1",
-    name: "Samanta William",
-    studentId: "#123456789",
-    date: "March 25, 2021",
-    parentName: "Mana William",
-    city: "Jakarta",
-    grade: "VII A",
-    gradeColor: "bg-[#FF5777]",
-    isSelected: true
-  },
-  {
-    id: "2",
-    name: "Tony Soap",
-    studentId: "#123456789",
-    date: "March 25, 2021",
-    parentName: "James Soap",
-    city: "Jakarta",
-    grade: "VII B",
-    gradeColor: "bg-yellow-500",
-    isSelected: false
-  },
-  {
-    id: "3",
-    name: "Karen Hope",
-    studentId: "#123456789",
-    date: "March 25, 2021",
-    parentName: "Justin Hope",
-    city: "Jakarta",
-    grade: "VII C",
-    gradeColor: "bg-blue-600",
-    isSelected: true
-  },
-  {
-    id: "4",
-    name: "Jordan Nico",
-    studentId: "#123456789",
-    date: "March 25, 2021",
-    parentName: "Amanda Nico",
-    city: "Jakarta",
-    grade: "VII A",
-    gradeColor: "bg-yellow-500",
-    isSelected: false
-  },
-  {
-    id: "5",
-    name: "Nadila Adja",
-    studentId: "#123456789",
-    date: "March 25, 2021",
-    parentName: "Jack Adja",
-    city: "Jakarta",
-    grade: "VII A",
-    gradeColor: "bg-[#FF5777]",
-    isSelected: true
-  },
-  {
-    id: "6",
-    name: "Johnny Ahmad",
-    studentId: "#123456789",
-    date: "March 25, 2021",
-    parentName: "Danny Ahmad",
-    city: "Jakarta",
-    grade: "VII A",
-    gradeColor: "bg-yellow-500",
-    isSelected: false
-  }
-];
+// Remove static students mock
 
 export function StudentTable (){
+  const [students, setStudents] = useState<Student[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchStudents() {
+      try {
+        const response = await axiosInstance.get('/users?role=STUDENT');
+        const apiStudents = response.data.map((user: any) => ({
+          id: user.id,
+          name: user.name,
+          studentId: user.id.substring(0, 8),
+          date: new Date(user.createdAt).toLocaleDateString(),
+          parentName: "N/A", // TODO: Fetch from profile if available
+          city: "Luanda", // TODO: Update based on entity
+          grade: "N/A", // TODO: Update based on class
+          gradeColor: "bg-[#FF5777]",
+          isSelected: false,
+        }));
+        setStudents(apiStudents);
+      } catch (error) {
+        console.error("Failed to fetch students", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchStudents();
+  }, []);
 
   return (
-    <div className="bg-card rounded-lg border border-border overflow-hidden">
+    <div className="bg-card rounded-lg border border-border overflow-hidden w-full">
       <Table>
         <TableHeader>
           <TableRow className="bg-gray-50 border-[1px] border-gray-200">
@@ -106,9 +69,23 @@ export function StudentTable (){
           </TableRow>
         </TableHeader>
         <TableBody className="border-[1px] border-gray-200">
-          {students.map((student) => (
-            <StudentRow key={student.id} student={student} />
-          ))}
+          {isLoading ? (
+            <TableRow>
+              <TableCell colSpan={9} className="h-24 text-center">
+                <Loader2 className="h-6 w-6 animate-spin mx-auto text-blue-600" />
+              </TableCell>
+            </TableRow>
+          ) : students.length > 0 ? (
+            students.map((student) => (
+              <StudentRow key={student.id} student={student} />
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={9} className="h-24 text-center text-gray-500">
+                Nenhum estudante encontrado.
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
       

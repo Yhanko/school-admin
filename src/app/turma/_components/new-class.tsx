@@ -13,6 +13,8 @@ import {
 import {
   Plus,
 } from "@/lib/icons";
+import axiosInstance from "@/service/api";
+import { Loader2 } from "lucide-react";
 
 const PERIODS = ['Manhã', 'Tarde', 'Noite', 'Integral'];
 const ACADEMIC_LEVELS = [
@@ -42,15 +44,38 @@ export interface ClassFormData {
 }
 
 export function NewClass() {
-    const [formData, setFormData] = useState<ClassFormData>({
-        name: '',
-        period: 'Manhã',
-        academic_level: 'Educação Infantil',
-        room: '',
-        student_count: 0,
-        teacher_ids: [],
-        subject_ids: [],
-    });
+  const [formData, setFormData] = useState<ClassFormData>({
+      name: '',
+      period: 'Manhã',
+      academic_level: 'Educação Infantil',
+      room: '',
+      student_count: 0,
+      teacher_ids: ["temp-teacher-id"],
+      subject_ids: [],
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      await axiosInstance.post('/classes', {
+        name: formData.name,
+        period: formData.period,
+        academicLevel: formData.academic_level,
+        room: formData.room,
+        capacity: formData.student_count || 35,
+        teacherIds: formData.teacher_ids,
+      });
+      alert('Turma criada com sucesso!');
+      window.location.reload();
+    } catch (error) {
+      console.error('Erro ao criar turma', error);
+      alert('Erro ao criar turma');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
 
   return (
@@ -69,6 +94,7 @@ export function NewClass() {
             Adicione uma nova turma
           </SheetDescription>
         </SheetHeader>
+        <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -180,9 +206,13 @@ export function NewClass() {
                 ))}
               </select>   
           </div>
-        <SheetFooter>
-          <Button type="submit" className="bg-[#5856eb] rounded-full text-white hover:cursor-pointer hover:text-white hover:bg-[#3c3ad6]">Save changes</Button>
+        <SheetFooter className="mt-6">
+          <Button type="submit" disabled={isSubmitting} className="bg-[#5856eb] rounded-full text-white hover:cursor-pointer hover:text-white hover:bg-[#3c3ad6]">
+            {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+            Save changes
+          </Button>
         </SheetFooter>
+        </form>
       </SheetContent>
     </Sheet>
   )

@@ -12,9 +12,9 @@ import {
 } from "@/components/ui/dialog";
 //Hooks
 import { useState } from "react";
-import SessionCookie from '../config/SessionCookie';
 import axiosInstance from '../service/api';
 import { useRouter } from 'next/navigation';
+import { useAuth } from "@/store/useAuth";
 
 
 interface LogOutProps {
@@ -24,23 +24,20 @@ interface LogOutProps {
 export function LogOutModal({ children }: LogOutProps) {
   const [close, setClosed] = useState(false);
   const router = useRouter();
+  const { logout } = useAuth();
 
   const closeDialog = (value: boolean) => setClosed(value);
 
   const removeCookie = async function() {
     try {
-      // Tenta fazer o logout na API, mas prossegue mesmo se falhar
-      await axiosInstance.post(`/clientes/logout`).catch(() => {});
+      await axiosInstance.post(`/auth/logout`).catch(() => {});
     } catch (e) {
       console.error(e);
     } finally {
-      // Limpa ambos os cookies possíveis
-      document.cookie = `${SessionCookie.CLIENT}=; Max-Age=0; path=/`;
-      document.cookie = `${SessionCookie.AFFILIATE}=; Max-Age=0; path=/`;
-      
-      // Também pode ser útil limpar o localStorage se a app usar
-      localStorage.clear();
-      
+      // Clear global state
+      logout();
+      // Temporarily remove token from axios
+      axiosInstance.defaults.headers.common['Authorization'] = '';
       router.push("/");
     }
   };

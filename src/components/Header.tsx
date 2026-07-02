@@ -10,7 +10,10 @@ import YhankoIMG from "../assets/yhankoIMG.svg";
 //hooks
 import { NotificationsHover } from "./NotificationHover";
 
+import { useAuth } from "@/store/useAuth";
+
 export function Header() {
+    const { user } = useAuth();
     return (
         <header 
         className="flex h-[5rem] w-full items-center justify-end border-b-[1px] border-[#a39e9e] top-0 z-50">    
@@ -21,7 +24,11 @@ export function Header() {
                     alt="Avatar"
                     className="w-12 h-12 md:w-12 p-2 lg:w-12 xl:w-12 2xl:w-12 md:h-12 lg:h-12 xl:h-12 2xl:h-12 rounded-3xl"
                 />
-                </Link>
+            </Link>
+            <div className="flex flex-col items-end mr-4">
+                    <span className="text-sm font-bold text-[#303972]">{user?.name || 'Carregando...'}</span>
+                    <span className="text-xs text-gray-500">{user?.role || ''}</span>
+                </div>
                 <div className="flex space-x-4 max-w-24">
                     <div className="static">
                         <span

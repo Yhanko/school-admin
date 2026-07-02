@@ -8,9 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Student, PaymentType } from "@/types/types";
 import { useToast } from "@/hooks/use-toast";
+import axiosInstance from "@/service/api";
+import { Loader2 } from "lucide-react";
 
 export function ProcessPayment() {
-  const [students, ] = useState<Student[]>([]);
+  const [students, setStudents] = useState<any[]>([]);
   const [selectedStudent, setSelectedStudent] = useState("");
   const [paymentType, setPaymentType] = useState<PaymentType>("tuition");
   const [amount, setAmount] = useState("");
@@ -22,13 +24,26 @@ export function ProcessPayment() {
     fetchStudents();
   }, []);
 
-  const fetchStudents = async () => {}
+  const fetchStudents = async () => {
+    try {
+      const response = await axiosInstance.get('/users?role=STUDENT');
+      setStudents(response.data);
+    } catch (error) {
+      console.error("Failed to fetch students", error);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
+      await axiosInstance.post('/finance/payments', {
+        studentId: selectedStudent,
+        type: paymentType,
+        amount: parseFloat(amount),
+        notes: notes,
+      });
 
       toast({
         title: "Pagamento registrado",
@@ -38,10 +53,10 @@ export function ProcessPayment() {
       setSelectedStudent("");
       setAmount("");
       setNotes("");
-    } catch {
+    } catch (error) {
       toast({
         title: "Erro ao processar pagamento",
-        description: "tá gato",
+        description: "Ocorreu um erro ao processar o pagamento.",
         variant: "destructive",
       });
     } finally {
@@ -65,7 +80,7 @@ export function ProcessPayment() {
               <SelectContent>
                 {students.map((student) => (
                   <SelectItem key={student.id} value={student.id}>
-                    {student.fullName}
+                    {student.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -110,7 +125,7 @@ export function ProcessPayment() {
           </div>
 
           <Button type="submit" className="w-full rounded-full bg-[#5856eb] text-white hover:text-white hover:bg-[#3d3ae7] hover:cursor-pointer" disabled={loading}>
-            {loading ? "Processando..." : "Registrar Pagamento"}
+            {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Registrar Pagamento"}
           </Button>
         </form>
       </CardContent>

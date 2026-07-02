@@ -5,86 +5,61 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import Link from "next/link";
-interface Teachear {
+import { useEffect, useState } from "react";
+import axiosInstance from "@/service/api";
+import { Loader2 } from "@/lib/icons";
+
+interface Member {
   id: string;
   name: string;
-  subject: string;
+  role: string;
+  email: string;
+  profile?: {
+    degree?: string;
+    phone?: string;
+    photoUrl?: string;
+  }
 }
 
-const students: Teachear[] = [
-  {
-    id: "1",
-    name: "Dimitres Viga",
-    subject: "Mathematics"
-  },
-  {
-    id: "2", 
-    name: "Tom Housenberg",
-    subject: "Science"
-  },
-  {
-    id: "3",
-    name: "Dana Benevista", 
-    subject: "Art"
-  },
-  {
-    id: "4",
-    name: "Salvadore Morbeau",
-    subject: "Biology"
-  },
-  {
-    id: "5",
-    name: "Maria Historia",
-    subject: "History"
-  },
-  {
-    id: "6",
-    name: "Jack Sally",
-    subject: "Physics"
-  },
-  {
-    id: "7",
-    name: "Lula Beatrice",
-    subject: "Algorithm"
-  },
-  {
-    id: "8",
-    name: "Nella Vita",
-    subject: "English"
-  },
-  {
-    id: "9",
-    name: "Nadia Laravela",
-    subject: "Programming"
-  },
-  {
-    id: "10",
-    name: "Dakota Farral",
-    subject: "Science"
-  },
-  {
-    id: "11", 
-    name: "Miranda Adila",
-    subject: "Art"
-  },
-  {
-    id: "12",
-    name: "Indiana Barker",
-    subject: "Biology"
-  }
-];
-
 const AssotiationCards = () => {
+  const [members, setMembers] = useState<Member[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMembers = async () => {
+      try {
+        const response = await axiosInstance.get('/users');
+        const memberList = response.data.filter((user: any) => user.role === 'ASSOCIATION_MEMBER');
+        setMembers(memberList);
+      } catch (error) {
+        console.error("Failed to fetch association members:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMembers();
+  }, []);
+
   const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+    if (!name) return 'U';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64 w-full">
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
-      {/* Grid of Students */}
+    <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-7xl mt-4">
+      {/* Grid of Members */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {students.map((student) => (
-          <div key={student.id} className="bg-gray-50 rounded-lg p-6 text-center relative">
+        {members.map((member) => (
+          <div key={member.id} className="bg-gray-50 rounded-lg p-6 text-center relative">
             {/* More Options */}
             <div className="absolute top-4 right-4">
               <DropdownMenu>
@@ -94,13 +69,13 @@ const AssotiationCards = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="bg-white border border-gray-200 shadow-lg z-50">
-                  <Link href="/association-details">
-                    <DropdownMenuItem className="hover:bg-gray-50 hover:cursor-pointer">View Details</DropdownMenuItem>
+                  <Link href={`/association-details?id=${member.id}`}>
+                    <DropdownMenuItem className="hover:bg-gray-50 hover:cursor-pointer">Ver Detalhes</DropdownMenuItem>
                   </Link>
-                  <Link href="/change-associantion">
-                    <DropdownMenuItem className="hover:bg-gray-50 hover:cursor-pointer">Edit</DropdownMenuItem>
+                  <Link href={`/change-associantion?id=${member.id}`}>
+                    <DropdownMenuItem className="hover:bg-gray-50 hover:cursor-pointer">Editar</DropdownMenuItem>
                   </Link>
-                  <DropdownMenuItem className="hover:bg-gray-50 text-red-600 hover:cursor-pointer">Delete</DropdownMenuItem>
+                  <DropdownMenuItem className="hover:bg-gray-50 text-red-600 hover:cursor-pointer">Remover</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -108,17 +83,21 @@ const AssotiationCards = () => {
             {/* Avatar */}
             <div className="mb-4">
               <Avatar className="h-16 w-16 mx-auto">
-                <AvatarFallback className="bg-purple-200 text-purple-700 text-lg font-medium">
-                  {getInitials(student.name)}
-                </AvatarFallback>
+                {member.profile?.photoUrl ? (
+                    <img src={member.profile.photoUrl} alt={member.name} className="object-cover w-full h-full rounded-full" />
+                ) : (
+                    <AvatarFallback className="bg-purple-200 text-purple-700 text-lg font-medium">
+                      {getInitials(member.name)}
+                    </AvatarFallback>
+                )}
               </Avatar>
             </div>
 
             {/* Name */}
-            <h3 className="font-semibold text-gray-900 text-lg mb-1">{student.name}</h3>
+            <h3 className="font-semibold text-gray-900 text-lg mb-1 truncate px-2">{member.name}</h3>
             
-            {/* Subject */}
-            <p className="text-gray-500 text-sm mb-4">{student.subject}</p>
+            {/* Subject / Position */}
+            <p className="text-gray-500 text-sm mb-4 truncate px-2">{member.profile?.degree || 'Membro da Associação'}</p>
 
             {/* Contact Buttons */}
             <div className="flex justify-center space-x-2">
@@ -137,39 +116,21 @@ const AssotiationCards = () => {
             </div>
           </div>
         ))}
+        {members.length === 0 && (
+          <div className="col-span-full text-center py-12 text-gray-500">
+            Nenhum membro da associação encontrado.
+          </div>
+        )}
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-gray-500">
-          Showing 1-5 from 100 data
+      {members.length > 0 && (
+        <div className="flex items-center justify-between">
+            <div className="text-sm text-gray-500">
+            Mostrando {members.length} membros
+            </div>
         </div>
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious href="#" className="text-gray-400 hover:text-gray-600" />
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationLink href="#" isActive className="bg-[#6366f1] text-white hover:bg-[#5856eb]">
-                1
-              </PaginationLink>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationLink href="#" className="text-gray-600 hover:bg-gray-100">
-                2
-              </PaginationLink>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationLink href="#" className="text-gray-600 hover:bg-gray-100">
-                3
-              </PaginationLink>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationNext href="#" className="text-gray-400 hover:text-gray-600" />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      </div>
+      )}
     </div>
   );
 };

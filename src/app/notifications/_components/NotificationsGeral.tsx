@@ -1,106 +1,77 @@
-
+"use client"
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Bell, Check, X, CheckCheck, AlertCircle, Info, Calendar } from "@/lib/icons";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import axiosInstance from "@/service/api";
 
 interface Notification {
-  id: number;
+  id: string;
   title: string;
   description: string;
   date: string;
   isRead: boolean;
-  type: 'info' | 'warning' | 'success' | 'error';
+  type: string;
   priority: 'low' | 'medium' | 'high';
 }
 
-const mockNotifications: Notification[] = [
-  {
-    id: 1,
-    title: "Nova mensagem do professor",
-    description: "O professor João Silva enviou uma nova atividade para a turma de matemática. Prazo de entrega: 15/06/2025",
-    date: "2025-06-14T10:30:00",
-    isRead: false,
-    type: 'info',
-    priority: 'medium'
-  },
-  {
-    id: 2,
-    title: "Reunião de pais agendada",
-    description: "Reunião de pais e mestres agendada para dia 20/06/2025 às 19h no auditório principal",
-    date: "2025-06-14T09:15:00",
-    isRead: false,
-    type: 'warning',
-    priority: 'high'
-  },
-  {
-    id: 3,
-    title: "Avaliação aprovada",
-    description: "Sua avaliação de História foi aprovada com nota 8.5. Parabéns pelo excelente desempenho!",
-    date: "2025-06-13T16:45:00",
-    isRead: true,
-    type: 'success',
-    priority: 'low'
-  },
-  {
-    id: 4,
-    title: "Prazo de matrícula",
-    description: "Lembrete: O prazo para renovação de matrícula termina em 25/06/2025. Procure a secretaria",
-    date: "2025-06-13T14:20:00",
-    isRead: false,
-    type: 'warning',
-    priority: 'high'
-  },
-  {
-    id: 5,
-    title: "Sistema atualizado",
-    description: "O sistema escolar foi atualizado com novas funcionalidades. Confira as novidades no menu principal",
-    date: "2025-06-12T11:30:00",
-    isRead: true,
-    type: 'info',
-    priority: 'low'
-  },
-  {
-    id: 6,
-    title: "Evento cancelado",
-    description: "O evento esportivo programado para hoje foi cancelado devido às condições climáticas",
-    date: "2025-06-12T08:00:00",
-    isRead: false,
-    type: 'error',
-    priority: 'medium'
-  }
-];
-
 export default function NotificationsGeral() {
   const { toast } = useToast();
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
-  const itemsPerPage = 4;
+  const itemsPerPage = 5;
 
-  // Simulate loading
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-    return () => clearTimeout(timer);
+    fetchNotifications();
   }, []);
 
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  const fetchNotifications = async () => {
+    try {
+      const response = await axiosInstance.get('/notifications');
+      
+      const mappedNotifications = response.data.map((notification: any) => {
+        return {
+          id: notification.id,
+          title: notification.title,
+          description: notification.description,
+          date: notification.createdAt,
+          isRead: notification.isRead,
+          type: notification.type,
+          priority: notification.priority
+        };
+      });
+
+      // Ordenar por data decrescente (mais recentes primeiro)
+      mappedNotifications.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      
+      setNotifications(mappedNotifications);
+    } catch (error) {
+      console.error(error);
+      toast({ title: 'Erro', description: 'Falha ao carregar notificações', variant: 'destructive' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const totalPages = Math.ceil(notifications.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedNotifications = notifications.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedNotifications = notifications.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const unreadCount = notifications.filter(n => !n.isRead).length;
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleString('pt-BR', {
+    return new Intl.DateTimeFormat('pt-BR', {
       day: '2-digit',
-      month: '2-digit',
+      month: 'long',
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
-    });
+    }).format(date);
   };
 
   const getTypeIcon = (type: string) => {
@@ -120,45 +91,32 @@ export default function NotificationsGeral() {
     }
   };
 
-  const markAllAsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
-    toast({
-      description: (
-        <div className="flex items-center gap-3">
-          <CheckCheck className="w-5 h-5 text-green-500" />
-          <span>Todas as notificações foram marcadas como lidas</span>
-        </div>
-      ),
-      className: "border-l-4 border-l-green-500"
-    });
+  const markAllAsRead = async () => {
+    try {
+      await axiosInstance.patch('/notifications/read-all');
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+      toast({
+        title: "Sucesso",
+        description: "Todas as notificações foram marcadas como lidas",
+      });
+    } catch (error) {
+      console.error(error);
+      toast({ title: 'Erro', description: 'Falha ao marcar como lido', variant: 'destructive' });
+    }
   };
 
-  const toggleReadStatus = (id: number) => {
-    setNotifications(prev => 
-      prev.map(n => 
-        n.id === id ? { ...n, isRead: !n.isRead } : n
-      )
-    );
-    
-    const notification = notifications.find(n => n.id === id);
-    toast({
-      description: (
-        <div className="flex items-center gap-3">
-          {notification?.isRead ? (
-            <>
-              <Bell className="w-5 h-5 text-orange-500" />
-              <span>Notificação marcada como não lida</span>
-            </>
-          ) : (
-            <>
-              <Check className="w-5 h-5 text-green-500" />
-              <span>Notificação marcada como lida</span>
-            </>
-          )}
-        </div>
-      ),
-      className: `border-l-4 ${notification?.isRead ? 'border-l-orange-500' : 'border-l-green-500'}`
-    });
+  const toggleReadStatus = async (id: string) => {
+    try {
+      await axiosInstance.patch(`/notifications/${id}/read`);
+      setNotifications(prev => 
+        prev.map(n => 
+          n.id === id ? { ...n, isRead: true } : n
+        )
+      );
+    } catch (error) {
+      console.error(error);
+      toast({ title: 'Erro', description: 'Falha ao marcar notificação como lida', variant: 'destructive' });
+    }
   };
 
   if (isLoading) {

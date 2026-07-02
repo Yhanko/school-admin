@@ -31,28 +31,36 @@ const MetricCard = ({ title, value, change, changeType, icon, iconBg }: MetricCa
   </Card>
 );
 
-export function DashboardMetrics () {
+export function DashboardMetrics ({ 
+  totalStudents = 0, 
+  totalTeachers = 0, 
+  schoolBalance = 0 
+}: { 
+  totalStudents?: number, 
+  totalTeachers?: number, 
+  schoolBalance?: number 
+}) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       <MetricCard
-        title="Total Students"
-        value="932"
+        title="Total Estudantes"
+        value={totalStudents.toString()}
         change="+10%"
         changeType="positive"
         icon={<Users className="w-6 h-6 text-white" />}
         iconBg="bg-[#6366f1]"
       />
       <MetricCard
-        title="Total Teachers"
-        value="754"
+        title="Total Professores"
+        value={totalTeachers.toString()}
         change="-0,5%"
         changeType="negative"
         icon={<GraduationCap className="w-6 h-6 text-white" />}
         iconBg="bg-[#FF5777]"
       />
       <MetricCard
-        title="School Balance"
-        value="$123,456"
+        title="Saldo da Escola"
+        value={`${schoolBalance.toFixed(2)} KZ`}
         change="+23%"
         changeType="positive"
         icon={<DollarSign className="w-6 h-6 text-white" />}

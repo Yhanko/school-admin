@@ -22,50 +22,42 @@ import {
   Briefcase,
 } from '@/lib/icons';
 import Link from 'next/link';
+import axiosInstance from '@/service/api';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2 } from 'lucide-react';
 
 interface Regulation {
   id: string;
   title: string;
   description: string;
-  status: 'draft' | 'published';
-  created_at: string;
-  school_name?: string;
+  status: 'DRAFT' | 'PUBLISHED';
+  createdAt: string;
 }
 
 export function RegulationsClient() {
   const [regulations, setRegulations] = useState<Regulation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [shareDialog, setShareDialog] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  const fetchRegulations = async () => {
+    try {
+      const response = await axiosInstance.get('/regulations');
+      setRegulations(response.data);
+    } catch (error: any) {
+      toast({
+        title: 'Erro',
+        description: error.response?.data?.message || 'Falha ao carregar regulamentos',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const mockData: Regulation[] = [
-      {
-        id: '1',
-        title: 'Regulamento Geral de Funcionamento',
-        description:
-          'Documento que estabelece as normas gerais de funcionamento da instituição',
-        status: 'published',
-        created_at: '2025-01-10',
-        school_name: 'Escola Estadual Principal',
-      },
-      {
-        id: '2',
-        title: 'Código de Conduta Estudantil',
-        description: 'Normas e disciplina aplicáveis aos estudantes',
-        status: 'published',
-        created_at: '2025-01-05',
-        school_name: 'Escola Estadual Principal',
-      },
-      {
-        id: '3',
-        title: 'Política de Avaliação',
-        description: 'Critérios e metodologias de avaliação',
-        status: 'draft',
-        created_at: '2025-01-08',
-      },
-    ];
-    setRegulations(mockData);
-    setIsLoading(false);
+    fetchRegulations();
   }, []);
 
   const shareOptions = [
@@ -75,8 +67,31 @@ export function RegulationsClient() {
     { icon: Briefcase, label: 'Funcionários', color: 'text-orange-600' },
   ];
 
+  const handleDelete = async (id: string) => {
+    if (!confirm('Tem a certeza que deseja apagar este regulamento?')) return;
+    
+    setIsDeleting(id);
+    try {
+      await axiosInstance.delete(`/regulations/${id}`);
+      toast({ title: 'Sucesso', description: 'Regulamento apagado com sucesso.' });
+      setRegulations(regulations.filter(r => r.id !== id));
+    } catch (error: any) {
+      toast({
+        title: 'Erro',
+        description: error.response?.data?.message || 'Falha ao apagar regulamento',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsDeleting(null);
+    }
+  };
+
   if (isLoading) {
-    return <div className="text-center py-8">Carregando...</div>;
+    return (
+      <div className="flex justify-center items-center py-16">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    );
   }
 
   return (
@@ -108,13 +123,13 @@ export function RegulationsClient() {
                   <FileText className="h-8 w-8 text-blue-600" />
                   <Badge
                     variant={
-                      regulation.status === 'published'
+                      regulation.status === 'PUBLISHED'
                         ? 'default'
                         : 'secondary'
                     }
-                    className='bg-[#4043f8] tex-white'
+                    className={regulation.status === 'PUBLISHED' ? 'bg-[#4043f8] text-white' : ''}
                   >
-                    {regulation.status === 'published' ? 'Publicado' : 'Rascunho'}
+                    {regulation.status === 'PUBLISHED' ? 'Publicado' : 'Rascunho'}
                   </Badge>
                 </div>
                 <CardTitle className="text-lg mt-4">
@@ -123,11 +138,11 @@ export function RegulationsClient() {
               </CardHeader>
               <CardContent className="flex-1 space-y-4">
                 <p className="text-sm text-slate-600 line-clamp-2">
-                  {regulation.description}
+                  {regulation.description || 'Sem descrição.'}
                 </p>
                 <p className="text-xs text-slate-500">
                   Criado em{' '}
-                  {new Date(regulation.created_at).toLocaleDateString('pt-PT')}
+                  {new Date(regulation.createdAt).toLocaleDateString('pt-PT')}
                 </p>
 
                 <div className="flex flex-wrap gap-2 pt-4 border-t">
@@ -163,9 +178,7 @@ export function RegulationsClient() {
                               variant="outline"
                               className="w-full justify-start gap-3 hover:cursor-pointer"
                               onClick={() => {
-                                alert(
-                                  `Regulamento compartilhado com ${option.label}`
-                                );
+                                toast({ title: 'Partilha', description: `Regulamento compartilhado com ${option.label}` });
                                 setShareDialog(null);
                               }}
                             >
@@ -183,7 +196,7 @@ export function RegulationsClient() {
                     variant="outline"
                     className="gap-2 hover:cursor-pointer"
                     onClick={() =>
-                      alert('Regulamento baixado em PDF')
+                      toast({ title: 'Download', description: 'O regulamento foi baixado em PDF.' })
                     }
                   >
                     <Download className="h-4 w-4" />
@@ -194,8 +207,14 @@ export function RegulationsClient() {
                     size="sm"
                     variant="outline"
                     className="gap-2 text-red-600 hover:text-red-700 hover:cursor-pointer"
+                    onClick={() => handleDelete(regulation.id)}
+                    disabled={isDeleting === regulation.id}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    {isDeleting === regulation.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
                     Apagar
                   </Button>
                 </div>

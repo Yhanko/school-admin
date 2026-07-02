@@ -1,56 +1,109 @@
 "use client"
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, Clock, MapPin, Users, Plus, Sparkles } from "@/lib/icons";
-import { Activity } from "@/types/types";
+import { Calendar, Clock, MapPin, Users, Plus, Sparkles, Loader2, Trash2 } from "@/lib/icons";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import axiosInstance from "@/service/api";
+import { useToast } from "@/hooks/use-toast";
+
+interface EventEntity {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  type: string;
+  organizer: string;
+  location: string;
+  participants: number;
+}
 
 export default function NewEvent() {
-  const [activities] = useState<Activity[]>([
-    {
-      id: "act1",
-      title: "Feira de Ciências",
-      description: "Apresentação de projetos científicos desenvolvidos pelos alunos",
-      date: new Date("2024-03-15"),
-      type: "event",
-      organizer: "Coordenação Pedagógica",
-      location: "Auditório Principal",
-      participants: 150
-    },
-    {
-      id: "act2",
-      title: "Reunião de Pais",
-      description: "Encontro para discussão do desenvolvimento acadêmico",
-      date: new Date("2024-03-20"),
-      type: "meeting",
-      organizer: "Direção",
-      location: "Sala de Conferências",
-      participants: 80
-    },
-    {
-      id: "act3",
-      title: "Olimpíada Escolar",
-      description: "Competição esportiva entre as turmas",
-      date: new Date("2024-03-25"),
-      type: "activity",
-      organizer: "Educação Física",
-      location: "Quadra Poliesportiva",
-      participants: 200
-    }
-  ]);
+  const [events, setEvents] = useState<EventEntity[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
 
-  const typeColors: Record<Activity["type"], string> = {
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    date: "",
+    type: "event",
+    organizer: "",
+    location: "",
+    participants: 0,
+  });
+
+  const fetchEvents = async () => {
+    try {
+      const response = await axiosInstance.get('/events');
+      setEvents(response.data);
+    } catch (error) {
+      console.error("Erro ao buscar eventos", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({ ...prev, [id]: value }));
+  };
+
+  const handleSelectChange = (value: string) => {
+    setFormData(prev => ({ ...prev, type: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.title || !formData.date || !formData.location || !formData.organizer) {
+        toast({ title: 'Aviso', description: 'Por favor, preencha todos os campos obrigatórios.', variant: 'destructive' });
+        return;
+    }
+
+    setIsSubmitting(true);
+    try {
+        await axiosInstance.post('/events', {
+            ...formData,
+            participants: Number(formData.participants)
+        });
+        toast({ title: 'Sucesso', description: 'Atividade criada com sucesso!' });
+        setFormData({ title: "", description: "", date: "", type: "event", organizer: "", location: "", participants: 0 });
+        fetchEvents();
+    } catch (error: any) {
+        toast({ title: 'Erro', description: error.response?.data?.message || 'Falha ao criar atividade.', variant: 'destructive' });
+    } finally {
+        setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Tem a certeza que deseja apagar esta atividade?')) return;
+    try {
+        await axiosInstance.delete(`/events/${id}`);
+        toast({ title: 'Sucesso', description: 'Atividade apagada com sucesso.' });
+        fetchEvents();
+    } catch (error: any) {
+        toast({ title: 'Erro', description: error.response?.data?.message || 'Falha ao apagar.', variant: 'destructive' });
+    }
+  };
+
+  const typeColors: Record<string, string> = {
     event: "bg-primary/10 text-primary border-primary/20",
     activity: "bg-secondary/10 text-secondary border-secondary/20",
     meeting: "bg-accent/10 text-accent border-accent/20",
     holiday: "bg-muted text-muted-foreground border-border"
   };
 
-  const typeLabels: Record<Activity["type"], string> = {
+  const typeLabels: Record<string, string> = {
     event: "Evento",
     activity: "Atividade",
     meeting: "Reunião",
@@ -89,15 +142,17 @@ export default function NewEvent() {
                   <h4 className="font-semibold text-lg">Criar Nova Atividade</h4>
                 </div>
                 
-                <div className="space-y-5">
+                <form onSubmit={handleSubmit} className="space-y-5">
                   <div className="space-y-2 group">
                     <Label htmlFor="title" className="text-sm font-medium flex items-center gap-2">
                       <Sparkles className="h-3.5 w-3.5 text-[#646cffaa]" />
-                      Título da Atividade
+                      Título da Atividade *
                     </Label>
                     <Input 
                       id="title" 
                       placeholder="Ex: Feira Cultural 2024" 
+                      value={formData.title}
+                      onChange={handleChange}
                       className="transition-all duration-200 focus:ring-2 focus:ring-primary/20 border-border hover:border-primary/50"
                     />
                   </div>
@@ -110,7 +165,9 @@ export default function NewEvent() {
                     <Textarea 
                       id="description" 
                       placeholder="Descreva os detalhes da atividade..." 
-                      rows={4}
+                      rows={3}
+                      value={formData.description}
+                      onChange={handleChange}
                       className="transition-all duration-200 focus:ring-2 focus:ring-primary/20 border-border hover:border-primary/50 resize-none"
                     />
                   </div>
@@ -119,35 +176,92 @@ export default function NewEvent() {
                     <div className="space-y-2">
                       <Label htmlFor="date" className="text-sm font-medium flex items-center gap-2">
                         <Calendar className="h-3.5 w-3.5 text-[#646cffaa]" />
-                        Data
+                        Data *
                       </Label>
                       <Input 
                         id="date" 
                         type="date" 
+                        value={formData.date}
+                        onChange={handleChange}
                         className="transition-all duration-200 focus:ring-2 focus:ring-primary/20 border-border hover:border-primary/50"
                       />
                     </div>
 
                     <div className="space-y-2">
+                      <Label htmlFor="type" className="text-sm font-medium flex items-center gap-2">
+                        <Sparkles className="h-3.5 w-3.5 text-[#646cffaa]" />
+                        Tipo *
+                      </Label>
+                      <Select value={formData.type} onValueChange={handleSelectChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o tipo" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="event">Evento</SelectItem>
+                          <SelectItem value="activity">Atividade</SelectItem>
+                          <SelectItem value="meeting">Reunião</SelectItem>
+                          <SelectItem value="holiday">Feriado</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
                       <Label htmlFor="location" className="text-sm font-medium flex items-center gap-2">
                         <MapPin className="h-3.5 w-3.5 text-[#646cffaa]" />
-                        Local
+                        Local *
                       </Label>
                       <Input 
                         id="location" 
                         placeholder="Local do evento" 
+                        value={formData.location}
+                        onChange={handleChange}
+                        className="transition-all duration-200 focus:ring-2 focus:ring-primary/20 border-border hover:border-primary/50"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="organizer" className="text-sm font-medium flex items-center gap-2">
+                        <Users className="h-3.5 w-3.5 text-[#646cffaa]" />
+                        Organizador *
+                      </Label>
+                      <Input 
+                        id="organizer" 
+                        placeholder="Ex: Coordenação" 
+                        value={formData.organizer}
+                        onChange={handleChange}
+                        className="transition-all duration-200 focus:ring-2 focus:ring-primary/20 border-border hover:border-primary/50"
+                      />
+                    </div>
+
+                    <div className="space-y-2 sm:col-span-2">
+                      <Label htmlFor="participants" className="text-sm font-medium flex items-center gap-2">
+                        <Users className="h-3.5 w-3.5 text-[#646cffaa]" />
+                        Participantes Esperados
+                      </Label>
+                      <Input 
+                        id="participants" 
+                        type="number"
+                        min="0"
+                        value={formData.participants}
+                        onChange={handleChange}
                         className="transition-all duration-200 focus:ring-2 focus:ring-primary/20 border-border hover:border-primary/50"
                       />
                     </div>
                   </div>
 
                   <Button 
+                    type="submit"
+                    disabled={isSubmitting}
                     className="w-full h-12 rounded-full hover:cursor-pointer bg-[#2d36e9aa] hover:bg-[#2e38f5aa] hover:shadow-lg hover:scale-[1.02] transition-all duration-300 font-semibold group"
                   >
-                    <Plus className="h-5 w-5 mr-2 group-hover:rotate-90 transition-transform duration-300" />
-                    Criar Atividade
+                    {isSubmitting ? (
+                      <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                    ) : (
+                      <Plus className="h-5 w-5 mr-2 group-hover:rotate-90 transition-transform duration-300" />
+                    )}
+                    {isSubmitting ? "A criar..." : "Criar Atividade"}
                   </Button>
-                </div>
+                </form>
               </div>
 
               {/* Activities List Section */}
@@ -158,26 +272,44 @@ export default function NewEvent() {
                     <h4 className="font-semibold text-lg">Atividades Programadas</h4>
                   </div>
                   <Badge variant="secondary" className="font-semibold text-[rgba(39,82,94,0.67)]">
-                    {activities.length} eventos
+                    {events.length} eventos
                   </Badge>
                 </div>
                 
-                <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-                  {activities.map((activity, index) => (
+                <div className="space-y-4 max-h-[650px] overflow-y-auto pr-2 custom-scrollbar">
+                  {isLoading ? (
+                    <div className="flex justify-center p-8">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    </div>
+                  ) : events.length === 0 ? (
+                    <div className="text-center p-8 text-muted-foreground">Nenhuma atividade programada.</div>
+                  ) : events.map((activity, index) => (
                     <div 
                       key={activity.id} 
-                      className="group border rounded-xl p-5 bg-gradient-to-br from-card to-muted/20 hover:shadow-md hover:scale-[1.02] transition-all duration-300 cursor-pointer animate-fade-in"
-                      style={{ animationDelay: `${index * 100}ms` }}
+                      className="group border rounded-xl p-5 bg-gradient-to-br from-card to-muted/20 hover:shadow-md hover:scale-[1.02] transition-all duration-300 cursor-pointer animate-fade-in relative"
+                      style={{ animationDelay: `${index * 50}ms` }}
                     >
-                      <div className="flex items-start justify-between gap-3 mb-3">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute top-2 right-2 h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-100 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(activity.id);
+                        }}
+                      >
+                          <Trash2 className="h-4 w-4" />
+                      </Button>
+
+                      <div className="flex items-start justify-between gap-3 mb-3 pr-8">
                         <h5 className="font-semibold text-lg group-hover:text-primary transition-colors">
                           {activity.title}
                         </h5>
                         <Badge 
                           variant="outline" 
-                          className={`${typeColors[activity.type]} font-medium shrink-0 text-green-600`}
+                          className={`${typeColors[activity.type] || typeColors.event} font-medium shrink-0 text-green-600`}
                         >
-                          {typeLabels[activity.type]}
+                          {typeLabels[activity.type] || "Evento"}
                         </Badge>
                       </div>
                       
@@ -189,10 +321,11 @@ export default function NewEvent() {
                         <div className="flex items-center gap-2 text-sm">
                           <Calendar className="h-4 w-4 text-[#646cffaa]" />
                           <span className="font-medium text-foreground">
-                            {activity.date.toLocaleDateString('pt-BR', { 
+                            {new Date(activity.date).toLocaleDateString('pt-BR', { 
                               day: '2-digit', 
                               month: 'long', 
-                              year: 'numeric' 
+                              year: 'numeric',
+                              timeZone: 'UTC'
                             })}
                           </span>
                         </div>

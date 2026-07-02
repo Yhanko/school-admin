@@ -1,19 +1,21 @@
 "use client"
 
-import {TeacherProfile } from "./_components/teacherProfile";
+import { TeacherProfile } from "./_components/teacherProfile";
 import { ScheduleCard } from "../teachear-deatils/_components/sheduleCard";
+import { useSearchParams } from "next/navigation";
+import React, { Suspense } from "react";
 
-import React from "react";
+const TeacherDetailsContent = () => {
+  const searchParams = useSearchParams();
+  const id = searchParams.get('id');
 
-const TeacherDetails = () => {
-
-return (
+  return (
     <div className="min-h-screen p-6">
       <div className="container mx-auto">
         <div className="flex flex-col lg:flex-row gap-6 ">
           {/* Profile Section */}
           <div className="flex-1 w-[55rem]">
-            <TeacherProfile />
+            <TeacherProfile id={id} />
           </div>
           
           {/* Schedule Section */}
@@ -23,6 +25,14 @@ return (
         </div>
       </div>
     </div>
+  );
+};
+
+const TeacherDetails = () => {
+  return (
+    <Suspense fallback={<div>Carregando...</div>}>
+      <TeacherDetailsContent />
+    </Suspense>
   )
 };
 

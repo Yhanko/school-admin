@@ -6,123 +6,44 @@ import {
   Search,
   Trash2,
 } from "@/lib/icons";
-import { EditClass } from "./_components/edit-class"
+import { EditClass } from "./_components/edit-class";
+import { EnrollStudent } from "./_components/enroll-student";
 
+
+import { useState, useEffect } from "react";
+import axiosInstance from "@/service/api";
+import { Loader2 } from "lucide-react";
 
 export default function Turma(){
+  const [classes, setClasses] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const classes = [
-    {
-      id: 1,
-      name: "1A",
-      level: "1º Ano",
-      teacher: "Prof. Roberto Oliveira",
-      students: 32,
-      capacity: 35,
-      schedule: "07:00 - 11:30",
-      status: "Ativo",
-    },
-    {
-      id: 2,
-      name: "1B",
-      level: "1º Ano",
-      teacher: "Profa. Juliana Costa",
-      students: 30,
-      capacity: 35,
-      schedule: "07:00 - 11:30",
-      status: "Ativo",
-    },
-    {
-      id: 3,
-      name: "2A",
-      level: "2º Ano",
-      teacher: "Profa. Ana Santos",
-      students: 33,
-      capacity: 35,
-      schedule: "07:00 - 11:30",
-      status: "Ativo",
-    },
-    {
-      id: 4,
-      name: "2B",
-      level: "2º Ano",
-      teacher: "Profa. Ana Santos",
-      students: 31,
-      capacity: 35,
-      schedule: "13:00 - 17:30",
-      status: "Ativo",
-    },
-    {
-      id: 5,
-      name: "2C",
-      level: "2º Ano",
-      teacher: "Profa. Beatriz Lima",
-      students: 29,
-      capacity: 35,
-      schedule: "13:00 - 17:30",
-      status: "Ativo",
-    },
-    {
-      id: 6,
-      name: "3A",
-      level: "3º Ano",
-      teacher: "Prof. Carlos Silva",
-      students: 34,
-      capacity: 35,
-      schedule: "07:00 - 11:30",
-      status: "Ativo",
-    },
-    {
-      id: 7,
-      name: "3B",
-      level: "3º Ano",
-      teacher: "Prof. Carlos Silva",
-      students: 32,
-      capacity: 35,
-      schedule: "13:00 - 17:30",
-      status: "Ativo",
-    },
-    {
-      id: 8,
-      name: "3C",
-      level: "3º Ano",
-      teacher: "Profa. Beatriz Lima",
-      students: 30,
-      capacity: 35,
-      schedule: "13:00 - 17:30",
-      status: "Ativo",
-    },
-    {
-      id: 9,
-      name: "4A",
-      level: "4º Ano",
-      teacher: "Prof. Carlos Silva",
-      students: 33,
-      capacity: 35,
-      schedule: "07:00 - 11:30",
-      status: "Ativo",
-    },
-    {
-      id: 10,
-      name: "4B",
-      level: "4º Ano",
-      teacher: "Prof. Pedro Costa",
-      students: 31,
-      capacity: 35,
-      schedule: "13:00 - 17:30",
-      status: "Ativo",
-    },
-    {
-      id: 11,
-      name: "4C",
-      level: "4º Ano",
-      teacher: "Prof. Pedro Costa",
-      students: 32,
-      capacity: 35,
-      schedule: "13:00 - 17:30",
-      status: "Ativo",
-    },
-  ];
+  const fetchClasses = async () => {
+    try {
+      const response = await axiosInstance.get('/classes');
+      // Map API response to required UI format
+      const mappedClasses = response.data.map((c: any) => ({
+        id: c.id,
+        name: c.name,
+        level: `${c.grade || 1}º Ano`, // Mocked level
+        teacher: "Prof. Atribuído", // Mocked teacher for now
+        students: c.students?.length || 0,
+        capacity: c.capacity || 35,
+        schedule: c.shift === 'MORNING' ? '07:00 - 11:30' : '13:00 - 17:30',
+        status: "Ativo"
+      }));
+      setClasses(mappedClasses);
+    } catch (error) {
+      console.error("Failed to fetch classes", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchClasses();
+  }, []);
+// Remove static classes array
 
   const getOccupancyPercentage = (students: number, capacity: number) => {
     return Math.round((students / capacity) * 100);
@@ -226,34 +147,49 @@ export default function Turma(){
                   </tr>
                 </thead>
                 <tbody>
-                  {classes.map((cls) => {
-                    const occupancy = getOccupancyPercentage(cls.students, cls.capacity);
-                    return (
-                      <tr key={cls.id} className="border-b border-gray-200 border-[1px] hover:bg-muted/50">
-                        <td className="py-3 px-4 font-bold text-foreground text-lg">{cls.name}</td>
-                        <td className="py-3 px-4 text-muted-foreground">{cls.level}</td>
-                        <td className="py-3 px-4 text-muted-foreground text-xs">{cls.teacher}</td>
-                        <td className="py-3 px-4 text-muted-foreground text-xs">12</td>
-                        <td className="py-3 px-4 text-center font-semibold text-foreground">
-                          {cls.students}/{cls.capacity}
-                        </td>
-                        <td className="py-3 px-4 text-center">
-                          <span className={`font-semibold ${getOccupancyColor(occupancy)}`}>
-                            {occupancy}%
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 text-muted-foreground text-xs">{cls.schedule}</td>
-                        <td className="py-3 px-4 text-center">
-                          <div className="flex gap-2 justify-center">
-                            <EditClass/>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-600">
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                  {isLoading ? (
+                    <tr>
+                      <td colSpan={8} className="py-8 text-center">
+                        <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
+                      </td>
+                    </tr>
+                  ) : classes.length > 0 ? (
+                    classes.map((cls) => {
+                      const occupancy = getOccupancyPercentage(cls.students, cls.capacity);
+                      return (
+                        <tr key={cls.id} className="border-b border-gray-200 border-[1px] hover:bg-muted/50">
+                          <td className="py-3 px-4 font-bold text-foreground text-lg">{cls.name}</td>
+                          <td className="py-3 px-4 text-muted-foreground">{cls.level}</td>
+                          <td className="py-3 px-4 text-muted-foreground text-xs">{cls.teacher}</td>
+                          <td className="py-3 px-4 text-muted-foreground text-xs">Sala</td>
+                          <td className="py-3 px-4 text-center font-semibold text-foreground">
+                            {cls.students}/{cls.capacity}
+                          </td>
+                          <td className="py-3 px-4 text-center">
+                            <span className={`font-semibold ${getOccupancyColor(occupancy)}`}>
+                              {occupancy}%
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-muted-foreground text-xs">{cls.schedule}</td>
+                          <td className="py-3 px-4 text-center">
+                            <div className="flex gap-2 justify-center">
+                              <EnrollStudent classId={cls.id} className={cls.name} onSuccess={fetchClasses} />
+                              <EditClass/>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-600">
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  ) : (
+                    <tr>
+                      <td colSpan={8} className="py-8 text-center text-muted-foreground">
+                        Nenhuma turma encontrada.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>

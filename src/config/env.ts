@@ -1,5 +1,4 @@
 const env = {
-    API_BASE_URL : "https://192.168.1.129:9553/v1/",
-    BEAR_TOKEN : "eyJhbGciOiJIUzUxMiJ9.eyJhcHAiOnsiZG9ubyI6IjNlMWVmOGYwODM2MDZmZTU5M2RiMTY3YTVlMjg3OWQzZTgzYTFlNGQxNTNlMzgzNjQ3M2E2MmZjYjRjN2UzZDU4MmY5NmE2YTFiNWYifX0.u9R7DsHAGBbunFFUiHtsvgUS0h6zxtjD_NPm3np4A50f_MKb0VDOY0mG0o_na3cTuEJzK_k7uiCleB8HFXARsg",
+    API_BASE_URL : "http://localhost:3000",
 }
 export default env;

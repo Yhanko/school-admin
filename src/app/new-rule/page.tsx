@@ -2,29 +2,29 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, FileText, Eye } from '@/lib/icons';
 import Image from 'next/image';
+import axiosInstance from '@/service/api';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2 } from 'lucide-react';
 
 export default function NovoRegulamentoPage() {
+  const router = useRouter();
+  const { toast } = useToast();
+  
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [schoolName, setSchoolName] = useState('');
   const [content, setContent] = useState('');
-  const [status, setStatus] = useState('draft');
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -37,13 +37,48 @@ export default function NovoRegulamentoPage() {
     }
   };
 
+  const submitRegulation = async (status: 'DRAFT' | 'PUBLISHED') => {
+    if (!title) {
+      toast({ title: 'Aviso', description: 'O título do regulamento é obrigatório.', variant: 'destructive' });
+      return;
+    }
+    if (!content) {
+      toast({ title: 'Aviso', description: 'O conteúdo principal é obrigatório.', variant: 'destructive' });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await axiosInstance.post('/regulations', {
+        title,
+        description,
+        content,
+        status,
+        // fileUrl is optional, ignoring image upload for now
+      });
+
+      toast({ 
+        title: 'Sucesso!', 
+        description: `Regulamento ${status === 'DRAFT' ? 'guardado como rascunho' : 'publicado'} com sucesso.` 
+      });
+      router.push('/schoolRules');
+    } catch (error: any) {
+      toast({
+        title: 'Erro',
+        description: error.response?.data?.message || 'Ocorreu um erro ao guardar o regulamento.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleSave = () => {
-    alert('Regulamento salvo com sucesso!');
+    submitRegulation('DRAFT');
   };
 
   const handlePublish = () => {
-    setStatus('published');
-    alert('Regulamento publicado com sucesso!');
+    submitRegulation('PUBLISHED');
   };
 
   return (
@@ -87,7 +122,7 @@ export default function NovoRegulamentoPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="schoolName">Nome da Instituição *</Label>
+                    <Label htmlFor="schoolName">Nome da Instituição (para pré-visualização)</Label>
                     <Input
                       id="schoolName"
                       placeholder="Ex: Escola Estadual Principal"
@@ -110,19 +145,6 @@ export default function NovoRegulamentoPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="status">Status</Label>
-                    <Select value={status} onValueChange={setStatus}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="draft">Rascunho</SelectItem>
-                        <SelectItem value="published">Publicado</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
                     <Label htmlFor="logo">Logo da Instituição</Label>
                     <div className="flex items-center gap-2">
                       <Input
@@ -140,6 +162,8 @@ export default function NovoRegulamentoPage() {
                           src={logoPreview}
                           alt="Logo preview"
                           className="h-12 w-12 object-contain"
+                          width={48}
+                          height={48}
                         />
                       </div>
                     )}
@@ -179,13 +203,16 @@ export default function NovoRegulamentoPage() {
 
             <div className="flex gap-4 justify-center">
               <Link href="/schoolRules">
-                <Button variant="outline" className='hover:cursor-pointer rounded-full bg-red-800 hover:bg-red-70 text-white hover:text-white'>Cancelar</Button>
+                <Button variant="outline" disabled={isSubmitting} className='hover:cursor-pointer rounded-full bg-red-800 hover:bg-red-700 text-white hover:text-white'>
+                  Cancelar
+                </Button>
               </Link>
-              <Button variant="outline" onClick={handleSave} className='hover:cursor-pointer rounded-full bg-blue-800 text-white hover:bg-[#1b5edb] hover:text-white'>
+              <Button variant="outline" disabled={isSubmitting} onClick={handleSave} className='hover:cursor-pointer rounded-full bg-blue-800 text-white hover:bg-[#1b5edb] hover:text-white'>
+                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Guardar como Rascunho
               </Button>
-              <Button onClick={handlePublish} className="gap-2 rounded-full hover:cursor-pointer bg-green-700 hover:bg-green-600 hover:text-white">
-                <FileText className="h-4 w-4" />
+              <Button disabled={isSubmitting} onClick={handlePublish} className="gap-2 rounded-full hover:cursor-pointer bg-green-700 hover:bg-green-600 hover:text-white">
+                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
                 Publicar Regulamento
               </Button>
             </div>
@@ -200,6 +227,8 @@ export default function NovoRegulamentoPage() {
                       src={logoPreview}
                       alt="Logo"
                       className="h-16 w-16 object-contain"
+                      width={64}
+                      height={64}
                     />
                   )}
                   <div className="text-right">

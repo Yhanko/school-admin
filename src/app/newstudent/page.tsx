@@ -12,6 +12,8 @@ import {
   AlertCircle,
   ChevronRight,
 } from "@/lib/icons";
+import axiosInstance from "@/service/api";
+import { Loader2 } from "lucide-react";
 
 type AcademicLevel = "1-6" | "7-9" | "10-13" | "transfer" | null;
 
@@ -60,6 +62,7 @@ export default function StudentRegistration() {
   const [showModal, setShowModal] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState<AcademicLevel>(null);
   const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<StudentFormData>({
     studentNumber: "",
     firstName: "",
@@ -118,15 +121,30 @@ export default function StudentRegistration() {
     }
   };
 
-  const handleSubmit = () => {
-    const newStudent = {
-      id: formData.studentNumber,
-      name: `${formData.firstName} ${formData.lastName}`,
-      level: selectedLevel === "transfer" ? "Transferência" : `Classes ${selectedLevel}`,
-      date: new Date().toLocaleDateString("pt-PT"),
-    };
-    setSubmittedStudents([...submittedStudents, newStudent]);
-    resetForm();
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      const response = await axiosInstance.post('/users/student', {
+        name: `${formData.firstName} ${formData.lastName}`,
+        email: formData.email || `student${formData.studentNumber}@school.com`,
+        password: "DefaultPassword123!", // Should be generated or sent by email
+        // We omit files and advanced profile stuff since backend endpoint requires standard User info
+      });
+
+      const newStudent = {
+        id: response.data.id,
+        name: response.data.name,
+        level: selectedLevel === "transfer" ? "Transferência" : `Classes ${selectedLevel}`,
+        date: new Date().toLocaleDateString("pt-PT"),
+      };
+      setSubmittedStudents([...submittedStudents, newStudent]);
+      resetForm();
+    } catch (error) {
+      console.error("Failed to register student", error);
+      alert("Erro ao registrar aluno. Verifique os dados e tente novamente.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const resetForm = () => {

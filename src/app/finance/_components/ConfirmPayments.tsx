@@ -6,10 +6,49 @@ import { Input } from "@/components/ui/input";
 import { PaymentWithStudent } from "@/types/types";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, XCircle } from "@/lib/icons";
+import { useEffect } from "react";
+import axiosInstance from "@/service/api";
+import { Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export function ConfirmPayments() {
-  const [pendingPayments ] = useState<PaymentWithStudent[]>([]);
+  const [pendingPayments, setPendingPayments] = useState<any[]>([]);
   const [confirmedBy, setConfirmedBy] = useState("");
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchPayments();
+  }, []);
+
+  const fetchPayments = async () => {
+    try {
+      const response = await axiosInstance.get('/finance/payments');
+      const payments = response.data;
+      // Filter only pending
+      setPendingPayments(payments.filter((p: any) => p.status === 'pending'));
+    } catch (error) {
+      console.error("Failed to fetch payments", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleConfirm = async (id: string) => {
+    try {
+      await axiosInstance.patch(`/finance/payments/${id}/confirm`);
+      toast({ title: "Sucesso", description: "Pagamento confirmado com sucesso." });
+      setPendingPayments(prev => prev.filter(p => p.id !== id));
+    } catch (error) {
+      toast({ title: "Erro", description: "Falha ao confirmar pagamento", variant: "destructive" });
+    }
+  };
+
+  const handleCancel = async (id: string) => {
+    // Basic cancel logic, just an example since backend only has confirm out of the box in controller right now.
+    // Assuming backend might implement /cancel or update later.
+    toast({ title: "Info", description: "Funcionalidade de cancelamento a ser implementada no backend." });
+  };
 
 
   return (
@@ -28,7 +67,11 @@ export function ConfirmPayments() {
         </div>
 
         <div className="space-y-4">
-          {pendingPayments.length === 0 ? (
+          {loading ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : pendingPayments.length === 0 ? (
             <p className="text-center text-muted-foreground py-8">
               Não há pagamentos pendentes no momento.
             </p>
@@ -40,10 +83,12 @@ export function ConfirmPayments() {
               >
                 <div className="flex items-start justify-between">
                   <div className="space-y-1">
-                    <p className="font-semibold text-lg">{payment.students?.name || 'N/A'}</p>
-                    <Badge variant="secondary">Cartão</Badge>
+                    <p className="font-semibold text-lg">{payment.student?.name || 'Aluno Desconhecido'}</p>
+                    <Badge variant="secondary">
+                      {payment.type === 'tuition' ? 'Propina' : payment.type === 'enrollment' ? 'Matrícula' : payment.type}
+                    </Badge>
                     <p className="text-sm text-muted-foreground">
-                      Registrado em: {new Date(payment.created_at).toLocaleString('pt-AO')}
+                      Registrado em: {new Date(payment.createdAt || payment.created_at).toLocaleString('pt-AO')}
                     </p>
                     {payment.notes && (
                       <p className="text-sm text-muted-foreground">Obs: {payment.notes}</p>
@@ -51,7 +96,7 @@ export function ConfirmPayments() {
                   </div>
                   <div className="text-right">
                     <p className="text-2xl font-bold text-gradient-primary">
-                      3237821
+                      {payment.amount} KZ
                     </p>
                   </div>
                 </div>
@@ -60,6 +105,7 @@ export function ConfirmPayments() {
                   <Button
                     className="flex-1"
                     variant="default"
+                    onClick={() => handleConfirm(payment.id)}
                   >
                     <CheckCircle className="h-4 w-4 mr-2" />
                     Confirmar
@@ -67,6 +113,7 @@ export function ConfirmPayments() {
                   <Button
                     variant="destructive"
                     className="flex-1"
+                    onClick={() => handleCancel(payment.id)}
                   >
                     <XCircle className="h-4 w-4 mr-2" />
                     Cancelar

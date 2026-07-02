@@ -1,7 +1,10 @@
 "use client"
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import axiosInstance from '@/service/api';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2 } from '@/lib/icons';
 
-// Tipos de dados para o aluno e encarregado de educação
 interface StudentData {
   photo: string;
   firstName: string;
@@ -12,7 +15,6 @@ interface StudentData {
   phone: string;
   email: string;
   address: string;
-  dataCycle: 'initial' | 'mid-term' | 'final'; // Novo campo para o ciclo de dados
 }
 
 interface ParentData {
@@ -24,113 +26,129 @@ interface ParentData {
   paymentMethod: 'cash' | 'debit';
 }
 
-// Dados simulados para diferentes ciclos
-const initialStudentData: StudentData = {
-  photo: '',
-  firstName: 'João',
-  lastName: 'Silva',
-  birthDate: '2010-05-15',
-  birthCity: 'Lisboa',
-  parentName: 'Maria Silva',
-  phone: '912345678',
-  email: 'joao.silva@example.com',
-  address: 'Rua Principal, 10',
-  dataCycle: 'initial',
-};
+function StudentParentFormContent() {
+  const searchParams = useSearchParams();
+  const id = searchParams.get('id');
+  const router = useRouter();
+  const { toast } = useToast();
 
-const initialParentData: ParentData = {
-  firstName: 'Maria',
-  lastName: 'Silva',
-  email: 'maria.silva@example.com',
-  phone: '912345678',
-  address: 'Rua Principal, 10',
-  paymentMethod: 'cash',
-};
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
 
-const midTermStudentData: StudentData = {
-  ...initialStudentData,
-  email: 'joao.s.updated@example.com', // Simulação de atualização
-  address: 'Avenida Secundária, 25', // Simulação de atualização
-  dataCycle: 'mid-term',
-};
+  const [studentData, setStudentData] = useState<StudentData>({
+    photo: '', firstName: '', lastName: '', birthDate: '', birthCity: '',
+    parentName: '', phone: '', email: '', address: ''
+  });
 
-const finalStudentData: StudentData = {
-  ...midTermStudentData,
-  phone: '939876543', // Simulação de atualização
-  dataCycle: 'final',
-};
+  const [parentData, setParentData] = useState<ParentData>({
+    firstName: '', lastName: '', email: '', phone: '', address: '', paymentMethod: 'cash'
+  });
 
-const midTermParentData: ParentData = {
-  ...initialParentData,
-  paymentMethod: 'debit', // Simulação de atualização
-};
-
-const finalParentData: ParentData = {
-  ...midTermParentData,
-  phone: '939876543', // Simulação de atualização
-};
-
-export default function StudentParentForm() {
-  const [currentCycle, setCurrentCycle] = useState<StudentData['dataCycle']>('initial');
-  const [studentData, setStudentData] = useState<StudentData>(initialStudentData);
-  const [parentData, setParentData] = useState<ParentData>(initialParentData);
-
-  // Função para simular o carregamento de dados com base no ciclo
-  const loadDataByCycle = (cycle: StudentData['dataCycle']) => {
-    setCurrentCycle(cycle);
-    switch (cycle) {
-      case 'initial':
-        setStudentData(initialStudentData);
-        setParentData(initialParentData);
-        break;
-      case 'mid-term':
-        setStudentData(midTermStudentData);
-        setParentData(midTermParentData);
-        break;
-      case 'final':
-        setStudentData(finalStudentData);
-        setParentData(finalParentData);
-        break;
-      default:
-        setStudentData(initialStudentData);
-        setParentData(initialParentData);
-    }
-  };
-
-  // Efeito para carregar os dados iniciais
   useEffect(() => {
-    loadDataByCycle('initial');
-  }, []);
+    if (!id) {
+        setIsFetching(false);
+        return;
+    }
 
-  // Handlers de mudança para os campos do aluno
+    const fetchStudent = async () => {
+        try {
+            const response = await axiosInstance.get(`/users/${id}`);
+            const data = response.data;
+            const names = data.name.split(' ');
+
+            setStudentData({
+                photo: data.profile?.photoUrl || '',
+                firstName: names[0] || '',
+                lastName: names.slice(1).join(' ') || '',
+                birthDate: data.profile?.dateOfBirth || '',
+                birthCity: data.profile?.birthCity || '',
+                parentName: data.profile?.guardianName || '',
+                phone: data.profile?.phone || '',
+                email: data.email || '',
+                address: data.profile?.address || '',
+            });
+
+            const parentNames = (data.profile?.guardianName || '').split(' ');
+            setParentData({
+                firstName: parentNames[0] || '',
+                lastName: parentNames.slice(1).join(' ') || '',
+                email: data.profile?.guardianEmail || '',
+                phone: data.profile?.guardianPhone || '',
+                address: data.profile?.guardianAddress || '',
+                paymentMethod: 'cash'
+            });
+        } catch (error) {
+            console.error(error);
+            toast({ title: 'Erro', description: 'Falha ao carregar aluno', variant: 'destructive' });
+        } finally {
+            setIsFetching(false);
+        }
+    };
+
+    fetchStudent();
+  }, [id, toast]);
+
   const handleStudentChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setStudentData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Handlers de mudança para os campos do encarregado de educação
   const handleParentChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setParentData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Handlers de mudança para os campos de rádio (pagamento)
   const handlePaymentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setParentData(prev => ({ ...prev, paymentMethod: e.target.value as ParentData['paymentMethod'] }));
   };
 
-  // Função de submissão simulada
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Dados do Aluno Submetidos:', studentData);
-    console.log('Dados do Encarregado de Educação Submetidos:', parentData);
-    alert(`Dados do ciclo "${currentCycle}" submetidos com sucesso!`);
+    if (!id) return;
+    setIsLoading(true);
+
+    const name = `${studentData.firstName} ${studentData.lastName}`.trim();
+    const guardianName = `${parentData.firstName} ${parentData.lastName}`.trim();
+
+    try {
+        await axiosInstance.patch(`/users/${id}`, {
+            name,
+            email: studentData.email,
+            profile: {
+                dateOfBirth: studentData.birthDate,
+                birthCity: studentData.birthCity,
+                phone: studentData.phone,
+                address: studentData.address,
+                guardianName,
+                guardianPhone: parentData.phone,
+                guardianEmail: parentData.email,
+                guardianAddress: parentData.address,
+            }
+        });
+
+        toast({ title: 'Sucesso', description: 'Aluno atualizado com sucesso!' });
+        router.push('/student');
+    } catch (error: any) {
+        toast({ title: 'Erro', description: error.response?.data?.message || 'Falha ao atualizar aluno', variant: 'destructive' });
+    } finally {
+        setIsLoading(false);
+    }
   };
 
+  if (isFetching) {
+    return (
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+        </div>
+    );
+  }
+
+  if (!id) {
+    return <div className="p-10">Nenhum aluno selecionado.</div>;
+  }
 
   return (
     <form onSubmit={handleSubmit} className="container p-2">
-
       {/* Student Details */}
       <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
         <h2 className="text-2xl font-bold text-purple-600">Editar Dados do Aluno</h2>
@@ -175,7 +193,6 @@ export default function StudentParentForm() {
               className="border rounded-lg p-2"
               value={studentData.birthDate}
               onChange={handleStudentChange}
-              required
             />
             <label htmlFor="birthCity" className="mt-2">Local de Nascimento (Cidade) *</label>
             <input
@@ -186,7 +203,6 @@ export default function StudentParentForm() {
               className="border rounded-lg p-2 mt-1"
               value={studentData.birthCity}
               onChange={handleStudentChange}
-              required
             />
           </div>
           <div className="flex flex-col">
@@ -198,7 +214,6 @@ export default function StudentParentForm() {
               className="border rounded-lg p-2"
               value={studentData.parentName}
               onChange={handleStudentChange}
-              required
             />
           </div>
           <div className="flex flex-col">
@@ -210,7 +225,6 @@ export default function StudentParentForm() {
               className="border rounded-lg p-2"
               value={studentData.phone}
               onChange={handleStudentChange}
-              required
             />
           </div>
           <div className="flex flex-col">
@@ -235,7 +249,6 @@ export default function StudentParentForm() {
               maxLength={200}
               value={studentData.address}
               onChange={handleStudentChange}
-              required
             />
           </div>
         </div>
@@ -255,7 +268,6 @@ export default function StudentParentForm() {
               className="border rounded-lg p-2"
               value={parentData.firstName}
               onChange={handleParentChange}
-              required
             />
           </div>
           <div className="flex flex-col">
@@ -267,7 +279,6 @@ export default function StudentParentForm() {
               className="border rounded-lg p-2"
               value={parentData.lastName}
               onChange={handleParentChange}
-              required
             />
           </div>
           <div className="flex flex-col">
@@ -279,7 +290,6 @@ export default function StudentParentForm() {
               className="border rounded-lg p-2"
               value={parentData.email}
               onChange={handleParentChange}
-              required
             />
           </div>
           <div className="flex flex-col">
@@ -291,7 +301,6 @@ export default function StudentParentForm() {
               className="border rounded-lg p-2"
               value={parentData.phone}
               onChange={handleParentChange}
-              required
             />
           </div>
           <div className="flex flex-col">
@@ -302,16 +311,16 @@ export default function StudentParentForm() {
               className="border rounded-lg p-2"
               value={parentData.address}
               onChange={handleParentChange}
-              required
             />
           </div>
           <div className="flex flex-col">
             <label>Método de Pagamento *</label>
             <div className="flex items-center mt-2">
               <input
-                type="file"
+                type="radio"
                 id="paymentCash"
                 name="paymentMethod"
+                value="cash"
                 className="mr-2"
                 checked={parentData.paymentMethod === 'cash'}
                 onChange={handlePaymentChange}
@@ -324,8 +333,18 @@ export default function StudentParentForm() {
 
       <div className="flex justify-between">
         <button type="button" className="bg-gray-500 text-white px-4 py-2 rounded-full hover:bg-gray-600 transition duration-150">Guardar como Rascunho</button>
-        <button type="submit" className="bg-purple-600 text-white px-4 py-2 rounded-full hover:bg-purple-700 transition duration-150">Submeter Atualização</button>
+        <button disabled={isLoading} type="submit" className="bg-purple-600 text-white px-4 py-2 rounded-full hover:bg-purple-700 transition duration-150 flex justify-center w-48">
+            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Submeter Atualização"}
+        </button>
       </div>
     </form>
   );
-};
+}
+
+export default function StudentParentForm() {
+  return (
+    <Suspense fallback={<div>Carregando...</div>}>
+      <StudentParentFormContent />
+    </Suspense>
+  )
+}

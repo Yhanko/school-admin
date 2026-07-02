@@ -1,44 +1,73 @@
+"use client"
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FileText, Download, Calendar } from '@/lib/icons';
+import { FileText, Download, Calendar, Loader2 } from '@/lib/icons';
+import { useState } from 'react';
+import axiosInstance from '@/service/api';
+import { useToast } from '@/hooks/use-toast';
 
 export function RelatoriosPage() {
+  const { toast } = useToast();
+  const [loadingReport, setLoadingReport] = useState<string | null>(null);
+
   const reports = [
     {
-      id: 1,
-      title: 'Relatório de Frequência',
-      description: 'Frequência dos estudantes por turma',
-      date: '15/01/2025',
+      id: 'academic',
+      title: 'Relatório Acadêmico',
+      description: 'Desempenho acadêmico dos estudantes, notas e frequências',
+      date: new Date().toLocaleDateString(),
     },
     {
-      id: 2,
-      title: 'Relatório de Notas',
-      description: 'Desempenho acadêmico dos estudantes',
-      date: '12/01/2025',
-    },
-    {
-      id: 3,
+      id: 'financial',
       title: 'Relatório Financeiro',
-      description: 'Receitas e despesas do mês',
-      date: '10/01/2025',
+      description: 'Receitas, despesas e pagamentos',
+      date: new Date().toLocaleDateString(),
     },
     {
-      id: 4,
-      title: 'Relatório de Professores',
-      description: 'Carga horária e distribuição de turmas',
-      date: '08/01/2025',
+      id: 'administrative',
+      title: 'Relatório Administrativo',
+      description: 'Estrutura de funcionários, professores e turmas',
+      date: new Date().toLocaleDateString(),
     },
   ];
+
+  const handleDownload = async (reportId: string) => {
+    setLoadingReport(reportId);
+    try {
+      const response = await axiosInstance.get(`/reports/${reportId}`);
+      
+      // Converte o objeto de resposta para uma string JSON formatada
+      const dataStr = JSON.stringify(response.data, null, 2);
+      
+      // Cria um Blob com os dados e um objeto URL para ele
+      const blob = new Blob([dataStr], { type: "application/json" });
+      const url = window.URL.createObjectURL(blob);
+      
+      // Cria um elemento âncora temporário para forçar o download
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `relatorio_${reportId}_${new Date().getTime()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      
+      // Limpeza
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({ title: 'Sucesso', description: 'Relatório gerado com sucesso!' });
+    } catch (error) {
+      console.error(error);
+      toast({ title: 'Erro', description: 'Falha ao gerar o relatório', variant: 'destructive' });
+    } finally {
+      setLoadingReport(null);
+    }
+  };
 
   return (
     <div className="p-8">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold text-slate-900">Relatórios</h1>
-          <Button className="gap-2 rounded-full bg-[#5856eb] hover:bg-[#4947f7] hover:cursor-pointer">
-            <FileText className="h-4 w-4" />
-            Gerar Novo Relatório
-          </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -63,9 +92,19 @@ export function RelatoriosPage() {
                     <Calendar className="h-4 w-4" />
                     <span>{report.date}</span>
                   </div>
-                  <Button size="sm" variant="outline" className="gap-2 rounded-full hover:cursor-pointer bg-[#4D44B5] text-white hover:bg-[#4D44B5] hover:text-white">
-                    <Download className="h-4 w-4" />
-                    Download
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="gap-2 rounded-full hover:cursor-pointer bg-[#4D44B5] text-white hover:bg-[#3d368a] hover:text-white"
+                    onClick={() => handleDownload(report.id)}
+                    disabled={loadingReport === report.id}
+                  >
+                    {loadingReport === report.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Download className="h-4 w-4" />
+                    )}
+                    Gerar JSON
                   </Button>
                 </div>
               </CardContent>
@@ -75,26 +114,26 @@ export function RelatoriosPage() {
 
         <Card className="mt-8">
           <CardHeader>
-            <CardTitle>Tipos de Relatórios Disponíveis</CardTitle>
+            <CardTitle>Tipos de Relatórios Disponíveis (JSON)</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="p-4 border rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
                 <h3 className="font-medium text-slate-900 mb-2">Acadêmico</h3>
                 <p className="text-sm text-slate-500">
-                  Notas, frequência e desempenho dos estudantes
+                  Notas médias da instituição, taxa de frequência e alunos por turma.
                 </p>
               </div>
               <div className="p-4 border rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
                 <h3 className="font-medium text-slate-900 mb-2">Financeiro</h3>
                 <p className="text-sm text-slate-500">
-                  Receitas, despesas e inadimplência
+                  Receitas totais, status de pagamentos pendentes, confirmados e cancelados.
                 </p>
               </div>
               <div className="p-4 border rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
                 <h3 className="font-medium text-slate-900 mb-2">Administrativo</h3>
                 <p className="text-sm text-slate-500">
-                  Professores, turmas e estrutura escolar
+                  Métricas de recursos humanos, como número de professores, administradores e espaços físicos.
                 </p>
               </div>
             </div>
