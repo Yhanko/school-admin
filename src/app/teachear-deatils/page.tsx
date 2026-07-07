@@ -1,7 +1,6 @@
 "use client"
 
 import { TeacherProfile } from "./_components/teacherProfile";
-import { ScheduleCard } from "../teachear-deatils/_components/sheduleCard";
 import { useSearchParams } from "next/navigation";
 import React, { Suspense } from "react";
 
@@ -13,14 +12,8 @@ const TeacherDetailsContent = () => {
     <div className="min-h-screen p-6">
       <div className="container mx-auto">
         <div className="flex flex-col lg:flex-row gap-6 ">
-          {/* Profile Section */}
-          <div className="flex-1 w-[55rem]">
+          <div className="flex-1 w-full max-w-4xl">
             <TeacherProfile id={id} />
-          </div>
-          
-          {/* Schedule Section */}
-          <div className="flex-1 lg:max-w-sm">
-            <ScheduleCard />
           </div>
         </div>
       </div>

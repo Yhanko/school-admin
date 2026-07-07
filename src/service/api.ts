@@ -1,4 +1,5 @@
 import axios from 'axios';
+import Cookies from 'js-cookie';
 import env from "../config/env";
 import { useAuth } from '../store/useAuth';
 
@@ -19,6 +20,18 @@ axiosInstance.interceptors.request.use(
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      Cookies.remove('yhanko_school_admin_token', { path: '/' });
+      Cookies.remove('yhanko_school_admin_user', { path: '/' });
+      window.location.href = '/login';
+    }
     return Promise.reject(error);
   }
 );

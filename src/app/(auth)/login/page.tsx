@@ -68,13 +68,12 @@ const toggleCheck = () => {
       if (response.status === 201 || response.status === 200) {
         const token = response.data.access_token;
         
-        // Temporarily set token in axios for the next request
-        axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-
-        // Fetch User Profile
-        const userProfile = await axiosInstance.get('/users/me');
+        // Fetch User Profile with auth header directly
+        const userProfile = await axiosInstance.get('/users/me', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
         
-        // Save to global state (localStorage automatically)
+        // Save to global state (js-cookie automatically via store)
         setAuth(userProfile.data, token);
 
         toast({

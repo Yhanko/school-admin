@@ -15,20 +15,40 @@ export function DashboardLayout () {
   const [students, setStudents] = useState<any[]>([]);
   const [teachers, setTeachers] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
+  const [financialReport, setFinancialReport] = useState<any>(null);
+  const [academicReport, setAcademicReport] = useState<any>(null);
+  const [events, setEvents] = useState<any[]>([]);
+  const [inbox, setInbox] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const [studentsRes, teachersRes, paymentsRes] = await Promise.all([
+        const [
+          studentsRes, 
+          teachersRes, 
+          paymentsRes,
+          financialRes,
+          academicRes,
+          eventsRes,
+          inboxRes
+        ] = await Promise.all([
           axiosInstance.get('/users?role=STUDENT'),
           axiosInstance.get('/users?role=TEACHER'),
-          axiosInstance.get('/finance/payments')
+          axiosInstance.get('/finance/payments'),
+          axiosInstance.get('/reports/financial'),
+          axiosInstance.get('/reports/academic'),
+          axiosInstance.get('/events'),
+          axiosInstance.get('/messages/inbox')
         ]);
         
         setStudents(studentsRes.data);
         setTeachers(teachersRes.data);
-        setPayments(paymentsRes.data);
+        setPayments(paymentsRes.data.data || paymentsRes.data || []);
+        setFinancialReport(financialRes.data);
+        setAcademicReport(academicRes.data);
+        setEvents(eventsRes.data);
+        setInbox(inboxRes.data);
       } catch (error) {
         console.error("Failed to fetch dashboard data", error);
       } finally {
@@ -72,7 +92,7 @@ export function DashboardLayout () {
               schoolBalance={schoolBalance} 
             />
             {/* Metrics */}
-            <PerformanceChart  />
+            <PerformanceChart report={academicReport} />
             
             {/* Main Grid */}
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
@@ -80,8 +100,8 @@ export function DashboardLayout () {
               <div className="xl:col-span-8 space-y-6">
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <SchoolCalendar />
-                  <SchoolFinance />
+                  <SchoolCalendar events={events} />
+                  <SchoolFinance report={financialReport} />
                 </div>
                 
                 <StudentTable payments={recentPaymentsList} />
@@ -90,7 +110,7 @@ export function DashboardLayout () {
               {/* Right Column */}
               <div className="xl:col-span-4 space-y-6">
                 <RecentStudents students={recentStudentsList} />
-                <MessagesWidget />
+                <MessagesWidget inbox={inbox} />
               </div>
             </div>
           </main>

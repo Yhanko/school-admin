@@ -1,8 +1,6 @@
-"use client"
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Modal } from "./_components/modal";
+import { Modal } from "./modal";
 import {
   Plus,
   User,
@@ -26,6 +24,8 @@ interface StudentFormData {
   gender: string;
   email: string;
   phone: string;
+  password?: string;
+  confirmPassword?: string;
   birthCertificate: File | null;
   vaccineCard: File | null;
   proofOfAddress: File | null;
@@ -35,7 +35,8 @@ interface StudentFormData {
   parentLastName: string;
   parentEmail: string;
   parentPhone: string;
-  parentBI: File | null;
+  parentPassword?: string;
+  parentConfirmPassword?: string;
 
   // Guardian Info (for 10-13)
   guardianFirstName: string;
@@ -43,7 +44,8 @@ interface StudentFormData {
   guardianEmail: string;
   guardianPhone: string;
   guardianRelationship: string;
-  guardianBI: File | null;
+  guardianPassword?: string;
+  guardianConfirmPassword?: string;
 
   // Academic Info
   cycle: string;
@@ -58,8 +60,17 @@ interface StudentFormData {
   previousClass: string; // for transfer
 }
 
-export default function StudentRegistration() {
-  const [showModal, setShowModal] = useState(false);
+const MOCK_CLASSES = [
+  { id: "1", name: "1ª Classe A", room: "Sala 01", level: "1-6" },
+  { id: "2", name: "2ª Classe B", room: "Sala 02", level: "1-6" },
+  { id: "3", name: "3ª Classe A", room: "Sala 03", level: "1-6" },
+  { id: "4", name: "7ª Classe A", room: "Sala 04", level: "7-9" },
+  { id: "5", name: "8ª Classe B", room: "Sala 05", level: "7-9" },
+  { id: "6", name: "10ª Classe A", room: "Lab 1", level: "10-13" },
+  { id: "7", name: "11ª Classe B", room: "Lab 2", level: "10-13" },
+];
+
+export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean, onClose: () => void, onAdded?: () => void }) {
   const [selectedLevel, setSelectedLevel] = useState<AcademicLevel>(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -71,6 +82,8 @@ export default function StudentRegistration() {
     gender: "",
     email: "",
     phone: "",
+    password: "",
+    confirmPassword: "",
     birthCertificate: null,
     vaccineCard: null,
     proofOfAddress: null,
@@ -78,13 +91,15 @@ export default function StudentRegistration() {
     parentLastName: "",
     parentEmail: "",
     parentPhone: "",
-    parentBI: null,
+    parentPassword: "",
+    parentConfirmPassword: "",
     guardianFirstName: "",
     guardianLastName: "",
     guardianEmail: "",
     guardianPhone: "",
     guardianRelationship: "",
-    guardianBI: null,
+    guardianPassword: "",
+    guardianConfirmPassword: "",
     cycle: "",
     course: "",
     class: "",
@@ -131,13 +146,9 @@ export default function StudentRegistration() {
         // We omit files and advanced profile stuff since backend endpoint requires standard User info
       });
 
-      const newStudent = {
-        id: response.data.id,
-        name: response.data.name,
-        level: selectedLevel === "transfer" ? "Transferência" : `Classes ${selectedLevel}`,
-        date: new Date().toLocaleDateString("pt-PT"),
-      };
-      setSubmittedStudents([...submittedStudents, newStudent]);
+      if (onAdded) {
+        onAdded();
+      }
       resetForm();
     } catch (error) {
       console.error("Failed to register student", error);
@@ -148,7 +159,7 @@ export default function StudentRegistration() {
   };
 
   const resetForm = () => {
-    setShowModal(false);
+    onClose();
     setSelectedLevel(null);
     setCurrentStep(1);
     setFormData({
@@ -159,6 +170,8 @@ export default function StudentRegistration() {
       gender: "",
       email: "",
       phone: "",
+      password: "",
+      confirmPassword: "",
       birthCertificate: null,
       vaccineCard: null,
       proofOfAddress: null,
@@ -166,13 +179,15 @@ export default function StudentRegistration() {
       parentLastName: "",
       parentEmail: "",
       parentPhone: "",
-      parentBI: null,
+      parentPassword: "",
+      parentConfirmPassword: "",
       guardianFirstName: "",
       guardianLastName: "",
       guardianEmail: "",
       guardianPhone: "",
       guardianRelationship: "",
-      guardianBI: null,
+      guardianPassword: "",
+      guardianConfirmPassword: "",
       cycle: "",
       course: "",
       class: "",
@@ -286,7 +301,7 @@ export default function StudentRegistration() {
 
         <div className="flex flex-col space-y-2">
           <label className="text-sm font-medium text-foreground">
-            Último Nome *
+          Último Nome *
           </label>
           <input
             type="text"
@@ -351,110 +366,60 @@ export default function StudentRegistration() {
           />
         </div>
 
-        <div className="flex flex-col space-y-2">
-          <label className="text-sm font-medium text-foreground">Ciclo</label>
-          <select
-            name="cycle"
-            value={formData.cycle}
-            onChange={handleInputChange}
-            className="border border-border rounded-lg p-2"
-          >
-            <option value="">Selecione</option>
-            <option value="Primário">Primário</option>
-            <option value="Secundário I">Secundário I</option>
-            <option value="Secundário II">Secundário II</option>
-          </select>
-        </div>
 
-        <div className="flex flex-col space-y-2">
-          <label className="text-sm font-medium text-foreground">Curso</label>
-          <input
-            type="text"
-            name="course"
-            value={formData.course}
-            onChange={handleInputChange}
-            className="border border-border rounded-lg p-2"
-            placeholder="Curso/Especialidade"
-          />
-        </div>
+        {selectedLevel === "10-13" && (
+          <div className="flex flex-col space-y-2">
+            <label className="text-sm font-medium text-foreground">Curso</label>
+            <input
+              type="text"
+              name="course"
+              value={formData.course}
+              onChange={handleInputChange}
+              className="border border-border rounded-lg p-2"
+              placeholder="Curso/Especialidade"
+            />
+          </div>
+        )}
 
         <div className="flex flex-col space-y-2">
           <label className="text-sm font-medium text-foreground">Turma</label>
-          <input
-            type="text"
+          <select
             name="class"
             value={formData.class}
             onChange={handleInputChange}
             className="border border-border rounded-lg p-2"
-            placeholder="Ex: 1A"
+          >
+            <option value="">Selecione uma turma</option>
+            {MOCK_CLASSES.filter(c => selectedLevel === "transfer" ? true : c.level === selectedLevel).map((c) => (
+              <option key={c.id} value={c.name}>
+                {c.name} - {c.room}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex flex-col space-y-2">
+          <label className="text-sm font-medium text-foreground">Senha *</label>
+          <input
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleInputChange}
+            className="border border-border rounded-lg p-2"
+          />
+        </div>
+
+        <div className="flex flex-col space-y-2">
+          <label className="text-sm font-medium text-foreground">Confirmar Senha *</label>
+          <input
+            type="password"
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleInputChange}
+            className="border border-border rounded-lg p-2"
           />
         </div>
       </div>
 
-      <div className="space-y-4 mt-6">
-        <h4 className="font-semibold text-foreground">Documentos Necessários</h4>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="flex flex-col space-y-2">
-            <label className="text-sm font-medium text-foreground">
-              Certidão de Nascimento ou BI *
-            </label>
-            <label className="border-2 border-dashed border-border rounded-lg p-4 cursor-pointer hover:border-primary transition-all text-center">
-              <Upload className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">
-                {formData.birthCertificate
-                  ? formData.birthCertificate.name
-                  : "Clique para enviar"}
-              </span>
-              <input
-                type="file"
-                name="birthCertificate"
-                onChange={handleFileChange}
-                className="hidden"
-              />
-            </label>
-          </div>
-
-          <div className="flex flex-col space-y-2">
-            <label className="text-sm font-medium text-foreground">
-              Cartão de Vacina *
-            </label>
-            <label className="border-2 border-dashed border-border rounded-lg p-4 cursor-pointer hover:border-primary transition-all text-center">
-              <Upload className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">
-                {formData.vaccineCard
-                  ? formData.vaccineCard.name
-                  : "Clique para enviar"}
-              </span>
-              <input
-                type="file"
-                name="vaccineCard"
-                onChange={handleFileChange}
-                className="hidden"
-              />
-            </label>
-          </div>
-
-          <div className="flex flex-col space-y-2">
-            <label className="text-sm font-medium text-foreground">
-              Comprovativo de Morada
-            </label>
-            <label className="border-2 border-dashed border-border rounded-lg p-4 cursor-pointer hover:border-primary transition-all text-center">
-              <Upload className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">
-                {formData.proofOfAddress
-                  ? formData.proofOfAddress.name
-                  : "Clique para enviar"}
-              </span>
-              <input
-                type="file"
-                name="proofOfAddress"
-                onChange={handleFileChange}
-                className="hidden"
-              />
-            </label>
-          </div>
-        </div>
-      </div>
     </div>
   );
 
@@ -481,7 +446,7 @@ export default function StudentRegistration() {
 
         <div className="flex flex-col space-y-2">
           <label className="text-sm font-medium text-foreground">
-            Último Nome *
+          Último Nome *
           </label>
           <input
             type="text"
@@ -520,21 +485,25 @@ export default function StudentRegistration() {
         </div>
 
         <div className="flex flex-col space-y-2">
-          <label className="text-sm font-medium text-foreground">
-            BI/Documento de Identidade *
-          </label>
-          <label className="border-2 border-dashed border-border rounded-lg p-4 cursor-pointer hover:border-primary transition-all text-center">
-            <Upload className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">
-              {formData.parentBI ? formData.parentBI.name : "Clique para enviar"}
-            </span>
-            <input
-              type="file"
-              name="parentBI"
-              onChange={handleFileChange}
-              className="hidden"
-            />
-          </label>
+          <label className="text-sm font-medium text-foreground">Senha *</label>
+          <input
+            type="password"
+            name="parentPassword"
+            value={formData.parentPassword}
+            onChange={handleInputChange}
+            className="border border-border rounded-lg p-2"
+          />
+        </div>
+
+        <div className="flex flex-col space-y-2">
+          <label className="text-sm font-medium text-foreground">Confirmar Senha *</label>
+          <input
+            type="password"
+            name="parentConfirmPassword"
+            value={formData.parentConfirmPassword}
+            onChange={handleInputChange}
+            className="border border-border rounded-lg p-2"
+          />
         </div>
       </div>
     </div>
@@ -562,7 +531,7 @@ export default function StudentRegistration() {
 
         <div className="flex flex-col space-y-2">
           <label className="text-sm font-medium text-foreground">
-            Último Nome *
+          Último Nome *
           </label>
           <input
             type="text"
@@ -619,23 +588,25 @@ export default function StudentRegistration() {
         </div>
 
         <div className="flex flex-col space-y-2">
-          <label className="text-sm font-medium text-foreground">
-            BI/Documento de Identidade *
-          </label>
-          <label className="border-2 border-dashed border-border rounded-lg p-4 cursor-pointer hover:border-primary transition-all text-center">
-            <Upload className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">
-              {formData.guardianBI
-                ? formData.guardianBI.name
-                : "Clique para enviar"}
-            </span>
-            <input
-              type="file"
-              name="guardianBI"
-              onChange={handleFileChange}
-              className="hidden"
-            />
-          </label>
+          <label className="text-sm font-medium text-foreground">Senha *</label>
+          <input
+            type="password"
+            name="guardianPassword"
+            value={formData.guardianPassword}
+            onChange={handleInputChange}
+            className="border border-border rounded-lg p-2"
+          />
+        </div>
+
+        <div className="flex flex-col space-y-2">
+          <label className="text-sm font-medium text-foreground">Confirmar Senha *</label>
+          <input
+            type="password"
+            name="guardianConfirmPassword"
+            value={formData.guardianConfirmPassword}
+            onChange={handleInputChange}
+            className="border border-border rounded-lg p-2"
+          />
         </div>
       </div>
     </div>
@@ -781,148 +752,74 @@ export default function StudentRegistration() {
   };
 
   return (
-      <div className="space-y-8 p-8">
-        {/* Header */}
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">
-              Cadastro de Alunos
-            </h1>
-            <p className="text-muted-foreground">
-              Registre novos alunos no sistema com formulários específicos por
-              nível acadêmico
-            </p>
-          </div>
-          <Button
-            onClick={() => setShowModal(true)}
-            className="gap-2 bg-[#5856eb] text-white rounded-full hover:cursor-pointer hover:bg-[#5856eb] hover:text-white"
-          >
-            <Plus className="w-4 h-4" />
-            Novo Aluno
-          </Button>
-        </div>
-
-        {/* Modal */}
-        <Modal
-          isOpen={showModal}
-          onClose={() => {
-            resetForm();
-          }}
-          title={
-            selectedLevel === null
-              ? "Selecionar Nível Acadêmico"
-              : `Cadastro de Aluno - Passo ${currentStep} de ${getTotalSteps()}`
-          }
-          size="xl"
-        >
-          <div className="space-y-6">
-            {/* Progress Bar */}
-            {selectedLevel !== null && (
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>Progresso</span>
-                  <span>
-                    {currentStep} de {getTotalSteps()}
-                  </span>
-                </div>
-                <div className="w-full bg-muted rounded-full h-2">
-                  <div
-                    className="bg-[#5856eb] h-2 rounded-full transition-all duration-300"
-                    style={{
-                      width: `${(currentStep / getTotalSteps()) * 100}%`,
-                    }}
-                  />
-                </div>
+    <Modal
+      isOpen={isOpen}
+      onClose={() => {
+        resetForm();
+      }}
+      title={
+        selectedLevel === null
+          ? "Selecionar Nível Acadêmico"
+          : `Cadastro de Aluno - Passo ${currentStep} de ${getTotalSteps()}`
+      }
+      size="xl"
+    >
+      <div className="space-y-6">
+        {/* Progress Bar */}
+          {selectedLevel !== null && (
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm text-muted-foreground">
+                <span>Progresso</span>
+                <span>
+                  {currentStep} de {getTotalSteps()}
+                </span>
               </div>
-            )}
-
-            {/* Form Content */}
-            <div>{renderFormStep()}</div>
-
-            {/* Buttons */}
-            <div className="flex justify-between gap-4 pt-4 border-t border-border">
-              <Button
-                variant="outline"
-                onClick={handlePrevious}
-                disabled={currentStep === 1}
-                className="bg-blue-600 text-white rounded-full hover:bg-blue-500 hover:text-white hover:cursor-pointer"
-              >
-                Anterior
-              </Button>
-
-              {currentStep === getTotalSteps() ? (
-                <Button
-                  onClick={handleSubmit}
-                  className="bg-green-600 hover:bg-green-700 gap-2 hover:cursor-pointer rounded-full"
-                >
-                  <Check className="w-4 h-4" />
-                  Registrar Aluno
-                </Button>
-              ) : (
-                <Button onClick={handleNext} className="gap-2 bg-green-600 hover:bg-green-700 hover:cursor-pointer">
-                  Próximo
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-              )}
+              <div className="w-full bg-muted rounded-full h-2">
+                <div
+                  className="bg-[#5856eb] h-2 rounded-full transition-all duration-300"
+                  style={{
+                    width: `${(currentStep / getTotalSteps()) * 100}%`,
+                  }}
+                />
+              </div>
             </div>
+          )}
+
+          {/* Form Content */}
+          <div>{renderFormStep()}</div>
+
+          {/* Buttons */}
+          <div className="flex justify-between gap-4 pt-4 border-t border-border">
+            <Button
+              variant="outline"
+              onClick={handlePrevious}
+              disabled={currentStep === 1}
+              className="bg-blue-600 text-white rounded-full hover:bg-blue-500 hover:text-white hover:cursor-pointer"
+            >
+              Anterior
+            </Button>
+
+            {currentStep === getTotalSteps() ? (
+              <Button
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className="bg-green-600 hover:bg-green-700 gap-2 hover:cursor-pointer rounded-full"
+              >
+                {isSubmitting ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Check className="w-4 h-4" />
+                )}
+                Registrar Aluno
+              </Button>
+            ) : selectedLevel !== null ? (
+              <Button onClick={handleNext} className="gap-2 bg-green-600 hover:bg-green-700 hover:cursor-pointer rounded-full">
+                Próximo
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            ) : null}
           </div>
-        </Modal>
-
-        {/* Info Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <AlertCircle className="w-5 h-5 text-blue-600" />
-                Documentos Necessários
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm text-muted-foreground">
-              <p>
-                <strong>Classes 1-6:</strong> Certidão de nascimento, cartão de
-                vacina, comprovativo de morada
-              </p>
-              <p>
-                <strong>Classes 7-9:</strong> Documentos acima + Declaração das
-                classes anteriores
-              </p>
-              <p>
-                <strong>Classes 10-13:</strong> Todos os anteriores + Declaração
-                da 9ª classe
-              </p>
-              <p>
-                <strong>Transferência:</strong> Pedido de transferência + Todos
-                os documentos anteriores
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="w-5 h-5 text-green-600" />
-                Informações Adicionais
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm text-muted-foreground">
-              <p>
-                O número de estudante é gerado automaticamente com base no ano
-                atual
-              </p>
-              <p>
-                Todos os campos marcados com * são obrigatórios para o
-                prosseguimento
-              </p>
-              <p>
-                Os dados dos pais/encarregados variam conforme o nível
-                acadêmico
-              </p>
-              <p>
-                Após o registro, o aluno receberá um email de confirmação
-              </p>
-            </CardContent>
-          </Card>
         </div>
-      </div>
+      </Modal>
   );
 }

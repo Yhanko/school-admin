@@ -1,6 +1,6 @@
 "use client"
 import { MapPin, Phone, Mail } from "@/lib/icons";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { useEffect, useState } from "react";
 import axiosInstance from "@/service/api";
 import { Loader2 } from "@/lib/icons";
@@ -47,80 +47,51 @@ export function TeacherProfile ({ id }: { id: string | null }) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <Card className="bg-white w-[40rem]">
-              <CardHeader className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-purple-800 rounded-t-lg overflow-hidden">
-                  <div className="absolute top-4 right-8 w-24 h-24 bg-orange-400 rounded-full opacity-80"></div>
-                  <div className="absolute top-8 right-24 w-16 h-16 bg-yellow-400 rounded-full opacity-60"></div>
-                  <div className="absolute top-12 right-4 w-12 h-12 bg-red-400 rounded-full opacity-70"></div>
+      <div className="max-w-4xl mx-auto">
+        <Card className="bg-white border-none shadow-sm rounded-xl overflow-hidden mt-6">
+          <CardContent className="p-8 flex flex-col md:flex-row items-center md:items-start gap-8">
+            {/* Foto do Professor */}
+            <div className="w-32 h-32 bg-indigo-100 rounded-full flex items-center justify-center overflow-hidden shrink-0 shadow-sm border-4 border-white">
+              {teacher.profile?.photoUrl ? (
+                <img src={teacher.profile.photoUrl} alt="Teacher" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-4xl font-bold text-indigo-500">
+                  {teacher.name[0]}
+                </span>
+              )}
+            </div>
+
+            {/* Informações */}
+            <div className="flex-1 w-full text-center md:text-left mt-2">
+              <h1 className="text-3xl font-bold text-gray-900 mb-1">{teacher.name}</h1>
+              <p className="text-indigo-600 font-medium text-lg mb-8">Professor</p>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="flex items-center gap-3 justify-center md:justify-start">
+                  <div className="w-10 h-10 bg-orange-50 rounded-full flex items-center justify-center shrink-0">
+                    <MapPin className="w-5 h-5 text-orange-500" />
+                  </div>
+                  <span className="text-gray-700 font-medium">{teacher.profile?.city || 'Localização não definida'}</span>
                 </div>
                 
-                <div className="relative z-10 flex items-center gap-6 pt-8 pb-6">
-                  <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center overflow-hidden">
-                    {teacher.profile?.photoUrl ? (
-                      <img src={teacher.profile.photoUrl} alt="Teacher" className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-3xl font-bold text-indigo-500">
-                        {teacher.name[0]}
-                      </span>
-                    )}
+                <div className="flex items-center gap-3 justify-center md:justify-start">
+                  <div className="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center shrink-0">
+                    <Phone className="w-5 h-5 text-red-500" />
                   </div>
-                  <div className="text-white">
-                    <h1 className="text-3xl font-bold mb-2">{teacher.name}</h1>
-                    <p className="text-purple-100">Professor</p>
-                  </div>
-                </div>
-              </CardHeader>
-              
-              <CardContent className="p-8">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
-                      <MapPin className="w-4 h-4 text-orange-500" />
-                    </div>
-                    <span className="text-gray-700">{teacher.profile?.city || 'Localização não definida'}</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                      <Phone className="w-4 h-4 text-red-500" />
-                    </div>
-                    <span className="text-gray-700">{teacher.profile?.phone || 'Telefone não definido'}</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                      <Mail className="w-4 h-4 text-gray-500" />
-                    </div>
-                    <span className="text-gray-700">{teacher.email}</span>
-                  </div>
+                  <span className="text-gray-700 font-medium">{teacher.profile?.phone || 'Telefone não definido'}</span>
                 </div>
                 
-                <div className="mb-8">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Morada:</h2>
-                  <p className="text-gray-600 leading-relaxed">
-                    {teacher.profile?.address || 'Sem informação de morada.'}
-                  </p>
-                </div>
-                
-                <div className="mb-8">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-6">Formação Académica:</h2>
-                  
-                  <div className="space-y-6">
-                    <div>
-                      <h3 className="font-semibold text-gray-900">• {teacher.profile?.degree || 'Grau não especificado'}, {teacher.profile?.university || 'Universidade não especificada'}</h3>
-                      <p className="text-gray-500 text-sm">{teacher.profile?.educationPeriod || 'Período não especificado'}</p>
-                    </div>
+                <div className="flex items-center gap-3 justify-center md:justify-start">
+                  <div className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center shrink-0">
+                    <Mail className="w-5 h-5 text-gray-500" />
                   </div>
+                  <span className="text-gray-700 font-medium">{teacher.email}</span>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
-};
+}

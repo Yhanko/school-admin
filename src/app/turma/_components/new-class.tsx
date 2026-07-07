@@ -1,6 +1,6 @@
 "use client"
 import { Button } from "@/components/ui/button"
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Sheet,
   SheetContent,
@@ -10,50 +10,57 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import {
-  Plus,
-} from "@/lib/icons";
+import { Plus } from "@/lib/icons";
 import axiosInstance from "@/service/api";
 import { Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const PERIODS = ['Manhã', 'Tarde', 'Noite', 'Integral'];
 const ACADEMIC_LEVELS = [
-  'Educação Infantil',
-  '1º Ano',
-  '2º Ano',
-  '3º Ano',
-  '4º Ano',
-  '5º Ano',
-  '6º Ano',
-  '7º Ano',
-  '8º Ano',
-  '9º Ano',
-  '1º Ano - Ensino Médio',
-  '2º Ano - Ensino Médio',
-  '3º Ano - Ensino Médio',
+  '1-6',
+  '7-9',
+  '10-13',
 ];
 
 export interface ClassFormData {
   name: string;
   period: string;
   academic_level: string;
-  room: string;
-  student_count: number;
-  teacher_ids: string[];
-  subject_ids: string[];
+  grade: string;
+  course: string;
+  roomName: string;
+  capacity: number;
 }
 
 export function NewClass() {
   const [formData, setFormData] = useState<ClassFormData>({
       name: '',
       period: 'Manhã',
-      academic_level: 'Educação Infantil',
-      room: '',
-      student_count: 0,
-      teacher_ids: ["temp-teacher-id"],
-      subject_ids: [],
+      academic_level: '1-6',
+      grade: '',
+      course: '',
+      roomName: '',
+      capacity: 35,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [rooms, setRooms] = useState<any[]>([]);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchRooms = async () => {
+      try {
+        let url = `/rooms?academicLevel=${encodeURIComponent(formData.academic_level)}`;
+        if (formData.grade) {
+          url += `&grade=${encodeURIComponent(formData.grade)}`;
+        }
+        const response = await axiosInstance.get(url);
+        setRooms(response.data);
+      } catch (error) {
+        console.error("Failed to fetch rooms", error);
+      }
+    };
+    fetchRooms();
+  }, [formData.academic_level, formData.grade]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,15 +70,25 @@ export function NewClass() {
         name: formData.name,
         period: formData.period,
         academicLevel: formData.academic_level,
-        room: formData.room,
-        capacity: formData.student_count || 35,
-        teacherIds: formData.teacher_ids,
+        grade: formData.grade,
+        course: formData.course,
+        room: formData.roomName, // DTO expects 'room'
+        capacity: formData.capacity,
       });
-      alert('Turma criada com sucesso!');
-      window.location.reload();
+      toast({
+        title: "Sucesso",
+        description: "Turma criada com sucesso!",
+      });
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     } catch (error) {
       console.error('Erro ao criar turma', error);
-      alert('Erro ao criar turma');
+      toast({
+        title: "Erro",
+        description: "Erro ao criar turma. Verifique os dados e tente novamente.",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -95,9 +112,9 @@ export function NewClass() {
           </SheetDescription>
         </SheetHeader>
         <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Nome da Turma
               </label>
               <input
@@ -105,34 +122,93 @@ export function NewClass() {
                 required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Ex: Turma A"
+                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                placeholder="Ex: 1ª Classe A"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nº de total de alunos 
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Nível Acadêmico *
               </label>
-              <input
-                type="number"
+              <select
                 required
-                value={formData.room}
-                onChange={(e) => setFormData({ ...formData, room: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Ex: Sala 101"
-              />
+                value={formData.academic_level}
+                onChange={(e) => setFormData({ ...formData, academic_level: e.target.value })}
+                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+              >
+                {ACADEMIC_LEVELS.map((level) => (
+                  <option key={level} value={level}>
+                    {level === '1-6' ? 'Ensino Primário (1-6)' : level === '7-9' ? 'Ensino Secundário I (7-9)' : 'Ensino Secundário II (10-13)'}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Classe / Ano
+              </label>
+              <select
+                required
+                value={formData.grade}
+                onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
+                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+              >
+                <option value="">Selecione a classe</option>
+                {formData.academic_level === '1-6' && (
+                  <>
+                    <option value="1ª Classe">1ª Classe</option>
+                    <option value="2ª Classe">2ª Classe</option>
+                    <option value="3ª Classe">3ª Classe</option>
+                    <option value="4ª Classe">4ª Classe</option>
+                    <option value="5ª Classe">5ª Classe</option>
+                    <option value="6ª Classe">6ª Classe</option>
+                  </>
+                )}
+                {formData.academic_level === '7-9' && (
+                  <>
+                    <option value="7ª Classe">7ª Classe</option>
+                    <option value="8ª Classe">8ª Classe</option>
+                    <option value="9ª Classe">9ª Classe</option>
+                  </>
+                )}
+                {formData.academic_level === '10-13' && (
+                  <>
+                    <option value="10ª Classe">10ª Classe</option>
+                    <option value="11ª Classe">11ª Classe</option>
+                    <option value="12ª Classe">12ª Classe</option>
+                    <option value="13ª Classe">13ª Classe</option>
+                  </>
+                )}
+              </select>
+            </div>
+
+            {formData.academic_level === '10-13' && (
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Curso / Profissão
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.course}
+                  onChange={(e) => setFormData({ ...formData, course: e.target.value })}
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  placeholder="Ex: Ciências Físicas e Biológicas"
+                />
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Período
               </label>
               <select
                 required
                 value={formData.period}
                 onChange={(e) => setFormData({ ...formData, period: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
               >
                 {PERIODS.map((period) => (
                   <option key={period} value={period}>
@@ -143,73 +219,49 @@ export function NewClass() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nível Acadêmico *
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Sala
               </label>
               <select
                 required
-                value={formData.academic_level}
-                onChange={(e) => setFormData({ ...formData, academic_level: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={formData.roomName}
+                onChange={(e) => setFormData({ ...formData, roomName: e.target.value })}
+                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
               >
-                {ACADEMIC_LEVELS.map((level) => (
-                  <option key={level} value={level}>
-                    {level}
+                <option value="">Selecione uma sala</option>
+                {rooms.map((room) => (
+                  <option key={room.id} value={room.name}>
+                    {room.name} {room.floor ? `(${room.floor})` : ''} - Cap: {room.capacity}
                   </option>
                 ))}
               </select>
+              {rooms.length === 0 && (
+                <p className="text-xs text-orange-600 mt-1">
+                  Nenhuma sala cadastrada para este Cíclo/Classe.
+                </p>
+              )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Sala
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Capacidade Máxima (Alunos)
               </label>
               <input
-                type="text"
+                type="number"
                 required
+                value={formData.capacity}
                 onChange={(e) =>
-                  setFormData({ ...formData, student_count: parseInt(e.target.value) || 0 })
+                  setFormData({ ...formData, capacity: parseInt(e.target.value) || 0 })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Classe
-              </label>
-              <input
-                type="text"
-                required
-                onChange={(e) =>
-                  setFormData({ ...formData, student_count: parseInt(e.target.value) || 0 })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Professores
-            </label>
-            <select
-                required
-                value={formData.academic_level}
-                onChange={(e) => setFormData({ ...formData, academic_level: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                {ACADEMIC_LEVELS.map((level) => (
-                  <option key={level} value={level}>
-                    {level}
-                  </option>
-                ))}
-              </select>   
-          </div>
-        <SheetFooter className="mt-6">
+        <SheetFooter className="mt-8">
           <Button type="submit" disabled={isSubmitting} className="bg-[#5856eb] rounded-full text-white hover:cursor-pointer hover:text-white hover:bg-[#3c3ad6]">
             {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-            Save changes
+            Salvar Turma
           </Button>
         </SheetFooter>
         </form>

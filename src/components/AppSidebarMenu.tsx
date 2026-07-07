@@ -1,6 +1,6 @@
 "use client";
 
-import {
+import { 
   Sidebar,
   SidebarContent,
   SidebarGroup,

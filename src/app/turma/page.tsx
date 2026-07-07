@@ -1,13 +1,16 @@
 "use client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { NewClass } from "./_components/new-class";
+import { NewRoom } from "./_components/new-room";
+import { NewSubject } from "./_components/new-subject";
 import { Button } from "@/components/ui/button";
 import {
   Search,
   Trash2,
 } from "@/lib/icons";
 import { EditClass } from "./_components/edit-class";
-import { EnrollStudent } from "./_components/enroll-student";
+import { ClassSubjects } from "./_components/class-subjects";
+import { ClassDetails } from "./_components/class-details";
 
 
 import { useState, useEffect } from "react";
@@ -15,21 +18,22 @@ import axiosInstance from "@/service/api";
 import { Loader2 } from "lucide-react";
 
 export default function Turma(){
-  const [classes, setClasses] = useState<any[]>([]);
+  const [classes, setClasses] = useState<{id: string, name: string, level: string, teacher: string, room: string, students: number, capacity: number, schedule: string, status: string}[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchClasses = async () => {
     try {
       const response = await axiosInstance.get('/classes');
       // Map API response to required UI format
-      const mappedClasses = response.data.map((c: any) => ({
+      const mappedClasses = response.data.map((c: {id: string, name: string, academicLevel: string, teachers?: {name: string}[], room?: string, students?: unknown[], capacity?: number, period?: string}) => ({
         id: c.id,
         name: c.name,
-        level: `${c.grade || 1}º Ano`, // Mocked level
-        teacher: "Prof. Atribuído", // Mocked teacher for now
+        level: c.academicLevel === '1-6' ? 'Ensino Primário (1-6)' : c.academicLevel === '7-9' ? 'Ensino Secundário I (7-9)' : c.academicLevel === '10-13' ? 'Ensino Secundário II (10-13)' : c.academicLevel,
+        teacher: c.teachers && c.teachers.length > 0 ? c.teachers.map((t) => t.name).join(", ") : "Sem professor atribuído",
+        room: c.room || 'Sem sala',
         students: c.students?.length || 0,
         capacity: c.capacity || 35,
-        schedule: c.shift === 'MORNING' ? '07:00 - 11:30' : '13:00 - 17:30',
+        schedule: c.period || 'Integral',
         status: "Ativo"
       }));
       setClasses(mappedClasses);
@@ -57,11 +61,10 @@ export default function Turma(){
 
   return(
       <section className="space-y-4 p-4 w-[70rem]">
-        {/* Header */}
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">Gestão de Turmas</h1>
-            <p className="text-muted-foreground">Visualize e gerencie todas as turmas da escola</p>
+            <h1 className="text-3xl font-bold text-foreground">Gestão de Turmas</h1>
+            <p className="text-muted-foreground mt-1">Gerencie as turmas, alunos e professores da sua instituição</p>
           </div>
         </div>
 
@@ -122,8 +125,9 @@ export default function Turma(){
             />
           </div>
 
-          <NewClass/>
-
+          <NewSubject onCreated={fetchClasses} />
+          <NewRoom />
+          <NewClass />
         </div>
 
         {/* Classes Table */}
@@ -161,7 +165,7 @@ export default function Turma(){
                           <td className="py-3 px-4 font-bold text-foreground text-lg">{cls.name}</td>
                           <td className="py-3 px-4 text-muted-foreground">{cls.level}</td>
                           <td className="py-3 px-4 text-muted-foreground text-xs">{cls.teacher}</td>
-                          <td className="py-3 px-4 text-muted-foreground text-xs">Sala</td>
+                          <td className="py-3 px-4 text-muted-foreground text-xs">{cls.room}</td>
                           <td className="py-3 px-4 text-center font-semibold text-foreground">
                             {cls.students}/{cls.capacity}
                           </td>
@@ -173,7 +177,8 @@ export default function Turma(){
                           <td className="py-3 px-4 text-muted-foreground text-xs">{cls.schedule}</td>
                           <td className="py-3 px-4 text-center">
                             <div className="flex gap-2 justify-center">
-                              <EnrollStudent classId={cls.id} className={cls.name} onSuccess={fetchClasses} />
+                              <ClassDetails classId={cls.id} />
+                              <ClassSubjects classId={cls.id} className={cls.name} />
                               <EditClass/>
                               <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-600">
                                 <Trash2 className="w-4 h-4" />

@@ -5,7 +5,7 @@ import { Header } from "@/components/Header";
 import { BroadcastBanner } from "@/components/BroadcastBanner";
 import { useAuth } from "@/store/useAuth";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function RootLayout({
   children,
@@ -14,18 +14,22 @@ export default function RootLayout({
 }>) {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (mounted && !isAuthenticated) {
       router.push("/login");
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, mounted, router]);
 
-  if (!isAuthenticated) return null;
+  if (!mounted || !isAuthenticated) return null;
 
   return (
-    <div
-      >
+    <div>
         <SidebarProvider>
           <AppSidebar />
           <main className={`flex flex-col h-screen flex-1 sm:w-full md:w-full xl:w-[1100px] 2xl:w-[1100px]`}>

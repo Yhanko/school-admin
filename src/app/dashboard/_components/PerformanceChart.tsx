@@ -6,7 +6,9 @@ import { ApexOptions } from "apexcharts";
 
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
-export function PerformanceChart () {
+export function PerformanceChart({ report }: { report?: any }) {
+  const categories = report?.monthlyPerformance?.map((m: any) => m.month) || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  
   const chartOptions: ApexOptions = {
     chart: {
       type: 'area',
@@ -34,7 +36,7 @@ export function PerformanceChart () {
       }
     },
     xaxis: {
-      categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+      categories: categories,
       axisBorder: {
         show: false
       },
@@ -67,14 +69,17 @@ export function PerformanceChart () {
     }
   }
 
+  const attData = report?.monthlyPerformance?.map((m: any) => m.attendance) || [65, 75, 70, 80, 85, 75, 90, 85, 95, 90, 100, 95];
+  const gradeData = report?.monthlyPerformance?.map((m: any) => m.grade) || [55, 65, 60, 70, 75, 65, 80, 75, 85, 80, 90, 85];
+
   const chartSeries = [
     {
-      name: 'Performance 1',
-      data: [65, 75, 70, 80, 85, 75, 90, 85, 95, 90, 100, 95]
+      name: 'Assiduidade (%)',
+      data: attData
     },
     {
-      name: 'Performance 2',
-      data: [55, 65, 60, 70, 75, 65, 80, 75, 85, 80, 90, 85]
+      name: 'Média Notas',
+      data: gradeData
     }
   ]
 
@@ -86,11 +91,11 @@ export function PerformanceChart () {
           <div className="flex space-x-4 text-sm">
             <div className="flex items-center">
               <div className="w-3 h-3 bg-yellow-400 rounded-full mr-2"></div>
-              <span className="text-muted-foreground">1245</span>
+              <span className="text-muted-foreground">{report?.overview?.attendanceRate || 0}% Assiduidade Média</span>
             </div>
             <div className="flex items-center">
               <div className="w-3 h-3 bg-accent rounded-full mr-2"></div>
-              <span className="text-muted-foreground">1356</span>
+              <span className="text-muted-foreground">{report?.overview?.averageGrade || 0} Nota Média</span>
             </div>
           </div>
         </div>
