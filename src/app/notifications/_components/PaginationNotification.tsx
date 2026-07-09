@@ -1,3 +1,4 @@
+import React from "react";
 import { PaginationProps } from "@/types/interfaces";
 import { ChevronLeft, ChevronRight } from "@/lib/icons";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ export default function PaginationNotification({ page, pages, onPageChange }: Pa
 
   // Função para renderizar os botões das páginas
   const renderPageButtons = () => {
-    const buttons = [];
+    const buttons: React.ReactNode[] = [];
 
     // Criar um intervalo de páginas a ser exibido
     const start = 1;

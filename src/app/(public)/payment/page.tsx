@@ -1,6 +1,8 @@
 "use client"
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Plan, PriceCalculation, plans, calculatePrices } from '@/lib/plans';
 import { CreditCard, Lock, CheckCircle, AlertCircle, Eye, EyeOff } from '@/lib/icons';
 
 // Interfaces TypeScript
@@ -108,8 +110,23 @@ const PaymentForm: React.FC = () => {
     expiryDate: '',
     cvv: '',
     email: '',
-    plan: 'Premium Plan - R$ 29,90/mês'
+    plan: ''
   });
+
+  const searchParams = useSearchParams();
+  const [selectedPlan, setSelectedPlan] = useState<(Plan & { prices: PriceCalculation }) | null>(null);
+
+  useEffect(() => {
+    const planId = searchParams.get('plan');
+    if (planId) {
+      const foundPlan = plans.find(p => p.id === planId);
+      if (foundPlan) {
+        const prices = calculatePrices(foundPlan);
+        setSelectedPlan({ ...foundPlan, prices });
+        setFormData(prev => ({ ...prev, plan: foundPlan.name }));
+      }
+    }
+  }, [searchParams]);
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -268,12 +285,22 @@ const PaymentForm: React.FC = () => {
             <div className="bg-white/5 rounded-lg p-4 border border-white/10">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-white font-semibold">Premium Plan</h3>
-                  <p className="text-gray-400 text-sm">Acesso completo a todos os recursos</p>
+                  <h3 className="text-white font-semibold">
+                    {selectedPlan ? selectedPlan.name : 'Plano Básico'}
+                  </h3>
+                  <p className="text-gray-400 text-sm">
+                    {selectedPlan ? selectedPlan.description : 'Plano selecionado para assinatura'}
+                  </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[#FF5777] font-bold text-lg">R$ 29,90</p>
-                  <p className="text-gray-400 text-sm">por mês</p>
+                  <p className="text-[#FF5777] font-bold text-lg">
+                    {selectedPlan ? selectedPlan.prices.finalTotal.toFixed(2) : '29,90'} KZ
+                  </p>
+                  <p className="text-gray-400 text-sm">
+                    {selectedPlan && selectedPlan.period > 1 
+                      ? `por ${selectedPlan.period} meses`
+                      : 'por mês'}
+                  </p>
                 </div>
               </div>
             </div>
@@ -431,7 +458,7 @@ const PaymentForm: React.FC = () => {
               ) : (
                 <div className="flex items-center space-x-2">
                   <Lock className="w-5 h-5" />
-                  <span>Pagar R$ 29,90</span>
+                  <span>Pagar {selectedPlan ? selectedPlan.prices.finalTotal.toFixed(2) : '29,90'} KZ</span>
                 </div>
               )}
             </Button>
@@ -459,5 +486,14 @@ const PaymentForm: React.FC = () => {
     </div>
   );
 };
+import { Suspense } from 'react';
 
-export default PaymentForm;
+const PaymentPage: React.FC = () => {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#1B191F] flex items-center justify-center p-4"><div className="w-8 h-8 border-4 border-[#FF5777] border-t-transparent rounded-full animate-spin"></div></div>}>
+      <PaymentForm />
+    </Suspense>
+  );
+};
+
+export default PaymentPage;

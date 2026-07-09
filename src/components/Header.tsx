@@ -1,41 +1,91 @@
 "use client";
-//compoenetes
-import { LogOutModal } from "@/components/LogOutModal";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import Image from "next/image";
-//images e icones
-import { LogOut } from "@/lib/icons";
-import YhankoIMG from "../assets/yhankoIMG.svg";
-//hooks
+import { useEffect, useState } from "react";
 import { NotificationsHover } from "./NotificationHover";
+import { useAuth } from "@/store/useAuth";
+import { useAcademicYear } from "@/store/useAcademicYear";
+import axiosInstance from "@/service/api";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CalendarDays } from "lucide-react";
 
 export function Header() {
+    const { user } = useAuth();
+    const [mounted, setMounted] = useState(false);
+    
+    const { 
+        academicYears, 
+        selectedYear, 
+        activeYear, 
+        setAcademicYears, 
+        setSelectedYear, 
+        setActiveYear 
+    } = useAcademicYear();
+
+    useEffect(() => {
+        setMounted(true);
+        
+        // Fetch academic years
+        const fetchAcademicYears = async () => {
+            try {
+                const [allRes, activeRes] = await Promise.all([
+                    axiosInstance.get('/academic-years'),
+                    axiosInstance.get('/academic-years/active')
+                ]);
+                
+                setAcademicYears(allRes.data);
+                setActiveYear(activeRes.data);
+                
+                // Set selected year to active year initially if not already set
+                if (!selectedYear) {
+                    setSelectedYear(activeRes.data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch academic years", error);
+            }
+        };
+        
+        fetchAcademicYears();
+    }, []);
+
     return (
         <header 
-        className="flex h-[5rem] w-full items-center justify-end border-b-[1px] border-[#a39e9e] top-0 z-50">    
-            <nav className="flex items-center w-[12rem] h-16">
-             <Link href="profile" className="flex justify-center items-center mr-2 border-[1px] border-gray-300 rounded-full">
-                <Image
-                    src={YhankoIMG}
-                    alt="Avatar"
-                    className="w-12 h-12 md:w-12 p-2 lg:w-12 xl:w-12 2xl:w-12 md:h-12 lg:h-12 xl:h-12 2xl:h-12 rounded-3xl"
-                />
-                </Link>
-                <div className="flex space-x-4 max-w-24">
+        className="flex h-[5rem] w-full items-center justify-between border-b-[1px] border-[#a39e9e] px-8 top-0 z-50">    
+            <div className="flex flex-col items-start">
+                <span className="text-lg md:text-xl font-bold text-[#303972]">
+                    {mounted ? (user?.name || 'Carregando...') : 'Carregando...'}
+                </span>
+            </div>
+            
+            <nav className="flex items-center h-16">
+                <div className="flex items-center space-x-6">
+                    {/* Academic Year Selector */}
+                    {mounted && academicYears.length > 0 && selectedYear && (
+                        <div className="flex items-center space-x-2 bg-slate-100 px-3 py-1.5 rounded-md border border-slate-200">
+                            <CalendarDays className="h-4 w-4 text-[#303972]" />
+                            <span className="text-sm font-semibold text-[#303972] hidden md:inline">Ano Letivo:</span>
+                            <Select 
+                                value={selectedYear.id} 
+                                onValueChange={(val) => {
+                                    const y = academicYears.find(ay => ay.id === val);
+                                    if(y) setSelectedYear(y);
+                                }}
+                            >
+                                <SelectTrigger className="h-7 border-none bg-transparent shadow-none focus:ring-0 text-[#303972] font-semibold w-auto min-w-[110px] p-0 pr-2">
+                                    <SelectValue placeholder="Selecione" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {academicYears.map((year) => (
+                                        <SelectItem key={year.id} value={year.id} className="cursor-pointer">
+                                            {year.year} {year.id === activeYear?.id ? "(Ativo)" : ""}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    )}
+
                     <div className="static">
-                        <span
-                            className="absolute text-center ml-[20px] bg-[#1FC16B] text-[#ffffff] rounded-sm h-[4px] w-[4px] text-xs text-[10px] pt-[2px] mt-[12px]"
-                        >
-                        </span>
                         <NotificationsHover />
                     </div>
-
-                    <LogOutModal>
-                        <Button className="border-[1px] border-gray-300 hover:text-[#013479] w-12 h-12 md:size-10 lg:size-10 xl:size-10 2xl:size-10 bg-transparent hover:bg-transparent hover:cursor-pointer text-[#303972] shadow-none">
-                            <LogOut />
-                        </Button>
-                    </LogOutModal>
                 </div>
             </nav>
         </header>

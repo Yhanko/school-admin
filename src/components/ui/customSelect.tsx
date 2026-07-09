@@ -1,4 +1,5 @@
 import * as React from "react"
+import Image from "next/image"
 import * as SelectPrimitive from "@radix-ui/react-select"
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import SelectArrow from "../../assets/selected.svg"
@@ -25,7 +26,7 @@ const SelectTrigger = React.forwardRef<
   >
     {children}
     <SelectPrimitive.Icon asChild>
-       <img src={SelectArrow} className="h-3 w-3 opacity-50" />
+       <Image src={SelectArrow} alt="arrow" className="h-3 w-3 opacity-50" />
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
 ))

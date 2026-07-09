@@ -1,10 +1,15 @@
 "use client"
 
-import { Calendar as CalendarIcon, Plus, ChevronDown } from "@/lib/icons";
+import { Calendar as CalendarIcon, Plus, ChevronDown, Loader2 } from "@/lib/icons";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
+import { useState, useEffect } from "react";
+import axiosInstance from "@/service/api";
+import { NewEventModal } from "./new-event";
+import { Trash2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface ScheduleItem {
   id: string;
@@ -14,33 +19,6 @@ interface ScheduleItem {
   time: string;
   color: 'purple' | 'orange' | 'yellow' | 'blue';
 }
-
-const scheduleItems: ScheduleItem[] = [
-  {
-    id: "1",
-    title: "Visita no museu",
-    subject: "Algorithm",
-    date: "March 20, 2020",
-    time: "09:00 - 10:00 AM",
-    color: "purple"
-  },
-  {
-    id: "2",
-    title: "Dia de África",
-    subject: "Art",
-    date: "March 20, 2020",
-    time: "09:00 - 10:00 AM",
-    color: "orange"
-  },
-  {
-    id: "3",
-    title: "Prova do primeiro Trimestre",
-    subject: "Programming",
-    date: "March 20, 2020",
-    time: "09:00 - 10:00 AM",
-    color: "yellow"
-  },
-];
 
 const getColorClasses = (color: string) => {
   switch (color) {
@@ -57,7 +35,78 @@ const getColorClasses = (color: string) => {
   }
 };
 
-export function  CalendarSchedule () {
+const mapTypeToColor = (type: string): 'purple' | 'orange' | 'yellow' | 'blue' => {
+    switch (type) {
+        case 'event': return 'purple';
+        case 'activity': return 'blue';
+        case 'meeting': return 'orange';
+        case 'holiday': return 'yellow';
+        default: return 'purple';
+    }
+}
+
+export function CalendarSchedule() {
+  const [events, setEvents] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+
+  // Month and Year state
+  const [currentDate, setCurrentDate] = useState(new Date());
+
+  const fetchEvents = async () => {
+    try {
+      const response = await axiosInstance.get('/events');
+      setEvents(response.data);
+    } catch (error) {
+      console.error("Erro ao buscar eventos", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Tem a certeza que deseja apagar esta atividade?')) return;
+    try {
+        await axiosInstance.delete(`/events/${id}`);
+        toast({ title: 'Sucesso', description: 'Atividade apagada com sucesso.' });
+        fetchEvents();
+    } catch (error: any) {
+        toast({ title: 'Erro', description: error.response?.data?.message || 'Falha ao apagar.', variant: 'destructive' });
+    }
+  };
+
+  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  
+  const getDaysInMonth = (year: number, month: number) => {
+      return new Date(year, month + 1, 0).getDate();
+  };
+
+  const getFirstDayOfMonth = (year: number, month: number) => {
+      let day = new Date(year, month, 1).getDay();
+      // Adjust to make Monday 0 instead of Sunday 0
+      return day === 0 ? 6 : day - 1; 
+  };
+
+  const daysInMonth = getDaysInMonth(currentDate.getFullYear(), currentDate.getMonth());
+  const firstDay = getFirstDayOfMonth(currentDate.getFullYear(), currentDate.getMonth());
+  const totalSlots = Math.ceil((daysInMonth + firstDay) / 7) * 7;
+
+  // Process events for the side panel
+  const scheduleItems: ScheduleItem[] = events.map(e => {
+      const d = new Date(e.date);
+      return {
+          id: e.id,
+          title: e.title,
+          subject: e.description || e.type,
+          date: d.toLocaleDateString('pt-BR', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' }),
+          time: "All day", // Simplified as we only have date right now
+          color: mapTypeToColor(e.type)
+      };
+  });
 
   return (
     <div className="h-screen p-2 w-[70rem]">
@@ -65,7 +114,7 @@ export function  CalendarSchedule () {
         <h1 className="text-3xl font-bold text-foreground mb-2">Eventos da instituição</h1>
         <p className="text-muted-foreground">Eventos realizados pela instituição a nível geral</p>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center justify-between">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start justify-between">
           {/* Calendar Section */}
           <div className="lg:col-span-2">
             <Card className="bg-white border border-[#5856eb]">
@@ -76,15 +125,20 @@ export function  CalendarSchedule () {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" className="bg-white border border-gray-200 rounded-full px-4 py-2">
-                        January
+                        {monthNames[currentDate.getMonth()]}
                         <ChevronDown className="ml-2 h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                      <DropdownMenuItem>January</DropdownMenuItem>
-                      <DropdownMenuItem>February</DropdownMenuItem>
-                      <DropdownMenuItem>March</DropdownMenuItem>
-                      <DropdownMenuItem>April</DropdownMenuItem>
+                      {monthNames.map((m, idx) => (
+                          <DropdownMenuItem key={m} onClick={() => {
+                              const newDate = new Date(currentDate);
+                              newDate.setMonth(idx);
+                              setCurrentDate(newDate);
+                          }}>
+                              {m}
+                          </DropdownMenuItem>
+                      ))}
                     </DropdownMenuContent>
                   </DropdownMenu>
 
@@ -92,25 +146,25 @@ export function  CalendarSchedule () {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" className="bg-white border border-gray-200 rounded-full px-4 py-2">
-                        2021
+                        {currentDate.getFullYear()}
                         <ChevronDown className="ml-2 h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                      <DropdownMenuItem>2021</DropdownMenuItem>
-                      <DropdownMenuItem>2022</DropdownMenuItem>
-                      <DropdownMenuItem>2023</DropdownMenuItem>
-                      <DropdownMenuItem>2024</DropdownMenuItem>
+                      {[2023, 2024, 2025, 2026, 2027].map(y => (
+                          <DropdownMenuItem key={y} onClick={() => {
+                              const newDate = new Date(currentDate);
+                              newDate.setFullYear(y);
+                              setCurrentDate(newDate);
+                          }}>
+                              {y}
+                          </DropdownMenuItem>
+                      ))}
                     </DropdownMenuContent>
                   </DropdownMenu>
 
-                  {/* New Student Button */}
-                  <Link href="/newEvent">
-                    <Button className="bg-[#6366f1] hover:bg-[#5856eb] text-white rounded-full px-4 py-2 hover:cursor-pointer">
-                      <Plus className="mr-2 h-4 w-4" />
-                      New events
-                    </Button>
-                  </Link>
+                  {/* New Event Button */}
+                  <NewEventModal onSuccess={fetchEvents} />
                 </div>
               </CardHeader>
               <CardContent>
@@ -126,55 +180,58 @@ export function  CalendarSchedule () {
                   
                   <div className="grid grid-cols-7 gap-2">
                     {/* Calendar Days */}
-                    {Array.from({ length: 35 }, (_, i) => {
-                      const day = i - 5; // Adjust for starting position
-                      const isCurrentMonth = day > 0 && day <= 31;
-                      const isToday = day === 6;
-                      const hasEvents = [2, 10, 15, 18, 20, 24, 29].includes(day);
-                      const isSpecialDay = day === 10; // Purple background
+                    {Array.from({ length: totalSlots }, (_, i) => {
+                      const day = i - firstDay + 1;
+                      const isCurrentMonth = day > 0 && day <= daysInMonth;
+                      
+                      const currentDateObj = new Date();
+                      const isToday = isCurrentMonth && 
+                                      day === currentDateObj.getDate() && 
+                                      currentDate.getMonth() === currentDateObj.getMonth() && 
+                                      currentDate.getFullYear() === currentDateObj.getFullYear();
+                      
+                      // Find events for this day
+                      const dayEvents = isCurrentMonth ? events.filter(e => {
+                          const eDate = new Date(e.date);
+                          return eDate.getUTCDate() === day &&
+                                 eDate.getUTCMonth() === currentDate.getMonth() &&
+                                 eDate.getUTCFullYear() === currentDate.getFullYear();
+                      }) : [];
+
+                      const hasEvents = dayEvents.length > 0;
                       
                       return (
                         <div
                           key={i}
                           className={`
-                            h-16 border border-[#FF5777] rounded-lg p-2 text-sm
-                            ${isCurrentMonth ? 'bg-white text-gray-900' : 'bg-gray-50 text-gray-400'}
-                            ${isToday ? 'bg-[#FF5777] text-white' : ''}
-                            ${isSpecialDay ? 'bg-[#6366f1] text-white' : ''}
-                            cursor-pointer hover:bg-gray-50
+                            h-20 border rounded-lg p-2 text-sm overflow-hidden
+                            ${isCurrentMonth ? 'bg-white text-gray-900 border-gray-200' : 'bg-gray-50 text-gray-400 border-transparent'}
+                            ${isToday ? 'border-[#FF5777] shadow-sm' : ''}
+                            cursor-pointer hover:bg-gray-50 transition-colors
                           `}
                         >
                           {isCurrentMonth && (
                             <>
-                              <div className="font-medium">{day}</div>
-                              {hasEvents && (
-                                <div className="flex gap-1 mt-1">
-                                  <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
-                                  <div className="w-2 h-2 rounded-full bg-red-400"></div>
-                                  <div className="w-2 h-2 rounded-full bg-green-400"></div>
-                                </div>
-                              )}
-                              {isSpecialDay && (
-                                <div className="text-xs mt-1">Forms 2+</div>
-                              )}
-                              {day === 15 && (
-                                <div className="flex items-center justify-center w-6 h-6 bg-purple-200 text-purple-700 rounded-full text-xs font-bold mt-1">
-                                  2+
-                                </div>
-                              )}
-                              {day === 18 && (
-                                <div className="text-xs mt-1 text-red-500">Tony 2+</div>
-                              )}
-                              {day === 29 && (
-                                <div className="text-xs mt-1 text-gray-600">Jeremy</div>
-                              )}
+                              <div className={`font-medium ${isToday ? 'bg-[#FF5777] text-white w-6 h-6 flex items-center justify-center rounded-full' : ''}`}>
+                                  {day}
+                              </div>
+                              <div className="mt-1 space-y-1">
+                                  {dayEvents.slice(0, 2).map((evt, idx) => (
+                                      <div key={idx} className={`text-[10px] px-1 py-0.5 rounded truncate ${evt.type === 'event' ? 'bg-purple-100 text-purple-700' : evt.type === 'activity' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>
+                                          {evt.title}
+                                      </div>
+                                  ))}
+                                  {dayEvents.length > 2 && (
+                                      <div className="text-[10px] text-gray-500 font-medium">+{dayEvents.length - 2} mais</div>
+                                  )}
+                              </div>
                             </>
                           )}
-                          {!isCurrentMonth && day > 31 && (
-                            <div className="font-medium">{day - 31}</div>
+                          {!isCurrentMonth && day > daysInMonth && (
+                            <div className="font-medium">{day - daysInMonth}</div>
                           )}
                           {!isCurrentMonth && day <= 0 && (
-                            <div className="font-medium">{31 + day}</div>
+                            <div className="font-medium">{getDaysInMonth(currentDate.getFullYear(), currentDate.getMonth() - 1) + day}</div>
                           )}
                         </div>
                       );
@@ -187,43 +244,49 @@ export function  CalendarSchedule () {
 
           {/* Schedule Details Section */}
           <div className="lg:col-span-1">
-            <Card className="bg-white border border-[#5856eb]">
+            <Card className="bg-white border border-[#5856eb] h-full">
               <CardHeader>
-                <CardTitle className="text-xl font-bold text-gray-900">Events Details</CardTitle>
-                <p className="text-sm text-gray-500">Thursday, 10th April, 2020</p>
+                <CardTitle className="text-xl font-bold text-gray-900">Todos os Eventos</CardTitle>
+                <p className="text-sm text-gray-500">Listagem Completa</p>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {scheduleItems.map((item) => (
+              <CardContent className="space-y-4 max-h-[600px] overflow-y-auto">
+                {isLoading ? (
+                    <div className="flex justify-center p-4">
+                        <Loader2 className="animate-spin text-primary h-6 w-6" />
+                    </div>
+                ) : scheduleItems.length === 0 ? (
+                    <p className="text-muted-foreground text-center">Nenhum evento agendado.</p>
+                ) : scheduleItems.map((item) => (
                   <div
                     key={item.id}
-                    className={`border-l-4 pl-4 py-3 rounded-r-lg ${getColorClasses(item.color)}`}
+                    className={`border-l-4 pl-4 py-3 rounded-r-lg relative group ${getColorClasses(item.color)}`}
                   >
-                    <div className="flex items-center justify-between mb-2">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute top-2 right-2 h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-100 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(item.id);
+                        }}
+                      >
+                          <Trash2 className="h-4 w-4" />
+                    </Button>
+                    <div className="flex items-center justify-between mb-2 pr-8">
                       <h3 className="font-semibold text-gray-900">{item.title}</h3>
                       <div className="w-8 h-8 bg-purple-200 rounded-full flex items-center justify-center">
-                        <div className="w-6 h-6 bg-purple-400 rounded-full"></div>
+                        <CalendarIcon className="w-4 h-4 text-purple-600" />
                       </div>
                     </div>
-                    <p className="text-sm text-gray-600 mb-2">{item.subject}</p>
+                    <p className="text-sm text-gray-600 mb-2 truncate">{item.subject}</p>
                     <div className="flex items-center gap-4 text-xs text-gray-500">
                       <div className="flex items-center gap-1">
                         <CalendarIcon className="h-3 w-3" />
                         <span>{item.date}</span>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-                        <span>{item.time}</span>
-                      </div>
                     </div>
                   </div>
                 ))}
-                
-                <Button 
-                  variant="ghost" 
-                  className="w-full mt-6 text-[#6366f1] hover:bg-purple-50"
-                >
-                  View More
-                </Button>
               </CardContent>
             </Card>
           </div>

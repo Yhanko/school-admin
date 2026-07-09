@@ -72,6 +72,11 @@ const TestimonialsSection: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Auto-play functionality
   useEffect(() => {
@@ -82,6 +87,7 @@ const TestimonialsSection: React.FC = () => {
     }, 5000);
 
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentIndex, isAutoPlaying]);
 
   const nextTestimonial = () => {
@@ -128,7 +134,7 @@ const TestimonialsSection: React.FC = () => {
 
       {/* Partículas flutuantes */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(6)].map((_, i) => (
+        {mounted && [...Array(6)].map((_, i) => (
           <div
             key={i}
             className="absolute w-1 h-1 bg-[#FF5777]/30 rounded-full animate-float"
@@ -180,8 +186,8 @@ const TestimonialsSection: React.FC = () => {
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 transform translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 rounded-3xl"></div>
             
             {/* Aspas decorativas */}
-            <div className="absolute top-6 left-6 text-[#FF5777]/20 text-6xl font-serif">(")</div>
-            <div className="absolute bottom-6 right-6 text-[#FF5777]/20 text-6xl font-serif rotate-180">(")</div>
+            <div className="absolute top-6 left-6 text-[#FF5777]/20 text-6xl font-serif">(&quot;)</div>
+            <div className="absolute bottom-6 right-6 text-[#FF5777]/20 text-6xl font-serif rotate-180">(&quot;)</div>
             
             {/* Conteúdo do testemunho */}
             <div className="relative z-10 text-center">

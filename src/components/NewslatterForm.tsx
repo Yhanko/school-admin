@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -28,6 +28,11 @@ export function NewsletterForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [selectedInterests, setSelectedInterests] = useState<string[]>([])
+
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const {
     register,
@@ -155,7 +160,7 @@ export function NewsletterForm() {
 
       {/* Partículas flutuantes */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(6)].map((_, i) => (
+        {mounted && [...Array(6)].map((_, i) => (
           <div
             key={i}
             className="absolute w-1 h-1 bg-[#FF5777]/30 rounded-full animate-float"

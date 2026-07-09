@@ -22,8 +22,7 @@ import RequestError from "../../../assets/ErroDeResposta.svg";
 import RoundedIcon from "../../../assets/roundedIcon.svg";
 import YhankoIMG from "../../../assets/yhankoIMG.svg";
 //Hook
-import saveCookie from "@/hooks/Hooks/Login/useSetTokenLogin";
-import {useEntityStore} from "@/hooks/useEntityStore";
+import { useAuth } from "@/store/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 
@@ -38,7 +37,6 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const { toast } = useToast();
-  const { setLoginHash } = useEntityStore()
   const [isChecked, setIsChecked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isVisible, setIsVisible ] = useState(false)
@@ -57,26 +55,26 @@ const toggleCheck = () => {
     resolver: zodResolver( loginSchema),
   });
 
-    function goTo(){
-      router.push("/dashboard")
-    }
+  const { setAuth } = useAuth();
 
   const onSubmit = async (data: LoginFormData) => {
-    
     try {
-      setIsLoading(true); // Inicia o estado de carregamento
-      const response = await axiosInstance.post("/clientes/login", {
-        ...data,
+      setIsLoading(true);
+      const response = await axiosInstance.post("/auth/login", {
+        email: data.email,
+        password: data.senha
       });
 
-      if (response.status === 202) {
-        setIsLoading(true);
-
-        const dataResponse = await response.data.mensagem; 
-
-        const remember = isChecked
-        saveCookie(dataResponse, remember);
-        setLoginHash(dataResponse)
+      if (response.status === 201 || response.status === 200) {
+        const token = response.data.access_token;
+        
+        // Fetch User Profile with auth header directly
+        const userProfile = await axiosInstance.get('/users/me', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        // Save to global state (js-cookie automatically via store)
+        setAuth(userProfile.data, token);
 
         toast({
           description: (
@@ -84,7 +82,6 @@ const toggleCheck = () => {
               <div className="rounded-full w-8 h-8 flex justify-center items-center">
                 <Image src={RoundedIcon} alt="icon"  />
               </div>
-              
               <span className="text-[#717F96]">Login realizado com sucesso!</span>
             </div>
           ),
@@ -93,26 +90,22 @@ const toggleCheck = () => {
         });
         
         router.push("/dashboard");
-        reset()
-
       }
-    } catch (error: unknown) {
+    } catch (error: any) {
       setIsLoading(false);
-      if (error instanceof AxiosError) {
+      const message = error.response?.data?.message || "Erro ao realizar o login.";
         toast({
           description: (
             <div className="flex items-center gap-4 ">
               <div className="rounded-full w-8 h-8 flex justify-center items-center bg-[fill: rgba(251, 55, 72, 0.16)]">
                 <Image src={RequestError} alt="icon"  />
               </div>
-              
-              <span className="text-[#717F96]">{error?.response?.data.mensagem}</span>
+              <span className="text-[#717F96]">{message}</span>
             </div>
           ),
           action: <ToastAction altText="close" className="shadow-none border-none text-[#717F96] hover:bg-transparent"><AiOutlineClose /></ToastAction>,
-          className: "border-l-4 border-l-[#FB3748]", // Estiliza a borda esquerda
+          className: "border-l-4 border-l-[#FB3748]",
         });
-      }
     }
   };
   
@@ -141,7 +134,7 @@ const toggleCheck = () => {
             <Input
               id="floating-input"
               type="email"
-              className={`peer w-full h-12 lg:h-14 pl-6 pt-4 pb-2 border-[2px] border-[#E2E5F1] focus:border-[#E2E5F1] focus-visible:border-[#E2E5F1] focus-visible:text-[#717F96] placeholder-transparent focus:outline-none ${errors.email &&   'border-[#D03816]'}`}
+              className={`peer w-full h-12 lg:h-14 pl-6 pt-4 pb-2 rounded border-[2px] border-[#E2E5F1] focus:border-[#E2E5F1] focus-visible:border-[#E2E5F1] focus-visible:text-[#717F96] placeholder-transparent focus:outline-none ${errors.email &&   'border-[#D03816]'}`}
               placeholder=" " 
               {...register("email")}
             />
@@ -159,7 +152,7 @@ const toggleCheck = () => {
             <Input
               id="float-input"
               type={ isVisible ? "text" : "password"}
-              className={`peer w-full appearance-none h-12 lg:h-14 pl-6 pt-4 pb-2 border-[2px] border-[#E2E5F1] focus:border-[#E2E5F1] focus-visible:border-[#E2E5F1] focus-visible:text-[#717F96] placeholder-transparent focus:outline-none ${errors.senha &&   'border-[#D03816]'}`}
+              className={`peer w-full appearance-none h-12 lg:h-14 pl-6 pt-4 pb-2 rounded border-[2px] border-[#E2E5F1] focus:border-[#E2E5F1] focus-visible:border-[#E2E5F1] focus-visible:text-[#717F96] placeholder-transparent focus:outline-none ${errors.senha &&   'border-[#D03816]'}`}
               placeholder=" "
               {...register("senha")} 
             />
@@ -191,7 +184,7 @@ const toggleCheck = () => {
                     onChange={toggleCheck}
                   />
                   <div
-                    className={`w-5 h-5 border-[2px] border-[#E2E5F1] rounded-md flex items-center justify-center transition duration-300 ${
+                    className={`w-5 h-5 border-[2px] border-[#E2E5F1] rounded flex items-center justify-center transition duration-300 ${
                       isChecked ? "bg-[#217EFD] border-[#217EFD]" : ""
                     }`}
                   >
@@ -210,14 +203,14 @@ const toggleCheck = () => {
             <div className="w-full mt-12">
               
               <Button
-                onClick={goTo}
-                //type="submit"
-                className="bg-[#FF5777] shadow-none hover:bg-[#fc4667] hover:cursor-pointer text-white w-full h-12 lg:h-14 mb-10 rounded-md">
+                type="submit"
+                disabled={isLoading}
+                className="bg-[#FF5777] hover:bg-[#fc4667] hover:cursor-pointer hover:shadow-[0_0_12px_rgba(255,87,119,0.5)] text-white w-full h-12 lg:h-14 mb-10 rounded">
                 {isLoading ? <Loader2  className="animate-spin" /> : "Entrar"}
               </Button>
             
               <Link href="/afiliate">
-                <Button className="bg-[#a550f5] text-white hover:bg-[#823ef0] hover:text-white hover:cursor-pointer w-full h-12 lg:h-14 rounded-md shadow-none">
+                <Button className="bg-[#a550f5] text-white hover:bg-[#823ef0] hover:text-white hover:cursor-pointer hover:shadow-[0_0_12px_rgba(165,80,245,0.5)] w-full h-12 lg:h-14 rounded shadow-none">
                   Entrar como Secretário/a
                 </Button>
               </Link>

@@ -8,140 +8,203 @@ import {
   Download,
   Search,
   MoreVertical,
+  Loader2
 } from "@/lib/icons";
+import { useState, useEffect } from "react";
+import axiosInstance from "@/service/api";
+import { useToast } from "@/hooks/use-toast";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 export default function Payments() {
+  const { toast } = useToast();
+  const [payments, setPayments] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isExporting, setIsExporting] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeSearch, setActiveSearch] = useState("");
+
+  const handleSearch = () => {
+    setActiveSearch(searchTerm.toLowerCase());
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
+
+  useEffect(() => {
+    fetchPayments();
+  }, []);
+
+  const fetchPayments = async () => {
+    try {
+      const response = await axiosInstance.get('/finance/payments');
+      setPayments(response.data.data || response.data || []);
+    } catch (error) {
+      console.error("Erro ao carregar pagamentos:", error);
+      toast({ title: 'Erro', description: 'Falha ao carregar pagamentos', variant: 'destructive' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    // A API usa: 'confirmed', 'pending', 'cancelled'
+    const statusConfig: Record<string, { bg: string; text: string; icon: React.ElementType, label: string }> = {
+      "confirmed": {
+        bg: "bg-green-100 dark:bg-green-900",
+        text: "text-green-800 dark:text-green-100",
+        icon: CheckCircle,
+        label: "Pago",
+      },
+      "pending": {
+        bg: "bg-yellow-100 dark:bg-yellow-900",
+        text: "text-yellow-800 dark:text-yellow-100",
+        icon: Clock,
+        label: "Pendente",
+      },
+      "cancelled": {
+        bg: "bg-red-100 dark:bg-red-900",
+        text: "text-red-800 dark:text-red-100",
+        icon: AlertCircle,
+        label: "Cancelado",
+      },
+    };
+
+    const config = statusConfig[status] || statusConfig["pending"];
+    const Icon = config.icon;
+
+    return (
+      <div className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text} w-fit`}>
+        <Icon className="w-3 h-3" />
+        {config.label}
+      </div>
+    );
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+      </div>
+    );
+  }
+
+  // Calculate stats dynamically
+  const totalAmount = payments.reduce((acc, curr) => acc + curr.amount, 0);
+  const paidAmount = payments.filter(p => p.status === 'confirmed').reduce((acc, curr) => acc + curr.amount, 0);
+  const pendingAmount = payments.filter(p => p.status === 'pending').reduce((acc, curr) => acc + curr.amount, 0);
+  const cancelledAmount = payments.filter(p => p.status === 'cancelled').reduce((acc, curr) => acc + curr.amount, 0);
+  
+  const paidRate = totalAmount ? (paidAmount / totalAmount) * 100 : 0;
+  const pendingRate = totalAmount ? (pendingAmount / totalAmount) * 100 : 0;
+  const cancelledRate = totalAmount ? (cancelledAmount / totalAmount) * 100 : 0;
+
+  const exportToPDF = () => {
+    setIsExporting(true);
+    try {
+      const doc = new jsPDF();
+      
+      // Título
+      doc.setFontSize(20);
+      doc.setTextColor(40, 40, 40);
+      doc.text("Relatório Geral de Pagamentos", 14, 22);
+      
+      // Subtítulo e data
+      doc.setFontSize(10);
+      doc.setTextColor(100, 100, 100);
+      doc.text(`Data de Emissão: ${new Date().toLocaleDateString()}`, 14, 30);
+      doc.text(`Yhanko Educa`, 14, 35);
+      
+      // Resumo Estatístico
+      doc.setFontSize(12);
+      doc.setTextColor(40, 40, 40);
+      doc.text("Resumo Financeiro", 14, 45);
+      
+      doc.setFontSize(10);
+      doc.text(`Total Esperado: ${totalAmount.toLocaleString()} Kz`, 14, 52);
+      doc.text(`Total Recebido (Pago): ${paidAmount.toLocaleString()} Kz`, 14, 58);
+      doc.text(`Total Pendente: ${pendingAmount.toLocaleString()} Kz`, 14, 64);
+      doc.text(`Total Cancelado/Atrasado: ${cancelledAmount.toLocaleString()} Kz`, 14, 70);
+      
+      let currentY = 80;
+
+      // Helper para desenhar tabelas
+      const drawTable = (title: string, data: any[], startY: number) => {
+        doc.setFontSize(12);
+        doc.text(title, 14, startY);
+        
+        const tableData = data.map(payment => [
+          payment.student?.name || 'Desconhecido',
+          payment.type,
+          `${payment.amount.toLocaleString()} Kz`,
+          payment.status === 'confirmed' ? 'Pago' : payment.status === 'pending' ? 'Pendente' : 'Cancelado',
+          payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString() : "-"
+        ]);
+
+        autoTable(doc, {
+          startY: startY + 5,
+          head: [['Aluno', 'Tipo', 'Valor', 'Status', 'Data Pagamento']],
+          body: tableData,
+          theme: 'striped',
+          headStyles: { fillColor: [74, 71, 245] },
+        });
+        
+        return (doc as any).lastAutoTable.finalY + 15;
+      };
+
+      const confirmedList = payments.filter(p => p.status === 'confirmed');
+      const pendingList = payments.filter(p => p.status === 'pending');
+      const cancelledList = payments.filter(p => p.status === 'cancelled');
+
+      if (confirmedList.length > 0) {
+        currentY = drawTable("1. Pagamentos Confirmados", confirmedList, currentY);
+      }
+      if (pendingList.length > 0) {
+        currentY = drawTable("2. Pagamentos Pendentes", pendingList, currentY);
+      }
+      if (cancelledList.length > 0) {
+        currentY = drawTable("3. Pagamentos em Atraso / Cancelados", cancelledList, currentY);
+      }
+
+      doc.save("Relatorio_Pagamentos.pdf");
+      toast({ title: 'Sucesso', description: 'Relatório exportado com sucesso!' });
+    } catch (error) {
+      console.error("Erro ao exportar PDF:", error);
+      toast({ title: 'Erro', description: 'Falha ao gerar o relatório PDF', variant: 'destructive' });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const paymentStats = [
     {
       title: "Pagamentos Recebidos",
-      value: "R$ 45,230",
-      percentage: "87.5%",
+      value: `${paidAmount.toLocaleString()} Kz`,
+      percentage: `${paidRate.toFixed(1)}%`,
       icon: CheckCircle,
       color: "text-green-600",
       bgColor: "bg-green-100 dark:bg-green-900",
     },
     {
       title: "Pagamentos Pendentes",
-      value: "R$ 6,470",
-      percentage: "12.5%",
+      value: `${pendingAmount.toLocaleString()} Kz`,
+      percentage: `${pendingRate.toFixed(1)}%`,
       icon: Clock,
       color: "text-orange-600",
       bgColor: "bg-orange-100 dark:bg-orange-900",
     },
     {
-      title: "Pagamentos Atrasados",
-      value: "R$ 2,100",
-      percentage: "4.1%",
+      title: "Pagamentos Cancelados/Atrasados",
+      value: `${cancelledAmount.toLocaleString()} Kz`,
+      percentage: `${cancelledRate.toFixed(1)}%`,
       icon: AlertCircle,
       color: "text-red-600",
       bgColor: "bg-red-100 dark:bg-red-900",
     },
   ];
-
-  const studentPayments = [
-    {
-      id: 1,
-      studentName: "João Silva",
-      grade: "3A",
-      dueDate: "2024-06-10",
-      amount: 1500,
-      status: "Pago",
-      paymentDate: "2024-06-08",
-    },
-    {
-      id: 2,
-      studentName: "Maria Santos",
-      grade: "2B",
-      dueDate: "2024-06-10",
-      amount: 1500,
-      status: "Pago",
-      paymentDate: "2024-06-09",
-    },
-    {
-      id: 3,
-      studentName: "Pedro Costa",
-      grade: "4C",
-      dueDate: "2024-06-10",
-      amount: 1500,
-      status: "Pendente",
-      paymentDate: null,
-    },
-    {
-      id: 4,
-      studentName: "Ana Oliveira",
-      grade: "1A",
-      dueDate: "2024-06-10",
-      amount: 1500,
-      status: "Pago",
-      paymentDate: "2024-06-10",
-    },
-    {
-      id: 5,
-      studentName: "Carlos Ferreira",
-      grade: "3B",
-      dueDate: "2024-06-10",
-      amount: 1500,
-      status: "Atrasado",
-      paymentDate: null,
-    },
-    {
-      id: 6,
-      studentName: "Beatriz Lima",
-      grade: "2A",
-      dueDate: "2024-06-10",
-      amount: 1500,
-      status: "Pago",
-      paymentDate: "2024-06-07",
-    },
-    {
-      id: 7,
-      studentName: "Diego Martins",
-      grade: "4A",
-      dueDate: "2024-06-10",
-      amount: 1500,
-      status: "Pendente",
-      paymentDate: null,
-    },
-    {
-      id: 8,
-      studentName: "Fernanda Gomes",
-      grade: "1B",
-      dueDate: "2024-06-10",
-      amount: 1500,
-      status: "Atrasado",
-      paymentDate: null,
-    },
-  ];
-
-  const getStatusBadge = (status: string) => {
-    const statusConfig: Record<string, { bg: string; text: string; icon: any }> = {
-      "Pago": {
-        bg: "bg-green-100 dark:bg-green-900",
-        text: "text-green-800 dark:text-green-100",
-        icon: CheckCircle,
-      },
-      "Pendente": {
-        bg: "bg-yellow-100 dark:bg-yellow-900",
-        text: "text-yellow-800 dark:text-yellow-100",
-        icon: Clock,
-      },
-      "Atrasado": {
-        bg: "bg-red-100 dark:bg-red-900",
-        text: "text-red-800 dark:text-red-100",
-        icon: AlertCircle,
-      },
-    };
-
-    const config = statusConfig[status] || statusConfig["Pendente"];
-    const Icon = config.icon;
-
-    return (
-      <div className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
-        <Icon className="w-3 h-3" />
-        {status}
-      </div>
-    );
-  };
 
   return (
       <section className="space-y-8 w-[70rem] p-4">
@@ -179,31 +242,31 @@ export default function Payments() {
         {/* Payment Summary */}
         <Card>
           <CardHeader>
-            <CardTitle>Resumo de Pagamentos - Junho 2024</CardTitle>
+            <CardTitle>Resumo de Pagamentos - Geral</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <p className="text-sm text-muted-foreground">Total Esperado</p>
-                <p className="text-2xl font-bold text-foreground">R$ 51,700</p>
+                <p className="text-2xl font-bold text-foreground">{totalAmount.toLocaleString()} Kz</p>
               </div>
               <div className="space-y-2">
                 <p className="text-sm text-muted-foreground">Total Recebido</p>
-                <p className="text-2xl font-bold text-green-600">R$ 45,230</p>
+                <p className="text-2xl font-bold text-green-600">{paidAmount.toLocaleString()} Kz</p>
               </div>
               <div className="space-y-2">
                 <p className="text-sm text-muted-foreground">Taxa de Recebimento</p>
-                <p className="text-2xl font-bold text-blue-600">87.5%</p>
+                <p className="text-2xl font-bold text-blue-600">{paidRate.toFixed(1)}%</p>
               </div>
             </div>
 
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Progresso de Arrecadação</span>
-                <span className="font-semibold text-foreground">87.5%</span>
+                <span className="font-semibold text-foreground">{paidRate.toFixed(1)}%</span>
               </div>
               <div className="w-full bg-muted rounded-full h-3">
-                <div className="bg-green-500 h-3 rounded-full" style={{ width: "87.5%" }}></div>
+                <div className="bg-green-500 h-3 rounded-full" style={{ width: `${paidRate}%` }}></div>
               </div>
             </div>
           </CardContent>
@@ -211,18 +274,29 @@ export default function Payments() {
 
         {/* Search and Filter */}
         <div className="flex gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Pesquisar por aluno..."
-              className="w-full pl-10 pr-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-          <Button className="gap-2 rounded-full hover:cursor-pointer hover:bg-[#5856eb] hover:text-white bg-[#4a47f5] text-white">
-            <Download className="w-4 h-4" />
-            Exportar
+          <div className="relative flex-1 flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Pesquisar por aluno..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="w-full pl-10 pr-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+            <Button onClick={handleSearch} className="bg-primary text-white hover:bg-primary/90 rounded-lg">
+              Pesquisar
             </Button>
+          </div>
+          <Button 
+            onClick={exportToPDF}
+            disabled={isExporting}
+            className="gap-2 rounded-full hover:cursor-pointer hover:bg-[#5856eb] hover:text-white bg-[#4a47f5] text-white">
+            {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+            {isExporting ? "A Exportar..." : "Exportar"}
+          </Button>
         </div>
 
         {/* Payments Table */}
@@ -239,28 +313,35 @@ export default function Payments() {
                 <thead>
                   <tr className="border-b border-gray-200 border-[1px]">
                     <th className="text-left py-3 px-4 font-semibold text-foreground">Aluno</th>
-                    <th className="text-left py-3 px-4 font-semibold text-foreground">Turma</th>
-                    <th className="text-left py-3 px-4 font-semibold text-foreground">Vencimento</th>
+                    <th className="text-left py-3 px-4 font-semibold text-foreground">Tipo</th>
                     <th className="text-right py-3 px-4 font-semibold text-foreground">Valor</th>
                     <th className="text-left py-3 px-4 font-semibold text-foreground">Status</th>
                     <th className="text-left py-3 px-4 font-semibold text-foreground">Data Pagamento</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {studentPayments.map((payment) => (
+                  {payments.filter(payment => 
+                    payment.student?.name?.toLowerCase().includes(activeSearch)
+                  ).map((payment) => (
                     <tr key={payment.id} className="border-b hover:bg-muted/50 border-gray-200 border-[1px]">
-                      <td className="py-3 px-4 font-medium text-foreground">{payment.studentName}</td>
-                      <td className="py-3 px-4 text-muted-foreground">{payment.grade}</td>
-                      <td className="py-3 px-4 text-muted-foreground">{payment.dueDate}</td>
+                      <td className="py-3 px-4 font-medium text-foreground">{payment.student?.name || 'Desconhecido'}</td>
+                      <td className="py-3 px-4 text-muted-foreground">{payment.type}</td>
                       <td className="py-3 px-4 text-right font-semibold text-foreground">
-                        R$ {payment.amount.toLocaleString()}
+                        {payment.amount.toLocaleString()} Kz
                       </td>
                       <td className="py-3 px-4">{getStatusBadge(payment.status)}</td>
                       <td className="py-3 px-4 text-muted-foreground">
-                        {payment.paymentDate || "-"}
+                        {payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString() : "-"}
                       </td>
                     </tr>
                   ))}
+                  {payments.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="py-6 text-center text-gray-500">
+                        Nenhum pagamento encontrado
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -268,19 +349,21 @@ export default function Payments() {
         </Card>
 
         {/* Late Payments Alert */}
-        <Card className="border-red-200 dark:border-red-800">
-          <CardHeader>
-            <CardTitle className="text-red-600 dark:text-red-400">Atenção: Pagamentos Atrasados</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              Existem 2 alunos com pagamentos atrasados. Recomenda-se entrar em contato com os responsáveis.
-            </p>
-            <Button variant="outline" className="text-red-600 hover:text-red-600 hover:cursor-pointer border-red-600 hover:bg-red-50 dark:hover:bg-red-950 rounded-full">
-              Enviar Notificações
-            </Button>
-          </CardContent>
-        </Card>
+        {cancelledAmount > 0 && (
+          <Card className="border-red-200 dark:border-red-800">
+            <CardHeader>
+              <CardTitle className="text-red-600 dark:text-red-400">Atenção: Pagamentos Atrasados/Cancelados</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Existem {payments.filter(p => p.status === 'cancelled').length} pagamentos não recebidos. Recomenda-se entrar em contato com os responsáveis.
+              </p>
+              <Button variant="outline" className="text-red-600 hover:text-red-600 hover:cursor-pointer border-red-600 hover:bg-red-50 dark:hover:bg-red-950 rounded-full">
+                Enviar Notificações
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </section>
   );
 }

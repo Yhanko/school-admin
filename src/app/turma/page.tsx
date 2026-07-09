@@ -1,128 +1,65 @@
 "use client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { NewClass } from "./_components/new-class";
+import { NewRoom } from "./_components/new-room";
+import { NewSubject } from "./_components/new-subject";
 import { Button } from "@/components/ui/button";
 import {
   Search,
   Trash2,
 } from "@/lib/icons";
-import { EditClass } from "./_components/edit-class"
+import { EditClass } from "./_components/edit-class";
+import { ClassSubjects } from "./_components/class-subjects";
+import { ClassDetails } from "./_components/class-details";
 
+
+import { useState, useEffect } from "react";
+import axiosInstance from "@/service/api";
+import { Loader2 } from "lucide-react";
 
 export default function Turma(){
+  const [classes, setClasses] = useState<{id: string, name: string, level: string, teacher: string, room: string, students: number, capacity: number, schedule: string, status: string}[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeSearch, setActiveSearch] = useState("");
 
-  const classes = [
-    {
-      id: 1,
-      name: "1A",
-      level: "1º Ano",
-      teacher: "Prof. Roberto Oliveira",
-      students: 32,
-      capacity: 35,
-      schedule: "07:00 - 11:30",
-      status: "Ativo",
-    },
-    {
-      id: 2,
-      name: "1B",
-      level: "1º Ano",
-      teacher: "Profa. Juliana Costa",
-      students: 30,
-      capacity: 35,
-      schedule: "07:00 - 11:30",
-      status: "Ativo",
-    },
-    {
-      id: 3,
-      name: "2A",
-      level: "2º Ano",
-      teacher: "Profa. Ana Santos",
-      students: 33,
-      capacity: 35,
-      schedule: "07:00 - 11:30",
-      status: "Ativo",
-    },
-    {
-      id: 4,
-      name: "2B",
-      level: "2º Ano",
-      teacher: "Profa. Ana Santos",
-      students: 31,
-      capacity: 35,
-      schedule: "13:00 - 17:30",
-      status: "Ativo",
-    },
-    {
-      id: 5,
-      name: "2C",
-      level: "2º Ano",
-      teacher: "Profa. Beatriz Lima",
-      students: 29,
-      capacity: 35,
-      schedule: "13:00 - 17:30",
-      status: "Ativo",
-    },
-    {
-      id: 6,
-      name: "3A",
-      level: "3º Ano",
-      teacher: "Prof. Carlos Silva",
-      students: 34,
-      capacity: 35,
-      schedule: "07:00 - 11:30",
-      status: "Ativo",
-    },
-    {
-      id: 7,
-      name: "3B",
-      level: "3º Ano",
-      teacher: "Prof. Carlos Silva",
-      students: 32,
-      capacity: 35,
-      schedule: "13:00 - 17:30",
-      status: "Ativo",
-    },
-    {
-      id: 8,
-      name: "3C",
-      level: "3º Ano",
-      teacher: "Profa. Beatriz Lima",
-      students: 30,
-      capacity: 35,
-      schedule: "13:00 - 17:30",
-      status: "Ativo",
-    },
-    {
-      id: 9,
-      name: "4A",
-      level: "4º Ano",
-      teacher: "Prof. Carlos Silva",
-      students: 33,
-      capacity: 35,
-      schedule: "07:00 - 11:30",
-      status: "Ativo",
-    },
-    {
-      id: 10,
-      name: "4B",
-      level: "4º Ano",
-      teacher: "Prof. Pedro Costa",
-      students: 31,
-      capacity: 35,
-      schedule: "13:00 - 17:30",
-      status: "Ativo",
-    },
-    {
-      id: 11,
-      name: "4C",
-      level: "4º Ano",
-      teacher: "Prof. Pedro Costa",
-      students: 32,
-      capacity: 35,
-      schedule: "13:00 - 17:30",
-      status: "Ativo",
-    },
-  ];
+  const handleSearch = () => {
+    setActiveSearch(searchTerm.toLowerCase());
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
+
+  const fetchClasses = async () => {
+    try {
+      const response = await axiosInstance.get('/classes');
+      // Map API response to required UI format
+      const mappedClasses = response.data.map((c: {id: string, name: string, academicLevel: string, teachers?: {name: string}[], room?: string, students?: unknown[], capacity?: number, period?: string}) => ({
+        id: c.id,
+        name: c.name,
+        level: c.academicLevel === '1-6' ? 'Ensino Primário (1-6)' : c.academicLevel === '7-9' ? 'Ensino Secundário I (7-9)' : c.academicLevel === '10-13' ? 'Ensino Secundário II (10-13)' : c.academicLevel,
+        teacher: c.teachers && c.teachers.length > 0 ? c.teachers.map((t) => t.name).join(", ") : "Sem professor atribuído",
+        room: c.room || 'Sem sala',
+        students: c.students?.length || 0,
+        capacity: c.capacity || 35,
+        schedule: c.period || 'Integral',
+        status: "Ativo"
+      }));
+      setClasses(mappedClasses);
+    } catch (error) {
+      console.error("Failed to fetch classes", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchClasses();
+  }, []);
+// Remove static classes array
 
   const getOccupancyPercentage = (students: number, capacity: number) => {
     return Math.round((students / capacity) * 100);
@@ -136,11 +73,10 @@ export default function Turma(){
 
   return(
       <section className="space-y-4 p-4 w-[70rem]">
-        {/* Header */}
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">Gestão de Turmas</h1>
-            <p className="text-muted-foreground">Visualize e gerencie todas as turmas da escola</p>
+            <h1 className="text-3xl font-bold text-foreground">Gestão de Turmas</h1>
+            <p className="text-muted-foreground mt-1">Gerencie as turmas, alunos e professores da sua instituição</p>
           </div>
         </div>
 
@@ -192,17 +128,26 @@ export default function Turma(){
 
         {/* Search and Filter */}
         <div className="flex gap-4 flex-col sm:flex-row">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Pesquisar por turma"
-              className="w-full pl-10 pr-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-            />
+          <div className="relative flex-1 flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Pesquisar por turma"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="w-full pl-10 pr-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+            <Button onClick={handleSearch} className="bg-primary text-white hover:bg-primary/90">
+              Pesquisar
+            </Button>
           </div>
 
-          <NewClass/>
-
+          <NewSubject onCreated={fetchClasses} />
+          <NewRoom />
+          <NewClass />
         </div>
 
         {/* Classes Table */}
@@ -226,34 +171,50 @@ export default function Turma(){
                   </tr>
                 </thead>
                 <tbody>
-                  {classes.map((cls) => {
-                    const occupancy = getOccupancyPercentage(cls.students, cls.capacity);
-                    return (
-                      <tr key={cls.id} className="border-b border-gray-200 border-[1px] hover:bg-muted/50">
-                        <td className="py-3 px-4 font-bold text-foreground text-lg">{cls.name}</td>
-                        <td className="py-3 px-4 text-muted-foreground">{cls.level}</td>
-                        <td className="py-3 px-4 text-muted-foreground text-xs">{cls.teacher}</td>
-                        <td className="py-3 px-4 text-muted-foreground text-xs">12</td>
-                        <td className="py-3 px-4 text-center font-semibold text-foreground">
-                          {cls.students}/{cls.capacity}
-                        </td>
-                        <td className="py-3 px-4 text-center">
-                          <span className={`font-semibold ${getOccupancyColor(occupancy)}`}>
-                            {occupancy}%
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 text-muted-foreground text-xs">{cls.schedule}</td>
-                        <td className="py-3 px-4 text-center">
-                          <div className="flex gap-2 justify-center">
-                            <EditClass/>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-600">
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                  {isLoading ? (
+                    <tr>
+                      <td colSpan={8} className="py-8 text-center">
+                        <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
+                      </td>
+                    </tr>
+                  ) : classes.length > 0 ? (
+                    classes.filter(c => c.name.toLowerCase().includes(activeSearch)).map((cls) => {
+                      const occupancy = getOccupancyPercentage(cls.students, cls.capacity);
+                      return (
+                        <tr key={cls.id} className="border-b border-gray-200 border-[1px] hover:bg-muted/50">
+                          <td className="py-3 px-4 font-bold text-foreground text-lg">{cls.name}</td>
+                          <td className="py-3 px-4 text-muted-foreground">{cls.level}</td>
+                          <td className="py-3 px-4 text-muted-foreground text-xs">{cls.teacher}</td>
+                          <td className="py-3 px-4 text-muted-foreground text-xs">{cls.room}</td>
+                          <td className="py-3 px-4 text-center font-semibold text-foreground">
+                            {cls.students}/{cls.capacity}
+                          </td>
+                          <td className="py-3 px-4 text-center">
+                            <span className={`font-semibold ${getOccupancyColor(occupancy)}`}>
+                              {occupancy}%
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-muted-foreground text-xs">{cls.schedule}</td>
+                          <td className="py-3 px-4 text-center">
+                            <div className="flex gap-2 justify-center">
+                              <ClassDetails classId={cls.id} />
+                              <ClassSubjects classId={cls.id} className={cls.name} />
+                              <EditClass/>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-600">
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  ) : (
+                    <tr>
+                      <td colSpan={8} className="py-8 text-center text-muted-foreground">
+                        Nenhuma turma encontrada.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>

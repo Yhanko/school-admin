@@ -1,106 +1,41 @@
-
-import { useState, useEffect } from "react";
+"use client"
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Bell, Check, X, CheckCheck, AlertCircle, Info, Calendar } from "@/lib/icons";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-
-interface Notification {
-  id: number;
-  title: string;
-  description: string;
-  date: string;
-  isRead: boolean;
-  type: 'info' | 'warning' | 'success' | 'error';
-  priority: 'low' | 'medium' | 'high';
-}
-
-const mockNotifications: Notification[] = [
-  {
-    id: 1,
-    title: "Nova mensagem do professor",
-    description: "O professor João Silva enviou uma nova atividade para a turma de matemática. Prazo de entrega: 15/06/2025",
-    date: "2025-06-14T10:30:00",
-    isRead: false,
-    type: 'info',
-    priority: 'medium'
-  },
-  {
-    id: 2,
-    title: "Reunião de pais agendada",
-    description: "Reunião de pais e mestres agendada para dia 20/06/2025 às 19h no auditório principal",
-    date: "2025-06-14T09:15:00",
-    isRead: false,
-    type: 'warning',
-    priority: 'high'
-  },
-  {
-    id: 3,
-    title: "Avaliação aprovada",
-    description: "Sua avaliação de História foi aprovada com nota 8.5. Parabéns pelo excelente desempenho!",
-    date: "2025-06-13T16:45:00",
-    isRead: true,
-    type: 'success',
-    priority: 'low'
-  },
-  {
-    id: 4,
-    title: "Prazo de matrícula",
-    description: "Lembrete: O prazo para renovação de matrícula termina em 25/06/2025. Procure a secretaria",
-    date: "2025-06-13T14:20:00",
-    isRead: false,
-    type: 'warning',
-    priority: 'high'
-  },
-  {
-    id: 5,
-    title: "Sistema atualizado",
-    description: "O sistema escolar foi atualizado com novas funcionalidades. Confira as novidades no menu principal",
-    date: "2025-06-12T11:30:00",
-    isRead: true,
-    type: 'info',
-    priority: 'low'
-  },
-  {
-    id: 6,
-    title: "Evento cancelado",
-    description: "O evento esportivo programado para hoje foi cancelado devido às condições climáticas",
-    date: "2025-06-12T08:00:00",
-    isRead: false,
-    type: 'error',
-    priority: 'medium'
-  }
-];
+import { useNotificationStore } from "@/hooks/useNotifications";
 
 export default function NotificationsGeral() {
   const { toast } = useToast();
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(true);
-  const itemsPerPage = 4;
+  
+  const { 
+    isLoading, 
+    unreadNotificationsCount, 
+    notifications, 
+    paginatedNotifications, 
+    page, 
+    pages, 
+    fetchNotifications, 
+    markAllAsRead, 
+    markAsRead, 
+    changePage 
+  } = useNotificationStore();
 
-  // Simulate loading
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const unreadCount = notifications.filter(n => !n.isRead).length;
-  const totalPages = Math.ceil(notifications.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedNotifications = notifications.slice(startIndex, startIndex + itemsPerPage);
+    // Only fetch if we don't have notifications yet or to ensure it's fresh
+    fetchNotifications();
+  }, [fetchNotifications]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleString('pt-BR', {
+    return new Intl.DateTimeFormat('pt-BR', {
       day: '2-digit',
-      month: '2-digit',
+      month: 'long',
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
-    });
+    }).format(date);
   };
 
   const getTypeIcon = (type: string) => {
@@ -120,48 +55,23 @@ export default function NotificationsGeral() {
     }
   };
 
-  const markAllAsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+  const handleMarkAllAsRead = async () => {
+    await markAllAsRead();
     toast({
-      description: (
-        <div className="flex items-center gap-3">
-          <CheckCheck className="w-5 h-5 text-green-500" />
-          <span>Todas as notificações foram marcadas como lidas</span>
-        </div>
-      ),
-      className: "border-l-4 border-l-green-500"
+      title: "Sucesso",
+      description: "Todas as notificações foram marcadas como lidas",
     });
   };
 
-  const toggleReadStatus = (id: number) => {
-    setNotifications(prev => 
-      prev.map(n => 
-        n.id === id ? { ...n, isRead: !n.isRead } : n
-      )
-    );
-    
-    const notification = notifications.find(n => n.id === id);
-    toast({
-      description: (
-        <div className="flex items-center gap-3">
-          {notification?.isRead ? (
-            <>
-              <Bell className="w-5 h-5 text-orange-500" />
-              <span>Notificação marcada como não lida</span>
-            </>
-          ) : (
-            <>
-              <Check className="w-5 h-5 text-green-500" />
-              <span>Notificação marcada como lida</span>
-            </>
-          )}
-        </div>
-      ),
-      className: `border-l-4 ${notification?.isRead ? 'border-l-orange-500' : 'border-l-green-500'}`
-    });
+  const toggleReadStatus = async (id: string, currentlyRead: boolean) => {
+    if (!currentlyRead) {
+      await markAsRead(id);
+    }
+    // Note: To mark as unread we would need another endpoint. 
+    // For now, if it's already read, we just do nothing or we could add an unread endpoint.
   };
 
-  if (isLoading) {
+  if (isLoading && notifications.length === 0) {
     return (
       <div className="p-6 space-y-4 max-w-4xl mx-auto">
         <div className="flex justify-center items-center h-64">
@@ -181,21 +91,21 @@ export default function NotificationsGeral() {
         <div className="flex items-center gap-3">
           <div className="relative">
             <Bell className="w-8 h-8 text-blue-600" />
-            {unreadCount > 0 && (
+            {unreadNotificationsCount > 0 && (
               <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
-                {unreadCount}
+                {unreadNotificationsCount}
               </span>
             )}
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-800">Notificações</h1>
-            <p className="text-gray-600">{unreadCount} não lidas de {notifications.length} total</p>
+            <p className="text-gray-600">{unreadNotificationsCount} não lidas de {notifications.length} total</p>
           </div>
         </div>
         
-        {unreadCount > 0 && (
+        {unreadNotificationsCount > 0 && (
           <Button
-            onClick={markAllAsRead}
+            onClick={handleMarkAllAsRead}
             className="bg-green-600 hover:bg-green-700 text-white transition-all duration-200 transform hover:scale-105"
           >
             <CheckCheck className="w-4 h-4 mr-2" />
@@ -244,27 +154,28 @@ export default function NotificationsGeral() {
                     </p>
                     <div className="flex items-center gap-2 text-xs text-gray-500">
                       <Calendar className="w-3 h-3" />
-                      {formatDate(notification.date)}
+                      {formatDate(notification.createdAt)}
                     </div>
                   </div>
                 </div>
                 
                 <Button
-                  onClick={() => toggleReadStatus(notification.id)}
+                  onClick={() => toggleReadStatus(notification.id, notification.isRead)}
                   variant="ghost"
                   size="sm"
+                  disabled={notification.isRead}
                   className={`
                     transition-all duration-200 hover:scale-105
                     ${notification.isRead 
-                      ? 'text-orange-600 hover:bg-orange-50' 
+                      ? 'text-gray-400 cursor-not-allowed' 
                       : 'text-green-600 hover:bg-green-50'
                     }
                   `}
                 >
                   {notification.isRead ? (
                     <>
-                      <Bell className="w-4 h-4 mr-2" />
-                      Marcar como não lida
+                      <CheckCheck className="w-4 h-4 mr-2" />
+                      Lida
                     </>
                   ) : (
                     <>
@@ -280,33 +191,33 @@ export default function NotificationsGeral() {
       )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
+      {pages > 1 && (
         <div className="flex justify-center">
           <Pagination>
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious 
-                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                  className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                  onClick={() => changePage(Math.max(1, page - 1))}
+                  className={page === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
                 />
               </PaginationItem>
               
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <PaginationItem key={page}>
+              {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
+                <PaginationItem key={p}>
                   <PaginationLink 
-                    onClick={() => setCurrentPage(page)}
-                    isActive={currentPage === page}
+                    onClick={() => changePage(p)}
+                    isActive={page === p}
                     className="cursor-pointer"
                   >
-                    {page}
+                    {p}
                   </PaginationLink>
                 </PaginationItem>
               ))}
               
               <PaginationItem>
                 <PaginationNext 
-                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                  className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                  onClick={() => changePage(Math.min(pages, page + 1))}
+                  className={page === pages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
                 />
               </PaginationItem>
             </PaginationContent>

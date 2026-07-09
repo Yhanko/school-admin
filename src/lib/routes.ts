@@ -1,12 +1,8 @@
-
 import { 
   Home, 
-  HandCoins,  
   MessagesSquare, 
-  CalendarDays, 
-  UsersThree, 
-  Student, 
-  SuitcaseSimple, 
+  CalendarDays,  
+  Student,  
   University, 
   UserCircle,
   SiGoogleclassroom,
@@ -14,9 +10,9 @@ import {
   PiFilesLight,
   LuUserCog,
   BsExclamationCircle,
-  BsCashCoin
+  BsCashCoin,
+  Clock
 } from "@/lib/icons";
-
 
 export const routes = [
   {
@@ -37,18 +33,18 @@ export const routes = [
     url: "/pedagogical",
     icon: University,
   },
-   {
+  {
     id: 4,
-    title: "Associação",
-    url: "/association",
-    icon: UsersThree,
- },
-    {
-    id: 5,
     title: "Turmas",
     url: "/turma",
     icon: SiGoogleclassroom,
- },
+  },
+  {
+    id: 5,
+    title: "Horários",
+    url: "/schedules",
+    icon: Clock,
+  },
   {
     id: 6,
     title: "Eventos",
@@ -57,56 +53,44 @@ export const routes = [
   },
   {
     id: 7,
-    title: "Finanças",
-    url: "/finance",
-    icon: HandCoins,
-  },
-    {
-    id: 8,
     title: "Pagamentos",
     url: "/payments",
     icon: BsCashCoin,
   },
- {
-  id: 9,
-    title: "Funcionários",
-    url: "/employees",
-    icon: SuitcaseSimple,
- },
   {
-    id: 10,
+    id: 8,
     title: "Chat",
     url: "/chat",
     icon:  MessagesSquare,
- },
+  },
   {
-    id: 11,
-    title: "Perfil",
-    url: "/profile",
-    icon: UserCircle,
- },
-   {
-    id: 12,
+    id: 9,
     title: "Relatórios",
     url: "/report",
     icon: FaRegFileAlt,
- },
+  },
   {
-    id: 13,
+    id: 10,
     title: "Regulamento",
     url: "/schoolRules",
     icon: PiFilesLight,
- },
+  },
   {
-    id: 14,
+    id: 11,
     title: "Disciplinar",
     url: "/disciplinar",
     icon: BsExclamationCircle,
- },
+  },
   {
-    id: 15,
+    id: 12,
     title: "Permissões",
     url: "/permission",
     icon: LuUserCog,
- },
+  },
+  {
+    id: 13,
+    title: "Perfil",
+    url: "/profile",
+    icon: UserCircle,
+  },
 ]

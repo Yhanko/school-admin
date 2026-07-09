@@ -1,146 +1,108 @@
-import { Search } from "@/lib/icons";
+"use client"
+import { Search, Loader2 } from "@/lib/icons";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+import axiosInstance from "@/service/api";
+import { ChatUser } from "../page";
+import { useAuth } from "@/store/useAuth";
 
-const groups = [
-  {
-    id: 1,
-    name: "Class History VII-A",
-    message: "Lorem ipsum dolor sit amet...",
-    time: "12:46 PM",
-    unread: 1,
-    color: "bg-indigo-500"
-  },
-  {
-    id: 2,
-    name: "Class VII-A",
-    message: "Lorem ipsum dolor sit amet...",
-    time: "12:46 PM",
-    unread: 1,
-    color: "bg-orange-500"
-  },
-  {
-    id: 3,
-    name: "All Student VII",
-    message: "Lorem ipsum dolor sit amet...",
-    time: "12:46 PM",
-    unread: 0,
-    color: "bg-yellow-500"
-  }
-];
+interface ChatSidebarProps {
+  onSelectUser: (user: ChatUser) => void;
+  selectedUserId?: string;
+}
 
-const chats = [
-  {
-    id: 1,
-    name: "Samantha William",
-    message: "Lorem ipsum dolor sit amet...",
-    time: "12:46 PM",
-    unread: 1,
-    avatar: "SW"
-  },
-  {
-    id: 2,
-    name: "Tony Soap",
-    message: "Lorem ipsum dolor sit amet...",
-    time: "12:46 PM",
-    unread: 1,
-    avatar: "TS"
-  },
-  {
-    id: 3,
-    name: "Karen Hope",
-    message: "Lorem ipsum dolor sit amet...",
-    time: "12:46 PM",
-    unread: 0,
-    avatar: "KH"
-  }
-];
+export function ChatSidebar ({ onSelectUser, selectedUserId }: ChatSidebarProps) {
+  const { user: currentUser } = useAuth();
+  const [users, setUsers] = useState<ChatUser[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [search, setSearch] = useState("");
 
-export function ChatSidebar () {
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await axiosInstance.get('/users');
+        setUsers(response.data);
+      } catch (error) {
+        console.error("Failed to fetch users", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
+  const filteredUsers = users.filter(u => {
+    // Filter out current user
+    if (currentUser?.id && u.id === currentUser.id) return false;
+    
+    const name = (u.name || '').toLowerCase();
+    const role = (u.role || '').toLowerCase();
+    const query = search.toLowerCase();
+    return name.includes(query) || role.includes(query);
+  });
+
   return (
     <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
       {/* Header */}
       <div className="p-6 border-b border-gray-100">
-        <h1 className="text-xl font-semibold text-gray-900 mb-4">Messages</h1>
+        <h1 className="text-xl font-semibold text-gray-900 mb-4">Mensagens</h1>
         
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input
             type="text"
-            placeholder="Search here..."
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Pesquisar utilizador..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
           />
         </div>
       </div>
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
-        {/* Groups Section */}
+        {/* Contacts Section */}
         <div className="p-4">
-          <h3 className="text-sm font-medium text-gray-500 mb-3">Groups</h3>
+          <h3 className="text-sm font-medium text-gray-500 mb-3">Contactos da Instituição</h3>
           <div className="space-y-2">
-            {groups.map((group) => (
-              <div key={group.id} className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer">
-                <div className={`w-10 h-10 ${group.color} rounded-full flex items-center justify-center`}>
-                  <span className="text-white text-sm font-medium">
-                    {group.name.split(' ').map(word => word[0]).join('').slice(0, 2)}
-                  </span>
+            {isLoading ? (
+                <div className="flex justify-center p-4">
+                    <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <p className="font-medium text-sm text-gray-900 truncate">{group.name}</p>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-gray-500">{group.time}</span>
-                      {group.unread > 0 && (
-                        <div className="w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center">
-                          <span className="text-xs text-white font-medium">{group.unread}</span>
+            ) : filteredUsers.length === 0 ? (
+                <p className="text-sm text-gray-400 text-center py-4">Nenhum utilizador encontrado.</p>
+            ) : (
+                filteredUsers.map((user) => {
+                  const nameParts = (user.name || "User").split(" ");
+                  const firstName = nameParts[0];
+                  const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : "";
+                  const initials = `${firstName[0]}${lastName ? lastName[0] : ''}`.toUpperCase();
+                  
+                  return (
+                    <div 
+                        key={user.id} 
+                        onClick={() => onSelectUser(user)}
+                        className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${selectedUserId === user.id ? 'bg-indigo-50 border-indigo-100' : 'hover:bg-gray-50'}`}
+                    >
+                        <Avatar className="w-10 h-10">
+                        <AvatarFallback className={`${selectedUserId === user.id ? 'bg-indigo-600 text-white' : 'bg-indigo-100 text-indigo-600'} text-sm transition-colors`}>
+                            {initials}
+                        </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                            <p className="font-medium text-sm text-gray-900 truncate">{user.name || "User"}</p>
                         </div>
-                      )}
-                    </div>
-                  </div>
-                  <p className="text-xs text-gray-500 truncate mt-1">{group.message}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Chats Section */}
-        <div className="p-4">
-          <h3 className="text-sm font-medium text-gray-500 mb-3">Chats</h3>
-          <div className="space-y-2">
-            {chats.map((chat) => (
-              <div key={chat.id} className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer">
-                <Avatar className="w-10 h-10">
-                  <AvatarFallback className="bg-indigo-100 text-indigo-600 text-sm">
-                    {chat.avatar}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <p className="font-medium text-sm text-gray-900 truncate">{chat.name}</p>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-gray-500">{chat.time}</span>
-                      {chat.unread > 0 && (
-                        <div className="w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center">
-                          <span className="text-xs text-white font-medium">{chat.unread}</span>
+                        <p className="text-xs text-gray-500 truncate mt-0.5">{user.role}</p>
                         </div>
-                      )}
                     </div>
-                  </div>
-                  <p className="text-xs text-gray-500 truncate mt-1">{chat.message}</p>
-                </div>
-              </div>
-            ))}
+                  );
+                })
+            )}
           </div>
-        </div>
-
-        {/* View More Button */}
-        <div className="p-4">
-          <Button variant="ghost" className="w-full text-indigo-600 hover:bg-indigo-50">
-            View More
-          </Button>
         </div>
       </div>
     </div>
