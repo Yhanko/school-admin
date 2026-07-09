@@ -82,12 +82,13 @@ export function ChatArea ({ selectedUser }: ChatAreaProps) {
       );
   }
 
-  const firstName = selectedUser.profile?.firstName || "User";
-  const lastName = selectedUser.profile?.lastName || "";
+  const nameParts = (selectedUser.name || "User").split(" ");
+  const firstName = nameParts[0];
+  const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : "";
   const initials = `${firstName[0]}${lastName ? lastName[0] : ''}`.toUpperCase();
 
   return (
-    <div className="flex-1 flex flex-col bg-gray-50 h-screen">
+    <div className="flex-1 flex flex-col bg-gray-50 h-full">
       {/* Chat Header */}
       <div className="bg-white border-b border-gray-200 p-4 shrink-0">
         <div className="flex items-center justify-between">
@@ -98,17 +99,9 @@ export function ChatArea ({ selectedUser }: ChatAreaProps) {
               </AvatarFallback>
             </Avatar>
             <div>
-              <h2 className="font-semibold text-gray-900">{firstName} {lastName}</h2>
+              <h2 className="font-semibold text-gray-900">{selectedUser.name || "User"}</h2>
               <p className="text-sm text-gray-500">{selectedUser.role}</p>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="text-gray-400">
-              <span className="text-lg">📹</span>
-            </Button>
-            <Button variant="ghost" size="sm" className="text-gray-400">
-              <span className="text-lg">⋯</span>
-            </Button>
           </div>
         </div>
       </div>
@@ -125,7 +118,7 @@ export function ChatArea ({ selectedUser }: ChatAreaProps) {
             </div>
         ) : (
             messages.map((msg) => {
-                const isMine = currentUser && msg.senderId === currentUser.sub;
+                const isMine = currentUser && msg.senderId === currentUser.id;
                 
                 return (
                     <div key={msg.id} className={`flex items-end gap-3 ${isMine ? 'justify-end' : 'justify-start'}`}>

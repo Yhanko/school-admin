@@ -3,20 +3,32 @@ import { Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
+import { Search as SearchIcon } from "lucide-react";
+
 interface SearchBarProps {
   onNewStudentClick?: () => void;
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
+  handleSearch: () => void;
 }
 
-export function SearchBar({ onNewStudentClick }: SearchBarProps) {
+export function SearchBar({ onNewStudentClick, searchTerm, setSearchTerm, handleSearch }: SearchBarProps) {
   return (
     <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6 mt-6 w-full px-4">
       {/* Search Input */}
-      <div className="flex-1 max-w-md relative">
-        <Input
-          type="text"
-          placeholder="Search here..."
-          className="bg-background border border-border rounded-md h-10 text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-transparent w-full"
-        />
+      <div className="flex-1 max-w-md relative flex gap-2">
+        <div className="relative flex-1">
+          <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Pesquisar estudante..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+            className="bg-background border border-border rounded-lg pl-10 pr-4 h-10 text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-transparent w-full"
+          />
+        </div>
+        <Button onClick={handleSearch} className="bg-primary text-white hover:bg-primary/90 h-10 rounded-lg">Pesquisar</Button>
       </div>
 
       {/* Action Buttons */}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +11,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   FileText,
   Download,
@@ -20,16 +24,21 @@ import {
   Users,
   GraduationCap,
   Briefcase,
+  Plus,
+  Upload
 } from '@/lib/icons';
 import Link from 'next/link';
 import axiosInstance from '@/service/api';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import jsPDF from 'jspdf';
 
 interface Regulation {
   id: string;
   title: string;
   description: string;
+  content?: string;
+  fileUrl?: string;
   status: 'DRAFT' | 'PUBLISHED';
   createdAt: string;
 }
@@ -40,6 +49,14 @@ export function RegulationsClient() {
   const [shareDialog, setShareDialog] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const { toast } = useToast();
+
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [newRule, setNewRule] = useState({ title: '', description: '', content: '', fileUrl: '' });
+  const [sendTo, setSendTo] = useState({ students: false, parents: false, teachers: false });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchRegulations = async () => {
     try {
@@ -86,6 +103,119 @@ export function RegulationsClient() {
     }
   };
 
+  const handleCreateSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const payload: any = {
+        title: newRule.title,
+        description: newRule.description,
+        status: 'PUBLISHED'
+      };
+
+      if (newRule.content) payload.content = newRule.content;
+      if (newRule.fileUrl) payload.fileUrl = newRule.fileUrl;
+
+      const response = await axiosInstance.post('/regulations', payload);
+      
+      setRegulations([response.data, ...regulations]);
+      setIsCreateModalOpen(false);
+      setNewRule({ title: '', description: '', content: '', fileUrl: '' });
+      
+      let sentToText = [];
+      if (sendTo.students) sentToText.push('Alunos');
+      if (sendTo.parents) sentToText.push('Encarregados');
+      if (sendTo.teachers) sentToText.push('Professores');
+      
+      const sentMessage = sentToText.length > 0 
+        ? ` Enviado para: ${sentToText.join(', ')}.` 
+        : '';
+
+      toast({ title: 'Sucesso', description: 'Regulamento criado com sucesso.' + sentMessage });
+      setSendTo({ students: false, parents: false, teachers: false });
+    } catch (error: any) {
+      toast({ title: 'Erro', description: error.response?.data?.message || 'Falha ao criar regulamento', variant: 'destructive' });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const downloadPDF = (regulation: Regulation) => {
+    if (regulation.fileUrl) {
+      window.open(regulation.fileUrl, '_blank');
+      return;
+    }
+
+    const doc = new jsPDF();
+    
+    doc.setFontSize(20);
+    doc.text(regulation.title, 14, 22);
+    
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Data de Criação: ${new Date(regulation.createdAt).toLocaleDateString('pt-PT')}`, 14, 30);
+    
+    doc.setFontSize(12);
+    doc.setTextColor(60, 60, 60);
+    
+    let currentY = 40;
+    
+    if (regulation.description) {
+      doc.text("Descrição:", 14, currentY);
+      doc.setFontSize(10);
+      const descLines = doc.splitTextToSize(regulation.description, 180);
+      doc.text(descLines, 14, currentY + 6);
+      currentY += 6 + (descLines.length * 5) + 5;
+    }
+    
+    if (regulation.content) {
+      doc.setFontSize(12);
+      doc.text("Conteúdo:", 14, currentY);
+      doc.setFontSize(10);
+      const contentLines = doc.splitTextToSize(regulation.content, 180);
+      doc.text(contentLines, 14, currentY + 6);
+    }
+    
+    doc.save(`Regulamento_${regulation.title.replace(/\s+/g, '_')}.pdf`);
+    toast({ title: 'Download Concluído', description: 'O regulamento foi exportado em PDF.' });
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    const titleWithoutExt = file.name.replace(/\.[^/.]+$/, "");
+    e.target.value = ''; // allow same file again
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await axiosInstance.post('/uploads/cloudinary', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      const uploadedUrl = response.data.path;
+
+      setNewRule({ ...newRule, title: titleWithoutExt, fileUrl: uploadedUrl });
+      setIsCreateModalOpen(true);
+      toast({ title: 'Upload Concluído', description: `O arquivo "${file.name}" foi enviado com sucesso para o Cloudinary.` });
+    } catch (error: any) {
+      toast({ 
+        title: 'Erro de Upload', 
+        description: error.response?.data?.message || 'Falha ao fazer o upload do ficheiro. Verifique se as chaves do Cloudinary estão configuradas no backend.', 
+        variant: 'destructive' 
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-16">
@@ -96,6 +226,132 @@ export function RegulationsClient() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">
+            Regulamentos Internos
+          </h1>
+          <p className="text-slate-600">
+            Crie, gerencie e compartilhe os regulamentos da sua instituição
+          </p>
+        </div>
+        <div className='flex space-x-4'>
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleFileChange} 
+            className="hidden" 
+            accept=".pdf,.doc,.docx,.txt"
+          />
+          <Button 
+            className="gap-2 bg-[#6366f1] rounded-full hover:bg-[#4043f8] hover:cursor-pointer"
+            onClick={handleImportClick}
+            disabled={isUploading}
+          >
+            {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+            {isUploading ? 'A carregar...' : 'Importar regulamento'}
+          </Button>
+          
+          <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+            <DialogTrigger asChild>
+              <Button className="gap-2 bg-[#6366f1] rounded-full hover:bg-[#4043f8] hover:cursor-pointer">
+                <Plus className="h-4 w-4" />
+                Criar regulamento
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Criar Novo Regulamento</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleCreateSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="title">Título do Regulamento</Label>
+                  <Input 
+                    id="title" 
+                    placeholder="Ex: Regulamento de Avaliação Escolar" 
+                    value={newRule.title}
+                    onChange={(e) => setNewRule({...newRule, title: e.target.value})}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description">Descrição Breve</Label>
+                  <Input 
+                    id="description" 
+                    placeholder="Ex: Normas e critérios para as avaliações trimestrais." 
+                    value={newRule.description}
+                    onChange={(e) => setNewRule({...newRule, description: e.target.value})}
+                  />
+                </div>
+
+                {newRule.fileUrl && (
+                  <div className="p-3 bg-blue-50 text-blue-700 rounded-md border border-blue-200 flex items-center justify-between">
+                    <span className="text-sm font-medium flex items-center gap-2">
+                      <FileText className="h-4 w-4" /> PDF Anexado
+                    </span>
+                    <Button type="button" variant="ghost" size="sm" onClick={() => setNewRule({...newRule, fileUrl: ''})}>Remover</Button>
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <Label htmlFor="content">Conteúdo do Regulamento (Opcional se anexar PDF)</Label>
+                  <Textarea 
+                    id="content" 
+                    placeholder="Digite o texto completo do regulamento aqui..." 
+                    className="min-h-[200px]"
+                    value={newRule.content}
+                    onChange={(e) => setNewRule({...newRule, content: e.target.value})}
+                  />
+                </div>
+                
+                <div className="space-y-3 pt-4 border-t">
+                  <Label>Enviar diretamente para (Notificar por email):</Label>
+                  <div className="flex flex-col space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="send-students" 
+                        checked={sendTo.students}
+                        onCheckedChange={(checked) => setSendTo({...sendTo, students: checked as boolean})}
+                      />
+                      <label htmlFor="send-students" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                        Alunos
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="send-parents" 
+                        checked={sendTo.parents}
+                        onCheckedChange={(checked) => setSendTo({...sendTo, parents: checked as boolean})}
+                      />
+                      <label htmlFor="send-parents" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                        Encarregados de Educação
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="send-teachers" 
+                        checked={sendTo.teachers}
+                        onCheckedChange={(checked) => setSendTo({...sendTo, teachers: checked as boolean})}
+                      />
+                      <label htmlFor="send-teachers" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                        Professores
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-4">
+                  <Button type="submit" className="bg-[#4043f8] hover:bg-[#3235df]" disabled={isSubmitting}>
+                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Guardar e Publicar
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+
       {regulations.length === 0 ? (
         <Card className="border-2 border-dashed border-slate-200 bg-slate-50">
           <CardContent className="py-16 text-center">
@@ -106,9 +362,7 @@ export function RegulationsClient() {
             <p className="text-slate-600 mb-6">
               Comece criando seu primeiro regulamento interno
             </p>
-            <Link href="/new-rule">
-              <Button>Criar Regulamento</Button>
-            </Link>
+            <Button onClick={() => setIsCreateModalOpen(true)}>Criar Regulamento</Button>
           </CardContent>
         </Card>
       ) : (
@@ -146,12 +400,24 @@ export function RegulationsClient() {
                 </p>
 
                 <div className="flex flex-wrap gap-2 pt-4 border-t">
-                  <Link href={`/regulamentos/${regulation.id}`}>
-                    <Button size="sm" variant="outline" className="gap-2 hover:cursor-pointer">
+                  {regulation.fileUrl ? (
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="gap-2 hover:cursor-pointer"
+                      onClick={() => window.open(regulation.fileUrl, '_blank')}
+                    >
                       <Eye className="h-4 w-4" />
-                      Ver
+                      Ver PDF
                     </Button>
-                  </Link>
+                  ) : (
+                    <Link href={`/regulamentos/${regulation.id}`}>
+                      <Button size="sm" variant="outline" className="gap-2 hover:cursor-pointer">
+                        <Eye className="h-4 w-4" />
+                        Ver
+                      </Button>
+                    </Link>
+                  )}
 
                   <Dialog open={shareDialog === regulation.id}>
                     <DialogTrigger asChild>
@@ -195,9 +461,7 @@ export function RegulationsClient() {
                     size="sm"
                     variant="outline"
                     className="gap-2 hover:cursor-pointer"
-                    onClick={() =>
-                      toast({ title: 'Download', description: 'O regulamento foi baixado em PDF.' })
-                    }
+                    onClick={() => downloadPDF(regulation)}
                   >
                     <Download className="h-4 w-4" />
                     Download

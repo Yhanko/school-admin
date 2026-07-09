@@ -8,49 +8,42 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Phone, Mail, MoreHorizontal } from "@/lib/icons";
 import Link from "next/link";
-import { mockStudentProfiles } from "@/types/academicHistoryData";
 import { StudentFullProfile } from "@/types/academic-history";
-import { StudentHistoryModal } from "./studentsHistoryModal";
 
 
 interface Student {
   id: string;
   name: string;
-  studentId: string;
   date: string;
   parentName: string;
   city: string;
   grade: string;
   gradeColor: string;
+  phone: string;
+  email: string;
   isSelected: boolean;
 }
 
 interface StudentRowProps {
   student: Student;
+  onAction: (action: 'view' | 'edit' | 'delete' | 'history', student: Student) => void;
 }
 
-export function StudentRow ({ student }: StudentRowProps) {
-  const [selectedStudent, setSelectedStudent] = useState<StudentFullProfile | null>(null);
-  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
-
-  const handleViewHistory = (studentId: string) => {
-    const studentProfile = mockStudentProfiles.find((s) => s.id === studentId);
-    if (studentProfile) {
-      setSelectedStudent(studentProfile);
-      setIsHistoryModalOpen(true);
-    }
-  };
+export function StudentRow ({ student, onAction }: StudentRowProps) {
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
 
   return (
-    <>
       <TableRow className="hover:bg-muted/50 border-b border-border">
         <TableCell className="px-6 py-4">
           <Checkbox checked={student.isSelected} />
         </TableCell>
         
+        <TableCell className="px-6 py-4">
+          <span className="font-medium text-gray-900">{student.studentNumber}</span>
+        </TableCell>
+
         <TableCell className="px-6 py-4">
           <div className="flex items-center space-x-3 cursor-pointer">
             <Avatar className="h-10 w-10">
@@ -62,10 +55,7 @@ export function StudentRow ({ student }: StudentRowProps) {
           </div>
         </TableCell>
         
-        <TableCell className="px-6 py-4">
-          <span className="text-blue-600 font-medium">{student.studentId}</span>
-        </TableCell>
-        
+
         <TableCell className="px-6 py-4">
           <span className="text-gray-600">{student.date}</span>
         </TableCell>
@@ -79,13 +69,9 @@ export function StudentRow ({ student }: StudentRowProps) {
         </TableCell>
         
         <TableCell className="px-6 py-4">
-          <div className="flex items-center space-x-2">
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-blue-600">
-              <Phone className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-blue-600">
-              <Mail className="h-4 w-4" />
-            </Button>
+          <div className="flex flex-col space-y-1">
+            <span className="text-sm text-gray-900">{student.phone}</span>
+            <span className="text-sm text-gray-500">{student.email}</span>
           </div>
         </TableCell>
         
@@ -105,29 +91,33 @@ export function StudentRow ({ student }: StudentRowProps) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-popover border-border shadow-lg">
-              <Link href={"/students-details"}>
-                <DropdownMenuItem className="hover:bg-muted cursor-pointer">View Details</DropdownMenuItem>
-              </Link>
-              <Link href={"/change-student"}>
-                <DropdownMenuItem className="hover:bg-muted cursor-pointer">Edit</DropdownMenuItem>
-              </Link>
               <DropdownMenuItem 
                 className="hover:bg-muted cursor-pointer"
-                onClick={() => handleViewHistory(student.id)}
+                onClick={() => onAction('view', student)}
               >
-                View History
+                Visualizar Detalhes
               </DropdownMenuItem>
-              <DropdownMenuItem className="hover:bg-red-50 text-red-600 cursor-pointer">Delete</DropdownMenuItem>
+              <DropdownMenuItem 
+                className="hover:bg-muted cursor-pointer"
+                onClick={() => onAction('edit', student)}
+              >
+                Editar
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                className="hover:bg-muted cursor-pointer"
+                onClick={() => onAction('history', student)}
+              >
+                Ver Histórico
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                className="hover:bg-red-50 text-red-600 cursor-pointer"
+                onClick={() => onAction('delete', student)}
+              >
+                Deletar
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </TableCell>
-      </TableRow>
-      
-      <StudentHistoryModal
-        student={selectedStudent}
-        open={isHistoryModalOpen}
-        onOpenChange={setIsHistoryModalOpen}
-      />
-    </>
+    </TableRow>
   );
 };

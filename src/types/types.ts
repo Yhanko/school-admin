@@ -12,10 +12,13 @@ export type ReferencePayments = any;
 /* eslint-enable @typescript-eslint/no-explicit-any */
 // Define a interface para uma notificação
 export type Notification = {
-  id_notficacao_entidade: number;
-  descricao_notificado: string;
-  data_notificada: string;
-  leitura: string
+  id: string;
+  title: string;
+  description: string;
+  type: string;
+  priority: string;
+  isRead: boolean;
+  createdAt: string;
 }
 
 export type UserDataType = {

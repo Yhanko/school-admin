@@ -16,7 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 
 interface ClassEntity { id: string; name: string; course: string; }
 interface SubjectEntity { id: string; name: string; }
-interface TeacherEntity { id: string; profile?: { firstName: string; lastName: string; } }
+interface TeacherEntity { id: string; name: string; }
 interface RoomEntity { id: string; name: string; }
 
 interface ScheduleFormData {
@@ -151,7 +151,7 @@ export function NewSchedule({ onCreated }: { onCreated?: () => void }) {
                         <label className="block text-sm font-medium text-gray-700 mb-2">Professor *</label>
                         <select required value={formData.teacherId} onChange={(e) => setFormData({ ...formData, teacherId: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white">
                             <option value="" disabled>Selecione...</option>
-                            {teachers.map((t) => (<option key={t.id} value={t.id}>{t.profile?.firstName} {t.profile?.lastName}</option>))}
+                            {teachers.map((t) => (<option key={t.id} value={t.id}>{t.name}</option>))}
                         </select>
                     </div>
 

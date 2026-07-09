@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import axiosInstance from "@/service/api";
 import { ChatUser } from "../page";
+import { useAuth } from "@/store/useAuth";
 
 interface ChatSidebarProps {
   onSelectUser: (user: ChatUser) => void;
@@ -12,6 +13,7 @@ interface ChatSidebarProps {
 }
 
 export function ChatSidebar ({ onSelectUser, selectedUserId }: ChatSidebarProps) {
+  const { user: currentUser } = useAuth();
   const [users, setUsers] = useState<ChatUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -20,7 +22,6 @@ export function ChatSidebar ({ onSelectUser, selectedUserId }: ChatSidebarProps)
     const fetchUsers = async () => {
       try {
         const response = await axiosInstance.get('/users');
-        // Filter out current user if possible, but we don't have current user ID easily available here without decoding token or hitting /users/me
         setUsers(response.data);
       } catch (error) {
         console.error("Failed to fetch users", error);
@@ -33,7 +34,10 @@ export function ChatSidebar ({ onSelectUser, selectedUserId }: ChatSidebarProps)
   }, []);
 
   const filteredUsers = users.filter(u => {
-    const name = `${u.profile?.firstName || ''} ${u.profile?.lastName || ''}`.toLowerCase();
+    // Filter out current user
+    if (currentUser?.id && u.id === currentUser.id) return false;
+    
+    const name = (u.name || '').toLowerCase();
     const role = (u.role || '').toLowerCase();
     const query = search.toLowerCase();
     return name.includes(query) || role.includes(query);
@@ -72,8 +76,9 @@ export function ChatSidebar ({ onSelectUser, selectedUserId }: ChatSidebarProps)
                 <p className="text-sm text-gray-400 text-center py-4">Nenhum utilizador encontrado.</p>
             ) : (
                 filteredUsers.map((user) => {
-                  const firstName = user.profile?.firstName || "User";
-                  const lastName = user.profile?.lastName || "";
+                  const nameParts = (user.name || "User").split(" ");
+                  const firstName = nameParts[0];
+                  const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : "";
                   const initials = `${firstName[0]}${lastName ? lastName[0] : ''}`.toUpperCase();
                   
                   return (
@@ -89,7 +94,7 @@ export function ChatSidebar ({ onSelectUser, selectedUserId }: ChatSidebarProps)
                         </Avatar>
                         <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
-                            <p className="font-medium text-sm text-gray-900 truncate">{firstName} {lastName}</p>
+                            <p className="font-medium text-sm text-gray-900 truncate">{user.name || "User"}</p>
                         </div>
                         <p className="text-xs text-gray-500 truncate mt-0.5">{user.role}</p>
                         </div>

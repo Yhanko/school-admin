@@ -37,6 +37,7 @@ export interface IncidentFormData {
 
 interface UserProps {
     id: string;
+    name: string;
     profile?: {
         firstName: string;
         lastName: string;
@@ -134,7 +135,7 @@ export function NewOccurrence({ onCreated }: { onCreated?: () => void }) {
                     <option value="" disabled>Selecione um aluno...</option>
                     {students.map((student) => (
                     <option key={student.id} value={student.id}>
-                        {student.profile?.firstName} {student.profile?.lastName}
+                        {student.name}
                     </option>
                     ))}
                 </select>

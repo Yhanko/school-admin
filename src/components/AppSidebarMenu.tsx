@@ -3,6 +3,7 @@
 import { 
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   //SidebarGroupLabel,
@@ -15,6 +16,8 @@ import { routes } from "@/lib/routes"
 //import LogoTipo from "../assets/yhankoIMG.png";
 import { usePathname } from 'next/navigation';
 import Link from "next/link";
+import { LogOutModal } from "@/components/LogOutModal";
+import { LogOut } from "@/lib/icons";
 
 export function AppSidebar() {
    const pathname = usePathname();
@@ -51,6 +54,19 @@ export function AppSidebar() {
             </SidebarMenu>
          </SidebarGroupContent>
         </SidebarGroup>
-      </SidebarContent>        
+      </SidebarContent>
+
+      <SidebarFooter className="bg-[#4D44B5] pb-8 pt-4">
+        <SidebarMenu>
+          <SidebarMenuItem className="w-[14rem]">
+             <LogOutModal>
+                <button className="flex w-full items-center gap-3 rounded-l-4xl px-5 h-10 text-[0.9rem] text-white hover:bg-[#F1F5F7] hover:text-[#4D44B5] transition-colors cursor-pointer">
+                   <LogOut size={24} />
+                   <span>Terminar Sessão</span>
+                </button>
+             </LogOutModal>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   )}

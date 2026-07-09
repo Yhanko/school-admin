@@ -16,10 +16,8 @@ interface DisciplinaryRecord {
   description: string;
   date: string;
   student?: {
-    profile?: {
-        firstName: string;
-        lastName: string;
-    }
+    id: string;
+    name: string;
   }
 }
 
@@ -27,12 +25,21 @@ export default function Deicipline() {
   const [incidents, setIncidents] = useState<DisciplinaryRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeSearch, setActiveSearch] = useState("");
   const { toast } = useToast();
+
+  const handleSearch = () => {
+    setActiveSearch(searchTerm.toLowerCase());
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
 
   const fetchIncidents = async () => {
     try {
-      // The backend should return disciplinary records. We might need to join/populate student info
-      // If the backend doesn't populate student info automatically, it might just return studentId.
       const response = await axiosInstance.get('/disciplinary');
       setIncidents(response.data);
     } catch (error) {
@@ -57,8 +64,16 @@ export default function Deicipline() {
       }
   };
 
+  const handleNotify = async (id: string) => {
+      try {
+          const response = await axiosInstance.post(`/disciplinary/${id}/notify`);
+          toast({ title: 'Sucesso', description: response.data?.message || 'Notificação enviada com sucesso.' });
+      } catch (error: any) {
+          toast({ title: 'Erro', description: error.response?.data?.message || 'Falha ao notificar encarregado.', variant: 'destructive' });
+      }
+  };
+
   const handleStatusChange = async (id: string, currentStatus: string) => {
-      // Simple toggle for demonstration: PENDING -> IN_PROGRESS -> RESOLVED -> PENDING
       const nextStatusMap: Record<string, string> = {
           'PENDING': 'IN_PROGRESS',
           'IN_PROGRESS': 'RESOLVED',
@@ -110,12 +125,11 @@ export default function Deicipline() {
   };
 
   const filteredIncidents = incidents.filter(inc => {
-      const studentName = inc.student?.profile ? `${inc.student.profile.firstName} ${inc.student.profile.lastName}` : inc.studentId;
-      const search = searchTerm.toLowerCase();
-      return studentName.toLowerCase().includes(search) || 
-             inc.type.toLowerCase().includes(search) || 
-             getStatusLabel(inc.status).toLowerCase().includes(search) ||
-             getSeverityLabel(inc.severity).toLowerCase().includes(search);
+      const studentName = inc.student?.name || inc.studentId;
+      return studentName.toLowerCase().includes(activeSearch) || 
+             inc.type.toLowerCase().includes(activeSearch) || 
+             getStatusLabel(inc.status).toLowerCase().includes(activeSearch) ||
+             getSeverityLabel(inc.severity).toLowerCase().includes(activeSearch);
   });
 
   return (
@@ -125,18 +139,24 @@ export default function Deicipline() {
             <CardTitle>Histórico de Ocorrências</CardTitle>
           </CardHeader>
           <div className="flex gap-4 flex-col sm:flex-row p-6">
-            <div className="relative flex-1 flex-col">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Pesquisar ocorrencia por nome, status, severidade..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full rounded-full pl-10 pr-4 py-2 bg-card border border-border focus:outline-none focus:ring-2 focus:ring-primary"
-              />
+            <div className="relative flex-1 flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Pesquisar ocorrencia por nome, status, severidade..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  className="w-full rounded-lg pl-10 pr-4 py-2 bg-card border border-border focus:outline-none focus:ring-2 focus:ring-primary"
+                />
               </div>
-              <NewOccurrence onCreated={fetchIncidents} />
+              <Button onClick={handleSearch} className="bg-primary text-white hover:bg-primary/90 rounded-lg">
+                Pesquisar
+              </Button>
             </div>
+            <NewOccurrence onCreated={fetchIncidents} />
+          </div>
           <CardContent>
             <div className="overflow-x-auto">
               <table className="w-full text-sm border-gray-200 border-[1px]">
@@ -165,9 +185,7 @@ export default function Deicipline() {
                           </td>
                       </tr>
                   ) : filteredIncidents.map((incident) => {
-                    const studentName = incident.student?.profile 
-                        ? `${incident.student.profile.firstName} ${incident.student.profile.lastName}` 
-                        : incident.studentId;
+                    const studentName = incident.student?.name || incident.studentId;
 
                     return (
                     <tr key={incident.id} className="border-gray-200 border-[1px] hover:bg-muted/50">
@@ -193,10 +211,10 @@ export default function Deicipline() {
                       </td>
                       <td className="py-3 px-4 text-center flex">
                         <div className="flex gap-2 justify-center w-full">
-                          <Button variant="ghost" size="sm" onClick={() => handleDelete(incident.id)} className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50">
+                          <Button variant="ghost" size="sm" onClick={() => handleDelete(incident.id)} className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50" title="Apagar">
                             <Trash2 className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50 hover:cursor-pointer">
+                          <Button variant="ghost" size="sm" onClick={() => handleNotify(incident.id)} className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50 hover:cursor-pointer" title="Enviar Notificação por Email">
                             <Mail className="w-4 h-4" />
                           </Button>
                         </div>

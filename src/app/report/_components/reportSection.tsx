@@ -5,6 +5,8 @@ import { FileText, Download, Calendar, Loader2 } from '@/lib/icons';
 import { useState } from 'react';
 import axiosInstance from '@/service/api';
 import { useToast } from '@/hooks/use-toast';
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 export function RelatoriosPage() {
   const { toast } = useToast();
@@ -35,29 +37,117 @@ export function RelatoriosPage() {
     setLoadingReport(reportId);
     try {
       const response = await axiosInstance.get(`/reports/${reportId}`);
+      const data = response.data;
       
-      // Converte o objeto de resposta para uma string JSON formatada
-      const dataStr = JSON.stringify(response.data, null, 2);
+      const doc = new jsPDF();
       
-      // Cria um Blob com os dados e um objeto URL para ele
-      const blob = new Blob([dataStr], { type: "application/json" });
-      const url = window.URL.createObjectURL(blob);
+      // Título
+      doc.setFontSize(20);
+      doc.setTextColor(40, 40, 40);
       
-      // Cria um elemento âncora temporário para forçar o download
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `relatorio_${reportId}_${new Date().getTime()}.json`;
-      document.body.appendChild(a);
-      a.click();
+      let title = "";
+      if (reportId === "academic") title = "Relatório Acadêmico";
+      else if (reportId === "financial") title = "Relatório Financeiro";
+      else if (reportId === "administrative") title = "Relatório Administrativo";
       
-      // Limpeza
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      doc.text(title, 14, 22);
+      
+      // Subtítulo e data
+      doc.setFontSize(10);
+      doc.setTextColor(100, 100, 100);
+      doc.text(`Data de Emissão: ${new Date().toLocaleDateString()}`, 14, 30);
+      
+      doc.setFontSize(12);
+      doc.setTextColor(60, 60, 60);
 
-      toast({ title: 'Sucesso', description: 'Relatório gerado com sucesso!' });
+      let currentY = 40;
+
+      if (reportId === "academic") {
+        doc.text("Resumo Geral", 14, currentY);
+        currentY += 8;
+        doc.setFontSize(10);
+        doc.text(`Total de Alunos: ${data.overview.totalStudents}`, 14, currentY);
+        currentY += 6;
+        doc.text(`Média Geral de Notas: ${data.overview.averageGrade}`, 14, currentY);
+        currentY += 6;
+        doc.text(`Taxa de Frequência: ${data.overview.attendanceRate}%`, 14, currentY);
+        currentY += 14;
+
+        if (data.classes && data.classes.length > 0) {
+          doc.setFontSize(12);
+          doc.text("Turmas", 14, currentY);
+          
+          autoTable(doc, {
+            startY: currentY + 4,
+            head: [['ID da Turma', 'Nome', 'Quantidade de Alunos']],
+            body: data.classes.map((c: any) => [
+              c.classId,
+              c.className,
+              c.studentsCount
+            ]),
+            styles: { fontSize: 9, cellPadding: 3 },
+            headStyles: { fillColor: [77, 68, 181] },
+            alternateRowStyles: { fillColor: [245, 247, 250] },
+          });
+        }
+      } 
+      else if (reportId === "financial") {
+        doc.text("Resumo Geral", 14, currentY);
+        currentY += 8;
+        doc.setFontSize(10);
+        doc.text(`Total Esperado: ${data.overview.totalExpected} Kz`, 14, currentY);
+        currentY += 6;
+        doc.text(`Total Arrecadado: ${data.overview.totalCollected} Kz`, 14, currentY);
+        currentY += 6;
+        doc.text(`Total Pendente: ${data.overview.totalPending} Kz`, 14, currentY);
+        currentY += 6;
+        doc.text(`Total Atrasado: ${data.overview.totalOverdue} Kz`, 14, currentY);
+        currentY += 6;
+        doc.text(`Taxa de Inadimplência: ${data.overview.defaultRate}%`, 14, currentY);
+        currentY += 6;
+        doc.text(`Taxa de Arrecadação: ${data.overview.collectionRate}%`, 14, currentY);
+        currentY += 14;
+
+        if (data.recentTransactions && data.recentTransactions.length > 0) {
+          doc.setFontSize(12);
+          doc.text("Transações Recentes", 14, currentY);
+          
+          autoTable(doc, {
+            startY: currentY + 4,
+            head: [['Estudante', 'Tipo', 'Valor (Kz)', 'Status', 'Data']],
+            body: data.recentTransactions.map((t: any) => [
+              t.studentName,
+              t.type,
+              t.amount,
+              t.status,
+              new Date(t.date).toLocaleDateString()
+            ]),
+            styles: { fontSize: 9, cellPadding: 3 },
+            headStyles: { fillColor: [77, 68, 181] },
+            alternateRowStyles: { fillColor: [245, 247, 250] },
+          });
+        }
+      }
+      else if (reportId === "administrative") {
+        doc.text("Resumo da Infraestrutura e Recursos Humanos", 14, currentY);
+        currentY += 8;
+        doc.setFontSize(10);
+        doc.text(`Professores Ativos: ${data.overview.totalTeachers}`, 14, currentY);
+        currentY += 6;
+        doc.text(`Total de Turmas: ${data.overview.totalClasses}`, 14, currentY);
+        currentY += 6;
+        doc.text(`Total de Salas: ${data.overview.totalRooms}`, 14, currentY);
+        currentY += 6;
+        doc.text(`Disciplinas Cadastradas: ${data.overview.totalSubjects}`, 14, currentY);
+        currentY += 6;
+        doc.text(`Horários Ativos: ${data.overview.activeSchedules}`, 14, currentY);
+      }
+
+      doc.save(`relatorio_${reportId}_${new Date().getTime()}.pdf`);
+      toast({ title: 'Sucesso', description: 'Relatório gerado em PDF com sucesso!' });
     } catch (error) {
       console.error(error);
-      toast({ title: 'Erro', description: 'Falha ao gerar o relatório', variant: 'destructive' });
+      toast({ title: 'Erro', description: 'Falha ao gerar o relatório em PDF', variant: 'destructive' });
     } finally {
       setLoadingReport(null);
     }
@@ -104,7 +194,7 @@ export function RelatoriosPage() {
                     ) : (
                       <Download className="h-4 w-4" />
                     )}
-                    Gerar JSON
+                    Gerar PDF
                   </Button>
                 </div>
               </CardContent>
@@ -114,7 +204,7 @@ export function RelatoriosPage() {
 
         <Card className="mt-8">
           <CardHeader>
-            <CardTitle>Tipos de Relatórios Disponíveis (JSON)</CardTitle>
+            <CardTitle>Tipos de Relatórios Disponíveis (PDF)</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

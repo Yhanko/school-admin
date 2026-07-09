@@ -7,6 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import axiosInstance from "@/service/api";
+import { NewEventModal } from "./new-event";
+import { Trash2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface ScheduleItem {
   id: string;
@@ -45,6 +48,7 @@ const mapTypeToColor = (type: string): 'purple' | 'orange' | 'yellow' | 'blue' =
 export function CalendarSchedule() {
   const [events, setEvents] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
   // Month and Year state
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -63,6 +67,17 @@ export function CalendarSchedule() {
   useEffect(() => {
     fetchEvents();
   }, []);
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Tem a certeza que deseja apagar esta atividade?')) return;
+    try {
+        await axiosInstance.delete(`/events/${id}`);
+        toast({ title: 'Sucesso', description: 'Atividade apagada com sucesso.' });
+        fetchEvents();
+    } catch (error: any) {
+        toast({ title: 'Erro', description: error.response?.data?.message || 'Falha ao apagar.', variant: 'destructive' });
+    }
+  };
 
   const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   
@@ -149,12 +164,7 @@ export function CalendarSchedule() {
                   </DropdownMenu>
 
                   {/* New Event Button */}
-                  <Link href="/newEvent">
-                    <Button className="bg-[#6366f1] hover:bg-[#5856eb] text-white rounded-full px-4 py-2 hover:cursor-pointer">
-                      <Plus className="mr-2 h-4 w-4" />
-                      New events
-                    </Button>
-                  </Link>
+                  <NewEventModal onSuccess={fetchEvents} />
                 </div>
               </CardHeader>
               <CardContent>
@@ -249,9 +259,20 @@ export function CalendarSchedule() {
                 ) : scheduleItems.map((item) => (
                   <div
                     key={item.id}
-                    className={`border-l-4 pl-4 py-3 rounded-r-lg ${getColorClasses(item.color)}`}
+                    className={`border-l-4 pl-4 py-3 rounded-r-lg relative group ${getColorClasses(item.color)}`}
                   >
-                    <div className="flex items-center justify-between mb-2">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute top-2 right-2 h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-100 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(item.id);
+                        }}
+                      >
+                          <Trash2 className="h-4 w-4" />
+                    </Button>
+                    <div className="flex items-center justify-between mb-2 pr-8">
                       <h3 className="font-semibold text-gray-900">{item.title}</h3>
                       <div className="w-8 h-8 bg-purple-200 rounded-full flex items-center justify-center">
                         <CalendarIcon className="w-4 h-4 text-purple-600" />

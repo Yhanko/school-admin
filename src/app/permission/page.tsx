@@ -24,6 +24,18 @@ export default function Permission(){
   const [users, setUsers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showPermissionDetails, setShowPermissionDetails] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeSearch, setActiveSearch] = useState("");
+
+  const handleSearch = () => {
+    setActiveSearch(searchTerm.toLowerCase());
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
 
   useEffect(() => {
     fetchPermissions();
@@ -173,13 +185,21 @@ export default function Permission(){
 
         {/* Search and Filter */}
         <div className="flex gap-4 flex-col sm:flex-row">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Pesquisar por nome ou email..."
-              className="w-full pl-10 pr-4 py-2 bg-card border border-border rounded-full focus:outline-none focus:ring-2 focus:ring-primary"
-            />
+          <div className="relative flex-1 flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Pesquisar por nome ou email..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="w-full pl-10 pr-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+            <Button onClick={handleSearch} className="bg-primary text-white hover:bg-primary/90">
+              Pesquisar
+            </Button>
           </div>
         </div>
 
@@ -201,7 +221,10 @@ export default function Permission(){
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((user) => (
+                  {users.filter(user => 
+                    user.name?.toLowerCase().includes(activeSearch) || 
+                    user.email?.toLowerCase().includes(activeSearch)
+                  ).map((user) => (
                     <tr key={user.id} className="border-[1px] border-gray-200 hover:bg-muted/50">
                       <td className="py-3 px-4 font-medium text-foreground">{user.name}</td>
                       <td className="py-3 px-4 text-muted-foreground text-xs">{user.email}</td>

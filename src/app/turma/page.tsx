@@ -20,6 +20,18 @@ import { Loader2 } from "lucide-react";
 export default function Turma(){
   const [classes, setClasses] = useState<{id: string, name: string, level: string, teacher: string, room: string, students: number, capacity: number, schedule: string, status: string}[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeSearch, setActiveSearch] = useState("");
+
+  const handleSearch = () => {
+    setActiveSearch(searchTerm.toLowerCase());
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
 
   const fetchClasses = async () => {
     try {
@@ -116,13 +128,21 @@ export default function Turma(){
 
         {/* Search and Filter */}
         <div className="flex gap-4 flex-col sm:flex-row">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Pesquisar por turma"
-              className="w-full pl-10 pr-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-            />
+          <div className="relative flex-1 flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Pesquisar por turma"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="w-full pl-10 pr-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+            <Button onClick={handleSearch} className="bg-primary text-white hover:bg-primary/90">
+              Pesquisar
+            </Button>
           </div>
 
           <NewSubject onCreated={fetchClasses} />
@@ -158,7 +178,7 @@ export default function Turma(){
                       </td>
                     </tr>
                   ) : classes.length > 0 ? (
-                    classes.map((cls) => {
+                    classes.filter(c => c.name.toLowerCase().includes(activeSearch)).map((cls) => {
                       const occupancy = getOccupancyPercentage(cls.students, cls.capacity);
                       return (
                         <tr key={cls.id} className="border-b border-gray-200 border-[1px] hover:bg-muted/50">

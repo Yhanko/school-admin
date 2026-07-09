@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, Loader2, Calendar } from "@/lib/icons";
+import { Plus, Search, Loader2, Calendar, Trash2 } from "@/lib/icons";
 import axiosInstance from "@/service/api";
 import { useToast } from "@/hooks/use-toast";
 import { NewSchedule } from "./_components/new-schedule";
@@ -13,7 +13,7 @@ interface Schedule {
   startTime: string;
   endTime: string;
   subject?: { name: string };
-  teacher?: { profile?: { firstName: string; lastName: string } };
+  teacher?: { name: string };
   room?: { name: string };
 }
 
@@ -64,6 +64,17 @@ export default function SchedulesPage() {
       fetchSchedules();
   }, [selectedClassId]);
 
+  const handleDelete = async (id: string) => {
+    if (!confirm("Tem a certeza que deseja eliminar este horário?")) return;
+    try {
+        await axiosInstance.delete(`/schedules/${id}`);
+        toast({ title: "Sucesso", description: "Horário eliminado com sucesso!" });
+        fetchSchedules();
+    } catch (error) {
+        toast({ title: "Erro", description: "Falha ao eliminar horário.", variant: "destructive" });
+    }
+  }
+
   const daysOfWeekMap = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
 
   return (
@@ -107,18 +118,19 @@ export default function SchedulesPage() {
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Disciplina</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Professor</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Sala</th>
+                    <th className="text-center py-3 px-4 font-semibold text-gray-700">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
                   {isLoading ? (
                       <tr>
-                          <td colSpan={5} className="py-8 text-center">
+                          <td colSpan={6} className="py-8 text-center">
                               <Loader2 className="w-6 h-6 animate-spin mx-auto text-indigo-500" />
                           </td>
                       </tr>
                   ) : schedules.length === 0 ? (
                       <tr>
-                          <td colSpan={5} className="py-8 text-center text-gray-500">
+                          <td colSpan={6} className="py-8 text-center text-gray-500">
                               Nenhum horário definido para esta turma.
                           </td>
                       </tr>
@@ -132,9 +144,14 @@ export default function SchedulesPage() {
                       </td>
                       <td className="py-3 px-4 text-gray-700 font-medium">{schedule.subject?.name || 'N/A'}</td>
                       <td className="py-3 px-4 text-gray-600">
-                          {schedule.teacher?.profile?.firstName} {schedule.teacher?.profile?.lastName}
+                          {schedule.teacher?.name || 'N/A'}
                       </td>
                       <td className="py-3 px-4 text-gray-600">{schedule.room?.name || 'N/A'}</td>
+                      <td className="py-3 px-4 text-center">
+                          <Button variant="ghost" size="sm" onClick={() => handleDelete(schedule.id)} className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors">
+                              <Trash2 className="w-4 h-4" />
+                          </Button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

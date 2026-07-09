@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { Notification } from "../types/types";
+import axiosInstance from "@/service/api";
 
 interface NotificationStore {
   notifications: Notification[];
@@ -10,9 +11,9 @@ interface NotificationStore {
   unreadNotificationsCount: number;
   pages: number;
   paginatedNotifications: Notification[];
-  setNotifications: (notifications: Notification[] | ((prev: Notification[]) => Notification[])) => void;
-  markAllAsRead: () => void;
-  markAsRead: (id: number) => void;
+  fetchNotifications: () => Promise<void>;
+  markAllAsRead: () => Promise<void>;
+  markAsRead: (id: string) => Promise<void>;
   changePage: (page: number) => void;
 }
 
@@ -21,58 +22,96 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
   isLoading: false,
   error: null,
   page: 1,
-  notificationsPerPage: 7,
+  notificationsPerPage: 5,
   unreadNotificationsCount: 0,
   pages: 1,
   paginatedNotifications: [],
 
-  setNotifications: (notifications) => {
-    const currentPage = get().page;
-    const notificationsPerPage = get().notificationsPerPage;
+  fetchNotifications: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await axiosInstance.get('/notifications');
+      
+      const mappedNotifications = response.data.map((notification: any) => ({
+        id: notification.id,
+        title: notification.title,
+        description: notification.description,
+        createdAt: notification.createdAt,
+        isRead: notification.isRead,
+        type: notification.type,
+        priority: notification.priority
+      }));
 
-    const newNotifications = typeof notifications === "function"
-      ? notifications(get().notifications)
-      : notifications;
+      // Ordenar por data decrescente
+      mappedNotifications.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      
+      const unreadCount = mappedNotifications.filter((msg: Notification) => !msg.isRead).length;
+      const totalPages = Math.ceil(mappedNotifications.length / get().notificationsPerPage);
+      const safePage = Math.min(get().page, totalPages || 1);
+      const paginated = mappedNotifications.slice(
+        (safePage - 1) * get().notificationsPerPage,
+        safePage * get().notificationsPerPage
+      );
 
-    const unreadCount = newNotifications.filter(msg => msg.leitura === "não lida").length;
-    const totalPages = Math.ceil(newNotifications.length / notificationsPerPage);
-
-    // Garante que a página atual nunca seja maior que o total de páginas
-    const safePage = Math.min(currentPage, totalPages || 1);
-
-    const paginated = newNotifications.slice(
-      (safePage - 1) * notificationsPerPage,
-      safePage * notificationsPerPage
-    );
-
-    set({
-      notifications: newNotifications,
-      unreadNotificationsCount: unreadCount,
-      pages: totalPages,
-      paginatedNotifications: paginated,
-      page: safePage,
-      isLoading: false,
-      error: null,
-    });
+      set({
+        notifications: mappedNotifications,
+        unreadNotificationsCount: unreadCount,
+        pages: totalPages,
+        paginatedNotifications: paginated,
+        page: safePage,
+        isLoading: false,
+      });
+    } catch (error) {
+      set({ isLoading: false, error: 'Falha ao carregar notificações' });
+    }
   },
 
-  markAsRead: (id: number) => {
-    get().setNotifications((prev) =>
-      prev.map(notification =>
-        notification.id_notficacao_entidade === id
-          ? { ...notification, leitura: "lida" }
-          : notification
-      )
-    );
+  markAsRead: async (id: string) => {
+    try {
+      await axiosInstance.patch(`/notifications/${id}/read`);
+      
+      const newNotifications = get().notifications.map(notification =>
+        notification.id === id ? { ...notification, isRead: true } : notification
+      );
+      
+      const unreadCount = newNotifications.filter((msg: Notification) => !msg.isRead).length;
+      const paginated = newNotifications.slice(
+        (get().page - 1) * get().notificationsPerPage,
+        get().page * get().notificationsPerPage
+      );
+
+      set({
+        notifications: newNotifications,
+        unreadNotificationsCount: unreadCount,
+        paginatedNotifications: paginated
+      });
+    } catch (error) {
+      console.error("Falha ao marcar como lida", error);
+    }
   },
 
-  markAllAsRead: () => {
-    get().setNotifications((prev) =>
-      prev.map(notification => ({
+  markAllAsRead: async () => {
+    try {
+      await axiosInstance.patch('/notifications/read-all');
+      
+      const newNotifications = get().notifications.map(notification => ({
         ...notification,
-        leitura: "lida",
-      }))
-    );
+        isRead: true,
+      }));
+      
+      const paginated = newNotifications.slice(
+        (get().page - 1) * get().notificationsPerPage,
+        get().page * get().notificationsPerPage
+      );
+
+      set({
+        notifications: newNotifications,
+        unreadNotificationsCount: 0,
+        paginatedNotifications: paginated
+      });
+    } catch (error) {
+      console.error("Falha ao marcar todas como lidas", error);
+    }
   },
 
   changePage: (page: number) => {

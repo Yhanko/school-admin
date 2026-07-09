@@ -1,67 +1,31 @@
 "use client"
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Bell, Check, X, CheckCheck, AlertCircle, Info, Calendar } from "@/lib/icons";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import axiosInstance from "@/service/api";
-
-interface Notification {
-  id: string;
-  title: string;
-  description: string;
-  date: string;
-  isRead: boolean;
-  type: string;
-  priority: 'low' | 'medium' | 'high';
-}
+import { useNotificationStore } from "@/hooks/useNotifications";
 
 export default function NotificationsGeral() {
   const { toast } = useToast();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(true);
-  const itemsPerPage = 5;
+  
+  const { 
+    isLoading, 
+    unreadNotificationsCount, 
+    notifications, 
+    paginatedNotifications, 
+    page, 
+    pages, 
+    fetchNotifications, 
+    markAllAsRead, 
+    markAsRead, 
+    changePage 
+  } = useNotificationStore();
 
   useEffect(() => {
+    // Only fetch if we don't have notifications yet or to ensure it's fresh
     fetchNotifications();
-  }, []);
-
-  const fetchNotifications = async () => {
-    try {
-      const response = await axiosInstance.get('/notifications');
-      
-      const mappedNotifications = response.data.map((notification: any) => {
-        return {
-          id: notification.id,
-          title: notification.title,
-          description: notification.description,
-          date: notification.createdAt,
-          isRead: notification.isRead,
-          type: notification.type,
-          priority: notification.priority
-        };
-      });
-
-      // Ordenar por data decrescente (mais recentes primeiro)
-      mappedNotifications.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      
-      setNotifications(mappedNotifications);
-    } catch (error) {
-      console.error(error);
-      toast({ title: 'Erro', description: 'Falha ao carregar notificações', variant: 'destructive' });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const totalPages = Math.ceil(notifications.length / itemsPerPage);
-  const paginatedNotifications = notifications.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  }, [fetchNotifications]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -91,35 +55,23 @@ export default function NotificationsGeral() {
     }
   };
 
-  const markAllAsRead = async () => {
-    try {
-      await axiosInstance.patch('/notifications/read-all');
-      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
-      toast({
-        title: "Sucesso",
-        description: "Todas as notificações foram marcadas como lidas",
-      });
-    } catch (error) {
-      console.error(error);
-      toast({ title: 'Erro', description: 'Falha ao marcar como lido', variant: 'destructive' });
-    }
+  const handleMarkAllAsRead = async () => {
+    await markAllAsRead();
+    toast({
+      title: "Sucesso",
+      description: "Todas as notificações foram marcadas como lidas",
+    });
   };
 
-  const toggleReadStatus = async (id: string) => {
-    try {
-      await axiosInstance.patch(`/notifications/${id}/read`);
-      setNotifications(prev => 
-        prev.map(n => 
-          n.id === id ? { ...n, isRead: true } : n
-        )
-      );
-    } catch (error) {
-      console.error(error);
-      toast({ title: 'Erro', description: 'Falha ao marcar notificação como lida', variant: 'destructive' });
+  const toggleReadStatus = async (id: string, currentlyRead: boolean) => {
+    if (!currentlyRead) {
+      await markAsRead(id);
     }
+    // Note: To mark as unread we would need another endpoint. 
+    // For now, if it's already read, we just do nothing or we could add an unread endpoint.
   };
 
-  if (isLoading) {
+  if (isLoading && notifications.length === 0) {
     return (
       <div className="p-6 space-y-4 max-w-4xl mx-auto">
         <div className="flex justify-center items-center h-64">
@@ -139,21 +91,21 @@ export default function NotificationsGeral() {
         <div className="flex items-center gap-3">
           <div className="relative">
             <Bell className="w-8 h-8 text-blue-600" />
-            {unreadCount > 0 && (
+            {unreadNotificationsCount > 0 && (
               <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
-                {unreadCount}
+                {unreadNotificationsCount}
               </span>
             )}
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-800">Notificações</h1>
-            <p className="text-gray-600">{unreadCount} não lidas de {notifications.length} total</p>
+            <p className="text-gray-600">{unreadNotificationsCount} não lidas de {notifications.length} total</p>
           </div>
         </div>
         
-        {unreadCount > 0 && (
+        {unreadNotificationsCount > 0 && (
           <Button
-            onClick={markAllAsRead}
+            onClick={handleMarkAllAsRead}
             className="bg-green-600 hover:bg-green-700 text-white transition-all duration-200 transform hover:scale-105"
           >
             <CheckCheck className="w-4 h-4 mr-2" />
@@ -202,27 +154,28 @@ export default function NotificationsGeral() {
                     </p>
                     <div className="flex items-center gap-2 text-xs text-gray-500">
                       <Calendar className="w-3 h-3" />
-                      {formatDate(notification.date)}
+                      {formatDate(notification.createdAt)}
                     </div>
                   </div>
                 </div>
                 
                 <Button
-                  onClick={() => toggleReadStatus(notification.id)}
+                  onClick={() => toggleReadStatus(notification.id, notification.isRead)}
                   variant="ghost"
                   size="sm"
+                  disabled={notification.isRead}
                   className={`
                     transition-all duration-200 hover:scale-105
                     ${notification.isRead 
-                      ? 'text-orange-600 hover:bg-orange-50' 
+                      ? 'text-gray-400 cursor-not-allowed' 
                       : 'text-green-600 hover:bg-green-50'
                     }
                   `}
                 >
                   {notification.isRead ? (
                     <>
-                      <Bell className="w-4 h-4 mr-2" />
-                      Marcar como não lida
+                      <CheckCheck className="w-4 h-4 mr-2" />
+                      Lida
                     </>
                   ) : (
                     <>
@@ -238,33 +191,33 @@ export default function NotificationsGeral() {
       )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
+      {pages > 1 && (
         <div className="flex justify-center">
           <Pagination>
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious 
-                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                  className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                  onClick={() => changePage(Math.max(1, page - 1))}
+                  className={page === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
                 />
               </PaginationItem>
               
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <PaginationItem key={page}>
+              {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
+                <PaginationItem key={p}>
                   <PaginationLink 
-                    onClick={() => setCurrentPage(page)}
-                    isActive={currentPage === page}
+                    onClick={() => changePage(p)}
+                    isActive={page === p}
                     className="cursor-pointer"
                   >
-                    {page}
+                    {p}
                   </PaginationLink>
                 </PaginationItem>
               ))}
               
               <PaginationItem>
                 <PaginationNext 
-                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                  className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                  onClick={() => changePage(Math.min(pages, page + 1))}
+                  className={page === pages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
                 />
               </PaginationItem>
             </PaginationContent>

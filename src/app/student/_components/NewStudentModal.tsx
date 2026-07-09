@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Modal } from "./modal";
 import {
@@ -9,9 +9,12 @@ import {
   Check,
   AlertCircle,
   ChevronRight,
+  Eye,
+  EyeOff
 } from "@/lib/icons";
 import axiosInstance from "@/service/api";
 import { Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 type AcademicLevel = "1-6" | "7-9" | "10-13" | "transfer" | null;
 
@@ -51,6 +54,7 @@ interface StudentFormData {
   cycle: string;
   course: string;
   class: string;
+  classe?: string;
 
   // Documents
   previousCertificate: File | null; // for 7-9
@@ -60,20 +64,14 @@ interface StudentFormData {
   previousClass: string; // for transfer
 }
 
-const MOCK_CLASSES = [
-  { id: "1", name: "1ª Classe A", room: "Sala 01", level: "1-6" },
-  { id: "2", name: "2ª Classe B", room: "Sala 02", level: "1-6" },
-  { id: "3", name: "3ª Classe A", room: "Sala 03", level: "1-6" },
-  { id: "4", name: "7ª Classe A", room: "Sala 04", level: "7-9" },
-  { id: "5", name: "8ª Classe B", room: "Sala 05", level: "7-9" },
-  { id: "6", name: "10ª Classe A", room: "Lab 1", level: "10-13" },
-  { id: "7", name: "11ª Classe B", room: "Lab 2", level: "10-13" },
-];
-
 export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean, onClose: () => void, onAdded?: () => void }) {
+  const { toast } = useToast();
   const [selectedLevel, setSelectedLevel] = useState<AcademicLevel>(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [availableClasses, setAvailableClasses] = useState<any[]>([]);
   const [formData, setFormData] = useState<StudentFormData>({
     studentNumber: "",
     firstName: "",
@@ -103,6 +101,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
     cycle: "",
     course: "",
     class: "",
+    classe: "",
     previousCertificate: null,
     grade9Certificate: null,
     transferRequest: null,
@@ -113,6 +112,20 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
   const [submittedStudents, setSubmittedStudents] = useState<
     Array<{ id: string; name: string; level: string; date: string }>
   >([]);
+
+  useEffect(() => {
+    if (isOpen) {
+      const fetchClasses = async () => {
+        try {
+          const response = await axiosInstance.get('/classes');
+          setAvailableClasses(response.data);
+        } catch (error) {
+          console.error("Failed to fetch classes", error);
+        }
+      };
+      fetchClasses();
+    }
+  }, [isOpen]);
 
   const generateStudentNumber = () => {
     const year = new Date().getFullYear();
@@ -141,18 +154,25 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
     try {
       const response = await axiosInstance.post('/users/student', {
         name: `${formData.firstName} ${formData.lastName}`,
+        studentNumber: formData.studentNumber || undefined,
         email: formData.email || `student${formData.studentNumber}@school.com`,
-        password: "DefaultPassword123!", // Should be generated or sent by email
-        // We omit files and advanced profile stuff since backend endpoint requires standard User info
+        password: formData.password || "DefaultPassword123!",
+        phone: formData.phone,
+        classId: formData.class,
+        parentName: formData.parentFirstName ? `${formData.parentFirstName} ${formData.parentLastName}`.trim() : undefined,
+        parentEmail: formData.parentEmail || undefined,
+        parentPhone: formData.parentPhone || undefined,
+        parentPassword: formData.parentPassword || undefined,
       });
 
       if (onAdded) {
         onAdded();
       }
+      toast({ title: 'Sucesso', description: "Aluno registrado com sucesso!" });
       resetForm();
     } catch (error) {
       console.error("Failed to register student", error);
-      alert("Erro ao registrar aluno. Verifique os dados e tente novamente.");
+      toast({ title: 'Erro', description: "Erro ao registrar aluno. Verifique os dados e tente novamente.", variant: 'destructive' });
     } finally {
       setIsSubmitting(false);
     }
@@ -162,6 +182,8 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
     onClose();
     setSelectedLevel(null);
     setCurrentStep(1);
+    setShowPassword(false);
+    setShowConfirmPassword(false);
     setFormData({
       studentNumber: "",
       firstName: "",
@@ -367,9 +389,26 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
         </div>
 
 
-        {selectedLevel === "10-13" && (
+        {selectedLevel === "transfer" && (
           <div className="flex flex-col space-y-2">
-            <label className="text-sm font-medium text-foreground">Curso</label>
+            <label className="text-sm font-medium text-foreground">Ciclo</label>
+            <select
+              name="cycle"
+              value={formData.cycle}
+              onChange={handleInputChange}
+              className="border border-border rounded-lg p-2"
+            >
+              <option value="">Selecione o Ciclo</option>
+              <option value="1-6">Ensino Primário (1-6)</option>
+              <option value="7-9">Ensino Secundário I (7-9)</option>
+              <option value="10-13">Ensino Secundário II (10-13)</option>
+            </select>
+          </div>
+        )}
+
+        {(selectedLevel === "10-13" || (selectedLevel === "transfer" && formData.cycle === "10-13")) && (
+          <div className="flex flex-col space-y-2">
+            <label className="text-sm font-medium text-foreground">Curso / Área de Formação</label>
             <input
               type="text"
               name="course"
@@ -382,6 +421,51 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
         )}
 
         <div className="flex flex-col space-y-2">
+          <label className="text-sm font-medium text-foreground">Classe</label>
+          <select
+            name="classe"
+            value={(formData as any).classe || ""}
+            onChange={handleInputChange}
+            className="border border-border rounded-lg p-2"
+          >
+            <option value="">Selecione uma classe</option>
+            {(() => {
+              const level = selectedLevel === "transfer" ? formData.cycle : selectedLevel;
+              if (level === "1-6") {
+                return (
+                  <>
+                    <option value="1">1ª Classe</option>
+                    <option value="2">2ª Classe</option>
+                    <option value="3">3ª Classe</option>
+                    <option value="4">4ª Classe</option>
+                    <option value="5">5ª Classe</option>
+                    <option value="6">6ª Classe</option>
+                  </>
+                );
+              } else if (level === "7-9") {
+                return (
+                  <>
+                    <option value="7">7ª Classe</option>
+                    <option value="8">8ª Classe</option>
+                    <option value="9">9ª Classe</option>
+                  </>
+                );
+              } else if (level === "10-13") {
+                return (
+                  <>
+                    <option value="10">10ª Classe</option>
+                    <option value="11">11ª Classe</option>
+                    <option value="12">12ª Classe</option>
+                    <option value="13">13ª Classe</option>
+                  </>
+                );
+              }
+              return null;
+            })()}
+          </select>
+        </div>
+
+        <div className="flex flex-col space-y-2">
           <label className="text-sm font-medium text-foreground">Turma</label>
           <select
             name="class"
@@ -390,33 +474,57 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             className="border border-border rounded-lg p-2"
           >
             <option value="">Selecione uma turma</option>
-            {MOCK_CLASSES.filter(c => selectedLevel === "transfer" ? true : c.level === selectedLevel).map((c) => (
-              <option key={c.id} value={c.name}>
-                {c.name} - {c.room}
+            {availableClasses.filter(c => {
+               const classLevel = c.academicLevel; // Use DB academicLevel property
+               if (selectedLevel === "transfer") {
+                  return formData.cycle ? classLevel === formData.cycle : true;
+               }
+               return classLevel === selectedLevel;
+            }).map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name} - {c.roomName} - {c.grade || ''}
               </option>
             ))}
           </select>
         </div>
         <div className="flex flex-col space-y-2">
           <label className="text-sm font-medium text-foreground">Senha *</label>
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleInputChange}
-            className="border border-border rounded-lg p-2"
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              value={formData.password}
+              onChange={handleInputChange}
+              className="w-full border border-border rounded-lg p-2 pr-10"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
         </div>
 
         <div className="flex flex-col space-y-2">
           <label className="text-sm font-medium text-foreground">Confirmar Senha *</label>
-          <input
-            type="password"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleInputChange}
-            className="border border-border rounded-lg p-2"
-          />
+          <div className="relative">
+            <input
+              type={showConfirmPassword ? "text" : "password"}
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleInputChange}
+              className="w-full border border-border rounded-lg p-2 pr-10"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -486,24 +594,42 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
 
         <div className="flex flex-col space-y-2">
           <label className="text-sm font-medium text-foreground">Senha *</label>
-          <input
-            type="password"
-            name="parentPassword"
-            value={formData.parentPassword}
-            onChange={handleInputChange}
-            className="border border-border rounded-lg p-2"
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              name="parentPassword"
+              value={formData.parentPassword}
+              onChange={handleInputChange}
+              className="w-full border border-border rounded-lg p-2 pr-10"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
         </div>
 
         <div className="flex flex-col space-y-2">
           <label className="text-sm font-medium text-foreground">Confirmar Senha *</label>
-          <input
-            type="password"
-            name="parentConfirmPassword"
-            value={formData.parentConfirmPassword}
-            onChange={handleInputChange}
-            className="border border-border rounded-lg p-2"
-          />
+          <div className="relative">
+            <input
+              type={showConfirmPassword ? "text" : "password"}
+              name="parentConfirmPassword"
+              value={formData.parentConfirmPassword}
+              onChange={handleInputChange}
+              className="w-full border border-border rounded-lg p-2 pr-10"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -589,24 +715,42 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
 
         <div className="flex flex-col space-y-2">
           <label className="text-sm font-medium text-foreground">Senha *</label>
-          <input
-            type="password"
-            name="guardianPassword"
-            value={formData.guardianPassword}
-            onChange={handleInputChange}
-            className="border border-border rounded-lg p-2"
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              name="guardianPassword"
+              value={formData.guardianPassword}
+              onChange={handleInputChange}
+              className="w-full border border-border rounded-lg p-2 pr-10"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
         </div>
 
         <div className="flex flex-col space-y-2">
           <label className="text-sm font-medium text-foreground">Confirmar Senha *</label>
-          <input
-            type="password"
-            name="guardianConfirmPassword"
-            value={formData.guardianConfirmPassword}
-            onChange={handleInputChange}
-            className="border border-border rounded-lg p-2"
-          />
+          <div className="relative">
+            <input
+              type={showConfirmPassword ? "text" : "password"}
+              name="guardianConfirmPassword"
+              value={formData.guardianConfirmPassword}
+              onChange={handleInputChange}
+              className="w-full border border-border rounded-lg p-2 pr-10"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
         </div>
       </div>
     </div>

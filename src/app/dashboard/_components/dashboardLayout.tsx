@@ -62,7 +62,7 @@ export function DashboardLayout () {
   const totalStudents = students.length;
   const totalTeachers = teachers.length;
   const confirmedPayments = payments.filter((p: any) => p.status === 'confirmed');
-  const schoolBalance = confirmedPayments.reduce((acc: number, curr: any) => acc + curr.amount, 0);
+  const totalPayments = confirmedPayments.length;
 
   const recentStudentsList = [...students].reverse().slice(0, 5);
   const recentPaymentsList = payments.filter((p: any) => p.status === 'pending').slice(0, 5);
@@ -89,7 +89,7 @@ export function DashboardLayout () {
             <DashboardMetrics 
               totalStudents={totalStudents} 
               totalTeachers={totalTeachers} 
-              schoolBalance={schoolBalance} 
+              totalPayments={totalPayments} 
             />
             {/* Metrics */}
             <PerformanceChart report={academicReport} />

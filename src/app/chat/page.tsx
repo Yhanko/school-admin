@@ -7,17 +7,14 @@ export interface ChatUser {
   id: string;
   email: string;
   role: string;
-  profile?: {
-    firstName: string;
-    lastName: string;
-  };
+  name: string;
 }
 
 export default function Chat () {
   const [selectedUser, setSelectedUser] = useState<ChatUser | null>(null);
 
   return (
-     <section className="h-screen flex w-[70rem]">
+     <section className="h-[calc(100vh-5rem)] flex w-full">
       <ChatSidebar onSelectUser={setSelectedUser} selectedUserId={selectedUser?.id} />
       <ChatArea selectedUser={selectedUser} />
     </section>
