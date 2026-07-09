@@ -38,7 +38,7 @@ export function LogOutModal({ children }: LogOutProps) {
       logout();
       // Temporarily remove token from axios
       axiosInstance.defaults.headers.common['Authorization'] = '';
-      router.push("/");
+      router.push("/login");
     }
   };
 

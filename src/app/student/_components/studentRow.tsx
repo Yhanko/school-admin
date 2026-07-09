@@ -16,11 +16,14 @@ interface Student {
   name: string;
   date: string;
   parentName: string;
+  parentEmail?: string;
+  parentPhone?: string;
   city: string;
   grade: string;
   gradeColor: string;
   phone: string;
   email: string;
+  studentNumber: string;
   isSelected: boolean;
 }
 
