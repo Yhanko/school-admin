@@ -21,7 +21,7 @@ export function ChatSidebar ({ onSelectUser, selectedUserId }: ChatSidebarProps)
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axiosInstance.get('/users');
+        const response = await axiosInstance.get('/messages/contacts');
         setUsers(response.data);
       } catch (error) {
         console.error("Failed to fetch users", error);
@@ -75,8 +75,8 @@ export function ChatSidebar ({ onSelectUser, selectedUserId }: ChatSidebarProps)
             ) : filteredUsers.length === 0 ? (
                 <p className="text-sm text-gray-400 text-center py-4">Nenhum utilizador encontrado.</p>
             ) : (
-                filteredUsers.map((user) => {
-                  const nameParts = (user.name || "User").split(" ");
+                filteredUsers.map((user: any) => {
+                  const nameParts = (user.nome || user.name || "User").split(" ");
                   const firstName = nameParts[0];
                   const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : "";
                   const initials = `${firstName[0]}${lastName ? lastName[0] : ''}`.toUpperCase();
@@ -84,19 +84,34 @@ export function ChatSidebar ({ onSelectUser, selectedUserId }: ChatSidebarProps)
                   return (
                     <div 
                         key={user.id} 
-                        onClick={() => onSelectUser(user)}
+                        onClick={() => {
+                          onSelectUser(user);
+                          if (user.naoLidas > 0) {
+                            // Limpa localmente
+                            setUsers(prev => prev.map(u => u.id === user.id ? { ...u, naoLidas: 0 } : u));
+                            // Chama a API para limpar
+                            axiosInstance.patch(`/messages/conversation/${user.id}/read`).catch(console.error);
+                          }
+                        }}
                         className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${selectedUserId === user.id ? 'bg-indigo-50 border-indigo-100' : 'hover:bg-gray-50'}`}
                     >
-                        <Avatar className="w-10 h-10">
-                        <AvatarFallback className={`${selectedUserId === user.id ? 'bg-indigo-600 text-white' : 'bg-indigo-100 text-indigo-600'} text-sm transition-colors`}>
-                            {initials}
-                        </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                            <p className="font-medium text-sm text-gray-900 truncate">{user.name || "User"}</p>
+                        <div className="relative">
+                          <Avatar className="w-10 h-10">
+                            <AvatarFallback className={`${selectedUserId === user.id ? 'bg-indigo-600 text-white' : 'bg-indigo-100 text-indigo-600'} text-sm transition-colors`}>
+                                {initials}
+                            </AvatarFallback>
+                          </Avatar>
                         </div>
-                        <p className="text-xs text-gray-500 truncate mt-0.5">{user.role}</p>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                              <p className="font-medium text-sm text-gray-900 truncate">{user.nome || user.name || "User"}</p>
+                              {user.naoLidas > 0 && (
+                                <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                                  {user.naoLidas}
+                                </span>
+                              )}
+                          </div>
+                          <p className="text-xs text-gray-500 truncate mt-0.5">{user.tipo || user.role}</p>
                         </div>
                     </div>
                   );

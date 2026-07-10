@@ -82,7 +82,7 @@ export function ChatArea ({ selectedUser }: ChatAreaProps) {
       );
   }
 
-  const nameParts = (selectedUser.name || "User").split(" ");
+  const nameParts = ((selectedUser as any).nome || selectedUser.name || "User").split(" ");
   const firstName = nameParts[0];
   const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : "";
   const initials = `${firstName[0]}${lastName ? lastName[0] : ''}`.toUpperCase();
@@ -99,8 +99,8 @@ export function ChatArea ({ selectedUser }: ChatAreaProps) {
               </AvatarFallback>
             </Avatar>
             <div>
-              <h2 className="font-semibold text-gray-900">{selectedUser.name || "User"}</h2>
-              <p className="text-sm text-gray-500">{selectedUser.role}</p>
+              <h2 className="font-semibold text-gray-900">{(selectedUser as any).nome || selectedUser.name || "User"}</h2>
+              <p className="text-sm text-gray-500">{(selectedUser as any).tipo || selectedUser.role}</p>
             </div>
           </div>
         </div>

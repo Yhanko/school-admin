@@ -24,6 +24,10 @@ export default function Payments() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeSearch, setActiveSearch] = useState("");
 
+  const [institution, setInstitution] = useState<any>(null);
+  const [iban, setIban] = useState("");
+  const [isUpdatingIban, setIsUpdatingIban] = useState(false);
+
   const handleSearch = () => {
     setActiveSearch(searchTerm.toLowerCase());
   };
@@ -36,7 +40,33 @@ export default function Payments() {
 
   useEffect(() => {
     fetchPayments();
+    fetchInstitution();
   }, []);
+
+  const fetchInstitution = async () => {
+    try {
+      const response = await axiosInstance.get('/users/me');
+      if (response.data?.institution) {
+        setInstitution(response.data.institution);
+        setIban(response.data.institution.iban || "");
+      }
+    } catch (error) {
+      console.error("Erro ao carregar instituição:", error);
+    }
+  };
+
+  const handleUpdateIban = async () => {
+    setIsUpdatingIban(true);
+    try {
+      await axiosInstance.patch('/institutions/me', { iban });
+      toast({ title: 'Sucesso', description: 'IBAN atualizado com sucesso!' });
+    } catch (error) {
+      console.error("Erro ao atualizar IBAN:", error);
+      toast({ title: 'Erro', description: 'Falha ao atualizar IBAN', variant: 'destructive' });
+    } finally {
+      setIsUpdatingIban(false);
+    }
+  };
 
   const fetchPayments = async () => {
     try {
@@ -50,6 +80,17 @@ export default function Payments() {
     }
   };
 
+  const handleConfirmPayment = async (id: string) => {
+    try {
+      await axiosInstance.patch(`/finance/payments/${id}/confirm`);
+      toast({ title: 'Sucesso', description: 'Pagamento confirmado com sucesso!' });
+      setPayments(prev => prev.map(p => p.id === id ? { ...p, status: 'confirmed', paymentDate: new Date() } : p));
+    } catch (error) {
+      console.error("Erro ao confirmar pagamento:", error);
+      toast({ title: 'Erro', description: 'Falha ao confirmar pagamento', variant: 'destructive' });
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     // A API usa: 'confirmed', 'pending', 'cancelled'
     const statusConfig: Record<string, { bg: string; text: string; icon: React.ElementType, label: string }> = {
@@ -58,6 +99,12 @@ export default function Payments() {
         text: "text-green-800 dark:text-green-100",
         icon: CheckCircle,
         label: "Pago",
+      },
+      "processing": {
+        bg: "bg-blue-100 dark:bg-blue-900",
+        text: "text-blue-800 dark:text-blue-100",
+        icon: Clock,
+        label: "Em Validação",
       },
       "pending": {
         bg: "bg-yellow-100 dark:bg-yellow-900",
@@ -208,12 +255,36 @@ export default function Payments() {
 
   return (
       <section className="space-y-8 w-[70rem] p-4">
-        {/* Header */}
+        {/* Header & IBAN Config */}
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-3xl font-bold text-foreground mb-2">Relatório de Pagamentos</h1>
             <p className="text-muted-foreground">Status de pagamentos mensais dos alunos</p>
           </div>
+          
+          {/* Configuração de IBAN */}
+          <Card className="w-[300px]">
+            <CardHeader className="py-3">
+              <CardTitle className="text-sm">Configuração Bancária (IBAN)</CardTitle>
+            </CardHeader>
+            <CardContent className="py-2 flex gap-2">
+              <input
+                type="text"
+                placeholder="AO06.0000.0000..."
+                value={iban}
+                onChange={(e) => setIban(e.target.value)}
+                className="w-full px-3 py-1.5 text-sm bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+              <Button 
+                onClick={handleUpdateIban} 
+                disabled={isUpdatingIban}
+                size="sm"
+                className="bg-primary text-white hover:bg-primary/90"
+              >
+                {isUpdatingIban ? <Loader2 className="w-4 h-4 animate-spin" /> : "Salvar"}
+              </Button>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Payment Stats */}
@@ -317,6 +388,8 @@ export default function Payments() {
                     <th className="text-right py-3 px-4 font-semibold text-foreground">Valor</th>
                     <th className="text-left py-3 px-4 font-semibold text-foreground">Status</th>
                     <th className="text-left py-3 px-4 font-semibold text-foreground">Data Pagamento</th>
+                    <th className="text-left py-3 px-4 font-semibold text-foreground">Comprovativo</th>
+                    <th className="text-left py-3 px-4 font-semibold text-foreground">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -333,11 +406,30 @@ export default function Payments() {
                       <td className="py-3 px-4 text-muted-foreground">
                         {payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString() : "-"}
                       </td>
+                      <td className="py-3 px-4">
+                        {payment.proofUrl ? (
+                          <Button variant="outline" size="sm" onClick={() => window.open(payment.proofUrl, '_blank')}>
+                            Ver Anexo
+                          </Button>
+                        ) : "-"}
+                      </td>
+                      <td className="py-3 px-4">
+                        {(payment.status === 'pending' || payment.status === 'processing') && (
+                          <Button 
+                            size="sm" 
+                            className="bg-green-500 hover:bg-green-600 text-white"
+                            onClick={() => handleConfirmPayment(payment.id)}
+                          >
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                            Confirmar
+                          </Button>
+                        )}
+                      </td>
                     </tr>
                   ))}
                   {payments.length === 0 && (
                     <tr>
-                      <td colSpan={5} className="py-6 text-center text-gray-500">
+                      <td colSpan={7} className="py-6 text-center text-gray-500">
                         Nenhum pagamento encontrado
                       </td>
                     </tr>
