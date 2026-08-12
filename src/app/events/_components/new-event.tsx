@@ -55,8 +55,9 @@ export function NewEventModal({ onSuccess }: NewEventModalProps) {
         setFormData({ title: "", description: "", date: "", type: "event", organizer: "", location: "", participants: 0 });
         setOpen(false);
         onSuccess();
-    } catch (error: any) {
-        toast({ title: 'Erro', description: error.response?.data?.message || 'Falha ao criar atividade.', variant: 'destructive' });
+    } catch (error) {
+        const err = error as { response?: { data?: { message?: string } } };
+        toast({ title: 'Erro', description: err.response?.data?.message || 'Falha ao criar atividade.', variant: 'destructive' });
     } finally {
         setIsSubmitting(false);
     }

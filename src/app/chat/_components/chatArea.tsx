@@ -3,7 +3,7 @@ import { Send, Paperclip, Loader2 } from "@/lib/icons";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ChatUser } from "../page";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import axiosInstance from "@/service/api";
 import { useAuth } from "@/store/useAuth";
 
@@ -28,7 +28,7 @@ export function ChatArea ({ selectedUser }: ChatAreaProps) {
   const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const fetchMessages = async () => {
+  const fetchMessages = useCallback(async () => {
     if (!selectedUser) return;
     setIsLoading(true);
     try {
@@ -39,7 +39,7 @@ export function ChatArea ({ selectedUser }: ChatAreaProps) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [selectedUser]);
 
   useEffect(() => {
     fetchMessages();
@@ -47,7 +47,7 @@ export function ChatArea ({ selectedUser }: ChatAreaProps) {
     // Optional: Setup polling for real-time feel if WebSockets aren't available
     const interval = setInterval(fetchMessages, 5000);
     return () => clearInterval(interval);
-  }, [selectedUser]);
+  }, [fetchMessages]);
 
   useEffect(() => {
       // Auto scroll to bottom

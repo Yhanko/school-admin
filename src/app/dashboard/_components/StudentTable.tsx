@@ -3,8 +3,17 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
 
-export function StudentTable ({ payments = [] }: { payments?: any[] }) {
-  const getInitials = (name: string) => {
+interface DashboardPaymentItem {
+  id?: string;
+  type?: string;
+  student?: { name?: string };
+  amount?: number;
+  status?: string;
+  createdAt?: string;
+}
+
+export function StudentTable ({ payments = [] }: { payments?: DashboardPaymentItem[] }) {
+  const getInitials = (name?: string) => {
     return name ? name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() : 'N/A';
   };
 
@@ -30,7 +39,7 @@ export function StudentTable ({ payments = [] }: { payments?: any[] }) {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-sm text-blue-600 font-medium">{payment.id.split('-')[0]}</span>
+                    <span className="text-sm text-blue-600 font-medium">{payment.id ? payment.id.split('-')[0] : 'N/A'}</span>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center">

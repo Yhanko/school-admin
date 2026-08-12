@@ -1,21 +1,21 @@
 "use client"
-import { useState } from "react";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Phone, Mail, MoreHorizontal } from "@/lib/icons";
-import Link from "next/link";
-import { StudentFullProfile } from "@/types/academic-history";
+import { MoreHorizontal } from "@/lib/icons";
 
 
-interface Student {
+export interface Student {
   id: string;
   name: string;
+  studentNumber?: string;
   date: string;
   parentName: string;
+  parentEmail?: string;
+  parentPhone?: string;
   city: string;
   grade: string;
   gradeColor: string;

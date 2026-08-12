@@ -50,8 +50,9 @@ const AddNewTeacher: React.FC = () => {
               firstName: '', lastName: '', email: '', phone: '', address: '',
               city: '', university: '', degree: '', educationPeriod: ''
           });
-      } catch (error: any) {
-          toast({ title: 'Erro', description: error.response?.data?.message || 'Falha ao criar professor', variant: 'destructive' });
+      } catch (error) {
+          const err = error as { response?: { data?: { message?: string } } };
+          toast({ title: 'Erro', description: err.response?.data?.message || 'Falha ao criar professor', variant: 'destructive' });
       } finally {
           setIsLoading(false);
       }

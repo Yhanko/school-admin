@@ -2,7 +2,7 @@
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import {StudentRow} from "./studentRow";
+import { StudentRow, Student } from "./studentRow";
 import { useState, useEffect } from "react";
 import { Modal } from "./modal";
 import { Button } from "@/components/ui/button";
@@ -13,20 +13,26 @@ import { StudentFullProfile } from "@/types/academic-history";
 import axiosInstance from "@/service/api";
 import { Loader2 } from "lucide-react";
 
-interface Student {
+interface ApiStudentUser {
   id: string;
   name: string;
-  date: string;
-  parentName: string;
-  parentEmail: string;
-  parentPhone: string;
-  city: string;
-  grade: string;
-  gradeColor: string;
-  phone: string;
-  email: string;
-  studentNumber: string;
-  isSelected: boolean;
+  createdAt: string;
+  phone?: string;
+  email?: string;
+  parent?: {
+    name?: string;
+    email?: string;
+    employeeProfile?: {
+      phone?: string;
+    };
+  };
+  code?: string;
+  enrollments?: Array<{
+    class: {
+      grade: string;
+      name: string;
+    };
+  }>;
 }
 
 // Remove static students mock
@@ -56,7 +62,7 @@ export function StudentTable ({ refreshKey, activeSearch }: { refreshKey?: numbe
     async function fetchStudents() {
       try {
         const response = await axiosInstance.get('/users?role=STUDENT');
-        const apiStudents = response.data.map((user: any) => ({
+        const apiStudents = response.data.map((user: ApiStudentUser) => ({
           id: user.id,
           name: user.name,
           date: new Date(user.createdAt).toLocaleDateString(),
@@ -65,7 +71,7 @@ export function StudentTable ({ refreshKey, activeSearch }: { refreshKey?: numbe
           parentPhone: user.parent?.employeeProfile?.phone || "N/A",
           studentNumber: user.code || "N/A",
           city: "Luanda", // TODO: Update based on entity
-          grade: user.enrollments?.length > 0 
+          grade: (user.enrollments && user.enrollments.length > 0 && user.enrollments[0].class)
             ? `${user.enrollments[0].class.grade} - ${user.enrollments[0].class.name}` 
             : "N/A",
           gradeColor: "bg-[#FF5777]",

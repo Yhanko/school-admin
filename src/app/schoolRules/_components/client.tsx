@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -58,24 +58,25 @@ export function RegulationsClient() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const fetchRegulations = async () => {
+  const fetchRegulations = useCallback(async () => {
     try {
       const response = await axiosInstance.get('/regulations');
       setRegulations(response.data);
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as { response?: { data?: { message?: string } } };
       toast({
         title: 'Erro',
-        description: error.response?.data?.message || 'Falha ao carregar regulamentos',
+        description: err.response?.data?.message || 'Falha ao carregar regulamentos',
         variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     fetchRegulations();
-  }, []);
+  }, [fetchRegulations]);
 
   const shareOptions = [
     { icon: Users, label: 'Encarregados de Educação', color: 'text-blue-600' },
@@ -92,10 +93,11 @@ export function RegulationsClient() {
       await axiosInstance.delete(`/regulations/${id}`);
       toast({ title: 'Sucesso', description: 'Regulamento apagado com sucesso.' });
       setRegulations(regulations.filter(r => r.id !== id));
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as { response?: { data?: { message?: string } } };
       toast({
         title: 'Erro',
-        description: error.response?.data?.message || 'Falha ao apagar regulamento',
+        description: err.response?.data?.message || 'Falha ao apagar regulamento',
         variant: 'destructive',
       });
     } finally {
@@ -107,7 +109,7 @@ export function RegulationsClient() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const payload: any = {
+      const payload: Record<string, unknown> = {
         title: newRule.title,
         description: newRule.description,
         status: 'PUBLISHED'
@@ -122,7 +124,7 @@ export function RegulationsClient() {
       setIsCreateModalOpen(false);
       setNewRule({ title: '', description: '', content: '', fileUrl: '' });
       
-      let sentToText = [];
+      const sentToText: string[] = [];
       if (sendTo.students) sentToText.push('Alunos');
       if (sendTo.parents) sentToText.push('Encarregados');
       if (sendTo.teachers) sentToText.push('Professores');
@@ -133,8 +135,9 @@ export function RegulationsClient() {
 
       toast({ title: 'Sucesso', description: 'Regulamento criado com sucesso.' + sentMessage });
       setSendTo({ students: false, parents: false, teachers: false });
-    } catch (error: any) {
-      toast({ title: 'Erro', description: error.response?.data?.message || 'Falha ao criar regulamento', variant: 'destructive' });
+    } catch (error) {
+      const err = error as { response?: { data?: { message?: string } } };
+      toast({ title: 'Erro', description: err.response?.data?.message || 'Falha ao criar regulamento', variant: 'destructive' });
     } finally {
       setIsSubmitting(false);
     }
@@ -145,12 +148,10 @@ export function RegulationsClient() {
       window.open(regulation.fileUrl, '_blank');
       return;
     }
-
+    
     const doc = new jsPDF();
-    
-    doc.setFontSize(20);
-    doc.text(regulation.title, 14, 22);
-    
+    doc.setFontSize(16);
+    doc.text(regulation.title, 14, 20);
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
     doc.text(`Data de Criação: ${new Date(regulation.createdAt).toLocaleDateString('pt-PT')}`, 14, 30);
@@ -205,10 +206,11 @@ export function RegulationsClient() {
       setNewRule({ ...newRule, title: titleWithoutExt, fileUrl: uploadedUrl });
       setIsCreateModalOpen(true);
       toast({ title: 'Upload Concluído', description: `O arquivo "${file.name}" foi enviado com sucesso para o Cloudinary.` });
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as { response?: { data?: { message?: string } } };
       toast({ 
         title: 'Erro de Upload', 
-        description: error.response?.data?.message || 'Falha ao fazer o upload do ficheiro. Verifique se as chaves do Cloudinary estão configuradas no backend.', 
+        description: err.response?.data?.message || 'Falha ao fazer o upload do ficheiro. Verifique se as chaves do Cloudinary estão configuradas no backend.', 
         variant: 'destructive' 
       });
     } finally {

@@ -10,15 +10,25 @@ import {
   MoreVertical,
   Loader2
 } from "@/lib/icons";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axiosInstance from "@/service/api";
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
+interface PaymentData {
+  id?: string;
+  student?: { name?: string };
+  type?: string;
+  amount?: number;
+  status?: string;
+  paymentDate?: string;
+  createdAt?: string;
+}
+
 export default function Payments() {
   const { toast } = useToast();
-  const [payments, setPayments] = useState<any[]>([]);
+  const [payments, setPayments] = useState<PaymentData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -34,11 +44,7 @@ export default function Payments() {
     }
   };
 
-  useEffect(() => {
-    fetchPayments();
-  }, []);
-
-  const fetchPayments = async () => {
+  const fetchPayments = useCallback(async () => {
     try {
       const response = await axiosInstance.get('/finance/payments');
       setPayments(response.data.data || response.data || []);
@@ -48,7 +54,11 @@ export default function Payments() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchPayments();
+  }, [fetchPayments]);
 
   const getStatusBadge = (status: string) => {
     // A API usa: 'confirmed', 'pending', 'cancelled'
@@ -93,10 +103,10 @@ export default function Payments() {
   }
 
   // Calculate stats dynamically
-  const totalAmount = payments.reduce((acc, curr) => acc + curr.amount, 0);
-  const paidAmount = payments.filter(p => p.status === 'confirmed').reduce((acc, curr) => acc + curr.amount, 0);
-  const pendingAmount = payments.filter(p => p.status === 'pending').reduce((acc, curr) => acc + curr.amount, 0);
-  const cancelledAmount = payments.filter(p => p.status === 'cancelled').reduce((acc, curr) => acc + curr.amount, 0);
+  const totalAmount = payments.reduce((acc, curr) => acc + (curr.amount || 0), 0);
+  const paidAmount = payments.filter(p => p.status === 'confirmed').reduce((acc, curr) => acc + (curr.amount || 0), 0);
+  const pendingAmount = payments.filter(p => p.status === 'pending').reduce((acc, curr) => acc + (curr.amount || 0), 0);
+  const cancelledAmount = payments.filter(p => p.status === 'cancelled').reduce((acc, curr) => acc + (curr.amount || 0), 0);
   
   const paidRate = totalAmount ? (paidAmount / totalAmount) * 100 : 0;
   const pendingRate = totalAmount ? (pendingAmount / totalAmount) * 100 : 0;
@@ -132,14 +142,14 @@ export default function Payments() {
       let currentY = 80;
 
       // Helper para desenhar tabelas
-      const drawTable = (title: string, data: any[], startY: number) => {
+      const drawTable = (title: string, data: PaymentData[], startY: number) => {
         doc.setFontSize(12);
         doc.text(title, 14, startY);
         
         const tableData = data.map(payment => [
           payment.student?.name || 'Desconhecido',
-          payment.type,
-          `${payment.amount.toLocaleString()} Kz`,
+          payment.type || '',
+          `${(payment.amount || 0).toLocaleString()} Kz`,
           payment.status === 'confirmed' ? 'Pago' : payment.status === 'pending' ? 'Pendente' : 'Cancelado',
           payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString() : "-"
         ]);
@@ -152,7 +162,7 @@ export default function Payments() {
           headStyles: { fillColor: [74, 71, 245] },
         });
         
-        return (doc as any).lastAutoTable.finalY + 15;
+        return (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 15;
       };
 
       const confirmedList = payments.filter(p => p.status === 'confirmed');
@@ -166,7 +176,7 @@ export default function Payments() {
         currentY = drawTable("2. Pagamentos Pendentes", pendingList, currentY);
       }
       if (cancelledList.length > 0) {
-        currentY = drawTable("3. Pagamentos em Atraso / Cancelados", cancelledList, currentY);
+        drawTable("3. Pagamentos em Atraso / Cancelados", cancelledList, currentY);
       }
 
       doc.save("Relatorio_Pagamentos.pdf");
@@ -327,9 +337,9 @@ export default function Payments() {
                       <td className="py-3 px-4 font-medium text-foreground">{payment.student?.name || 'Desconhecido'}</td>
                       <td className="py-3 px-4 text-muted-foreground">{payment.type}</td>
                       <td className="py-3 px-4 text-right font-semibold text-foreground">
-                        {payment.amount.toLocaleString()} Kz
+                        {(payment.amount || 0).toLocaleString()} Kz
                       </td>
-                      <td className="py-3 px-4">{getStatusBadge(payment.status)}</td>
+                      <td className="py-3 px-4">{getStatusBadge(payment.status || "")}</td>
                       <td className="py-3 px-4 text-muted-foreground">
                         {payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString() : "-"}
                       </td>

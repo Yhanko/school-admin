@@ -18,7 +18,7 @@ export function NewTeacher() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [classes, setClasses] = useState<any[]>([]);
+  const [classes, setClasses] = useState<{ id: string; name: string; academicLevel?: string; grade?: string }[]>([]);
   
   const [formData, setFormData] = useState({
       firstName: '',
@@ -80,8 +80,9 @@ export function NewTeacher() {
           setTimeout(() => {
               window.location.reload();
           }, 1000);
-      } catch (error: any) {
-          toast({ title: 'Erro', description: error.response?.data?.message || 'Falha ao criar professor', variant: 'destructive' });
+      } catch (error) {
+          const err = error as { response?: { data?: { message?: string } } };
+          toast({ title: 'Erro', description: err.response?.data?.message || 'Falha ao criar professor', variant: 'destructive' });
       } finally {
           setIsLoading(false);
       }

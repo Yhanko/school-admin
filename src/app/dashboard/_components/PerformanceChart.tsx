@@ -6,8 +6,23 @@ import { ApexOptions } from "apexcharts";
 
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
-export function PerformanceChart({ report }: { report?: any }) {
-  const categories = report?.monthlyPerformance?.map((m: any) => m.month) || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+interface MonthlyPerf {
+  month?: string;
+  attendance?: number;
+  grade?: number;
+}
+
+export interface PerformanceReport {
+  monthlyPerformance?: MonthlyPerf[];
+  overview?: {
+    attendanceRate?: number;
+    averageGrade?: number;
+    totalStudents?: number;
+  };
+}
+
+export function PerformanceChart({ report }: { report?: PerformanceReport | null }) {
+  const categories = report?.monthlyPerformance?.map((m: MonthlyPerf) => m.month) || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   
   const chartOptions: ApexOptions = {
     chart: {
@@ -69,8 +84,8 @@ export function PerformanceChart({ report }: { report?: any }) {
     }
   }
 
-  const attData = report?.monthlyPerformance?.map((m: any) => m.attendance) || [65, 75, 70, 80, 85, 75, 90, 85, 95, 90, 100, 95];
-  const gradeData = report?.monthlyPerformance?.map((m: any) => m.grade) || [55, 65, 60, 70, 75, 65, 80, 75, 85, 80, 90, 85];
+  const attData = report?.monthlyPerformance?.map((m: MonthlyPerf) => m.attendance ?? 0) || [65, 75, 70, 80, 85, 75, 90, 85, 95, 90, 100, 95];
+  const gradeData = report?.monthlyPerformance?.map((m: MonthlyPerf) => m.grade ?? 0) || [55, 65, 60, 70, 75, 65, 80, 75, 85, 80, 90, 85];
 
   const chartSeries = [
     {

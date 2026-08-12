@@ -82,8 +82,9 @@ function ChangeAssociationContent() {
 
         toast({ title: 'Sucesso', description: 'Membro atualizado com sucesso!' });
         router.push('/association');
-    } catch (error: any) {
-        toast({ title: 'Erro', description: error.response?.data?.message || 'Falha ao atualizar membro', variant: 'destructive' });
+    } catch (error) {
+        const err = error as { response?: { data?: { message?: string } } };
+        toast({ title: 'Erro', description: err.response?.data?.message || 'Falha ao atualizar membro', variant: 'destructive' });
     } finally {
         setIsLoading(false);
     }

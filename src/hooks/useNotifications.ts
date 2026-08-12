@@ -32,7 +32,7 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
     try {
       const response = await axiosInstance.get('/notifications');
       
-      const mappedNotifications = response.data.map((notification: any) => ({
+      const mappedNotifications = response.data.map((notification: Notification) => ({
         id: notification.id,
         title: notification.title,
         description: notification.description,
@@ -43,7 +43,7 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
       }));
 
       // Ordenar por data decrescente
-      mappedNotifications.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      mappedNotifications.sort((a: Notification, b: Notification) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       
       const unreadCount = mappedNotifications.filter((msg: Notification) => !msg.isRead).length;
       const totalPages = Math.ceil(mappedNotifications.length / get().notificationsPerPage);
@@ -61,7 +61,7 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
         page: safePage,
         isLoading: false,
       });
-    } catch (error) {
+    } catch {
       set({ isLoading: false, error: 'Falha ao carregar notificações' });
     }
   },

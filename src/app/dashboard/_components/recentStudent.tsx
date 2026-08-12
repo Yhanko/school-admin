@@ -3,7 +3,15 @@ import { Plus, Mail } from "@/lib/icons";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-export function RecentStudents ({ students = [] }: { students?: any[] }) {
+interface StudentItem {
+  id?: string;
+  name?: string;
+  code?: string;
+  email?: string;
+  enrollments?: { class?: { grade?: string; name?: string } }[];
+}
+
+export function RecentStudents ({ students = [] }: { students?: StudentItem[] }) {
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('');
   };
@@ -24,7 +32,7 @@ export function RecentStudents ({ students = [] }: { students?: any[] }) {
           <div key={index} className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-purple-200 rounded-full flex items-center justify-center">
-                <span className="text-purple-700 font-medium text-sm">{getInitials(student.name)}</span>
+                <span className="text-purple-700 font-medium text-sm">{getInitials(student.name || "?")}</span>
               </div>
               <div>
                 <p className="font-medium text-gray-900 text-sm">{student.name}</p>

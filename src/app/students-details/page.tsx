@@ -16,7 +16,7 @@ import { Loader2 } from "@/lib/icons";
 function StudentDetailsContent() {
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
-  const [student, setStudent] = useState<any>(null);
+  const [student, setStudent] = useState<typeof mockStudent | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -39,7 +39,7 @@ function StudentDetailsContent() {
           academicYear: '2024/2025',
           class: user.profile?.class || 'N/D',
           course: user.profile?.course || 'N/D',
-          status: 'ativo',
+          status: 'ativo' as const,
           enrollmentDate: new Date(user.createdAt).toISOString().split('T')[0],
           dateOfBirth: user.profile?.dateOfBirth || 'N/D',
           guardian: {

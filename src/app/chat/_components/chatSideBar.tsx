@@ -1,7 +1,6 @@
 "use client"
 import { Search, Loader2 } from "@/lib/icons";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import axiosInstance from "@/service/api";
 import { ChatUser } from "../page";

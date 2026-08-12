@@ -2,12 +2,8 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Modal } from "./modal";
 import {
-  Plus,
-  User,
   FileText,
-  Upload,
   Check,
-  AlertCircle,
   ChevronRight,
   Eye,
   EyeOff
@@ -71,7 +67,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [availableClasses, setAvailableClasses] = useState<any[]>([]);
+  const [availableClasses, setAvailableClasses] = useState<{ id: string; name: string; academicLevel?: string; grade?: string; roomName?: string }[]>([]);
   const [formData, setFormData] = useState<StudentFormData>({
     studentNumber: "",
     firstName: "",
@@ -108,10 +104,6 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
     previousSchool: "",
     previousClass: "",
   });
-
-  const [submittedStudents, setSubmittedStudents] = useState<
-    Array<{ id: string; name: string; level: string; date: string }>
-  >([]);
 
   useEffect(() => {
     if (isOpen) {
@@ -152,7 +144,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-      const response = await axiosInstance.post('/users/student', {
+      await axiosInstance.post('/users/student', {
         name: `${formData.firstName} ${formData.lastName}`,
         studentNumber: formData.studentNumber || undefined,
         email: formData.email || `student${formData.studentNumber}@school.com`,
@@ -424,7 +416,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
           <label className="text-sm font-medium text-foreground">Classe</label>
           <select
             name="classe"
-            value={(formData as any).classe || ""}
+            value={formData.classe || ""}
             onChange={handleInputChange}
             className="border border-border rounded-lg p-2"
           >

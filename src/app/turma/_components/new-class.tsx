@@ -43,7 +43,7 @@ export function NewClass() {
       capacity: 35,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [rooms, setRooms] = useState<any[]>([]);
+  const [rooms, setRooms] = useState<{ id: string; name: string }[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {

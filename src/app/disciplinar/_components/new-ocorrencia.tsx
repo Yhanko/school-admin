@@ -60,23 +60,24 @@ export function NewOccurrence({ onCreated }: { onCreated?: () => void }) {
     });
 
     useEffect(() => {
-        if (isOpen) {
-            fetchStudents();
-        }
-    }, [isOpen]);
+        if (!isOpen) return;
 
-    const fetchStudents = async () => {
-        try {
-            const response = await axiosInstance.get('/users?role=STUDENT');
-            setStudents(response.data);
-            if (response.data.length > 0 && !formData.studentId) {
-                setFormData(prev => ({ ...prev, studentId: response.data[0].id }));
+        const fetchStudents = async () => {
+            try {
+                const response = await axiosInstance.get('/users?role=STUDENT');
+                setStudents(response.data);
+                if (response.data.length > 0 && !formData.studentId) {
+                    setFormData(prev => ({ ...prev, studentId: response.data[0].id }));
+                }
+            } catch (error) {
+                console.error("Failed to fetch students", error);
+                toast({ title: 'Erro', description: 'Não foi possível carregar os alunos.', variant: 'destructive' });
             }
-        } catch (error) {
-            console.error("Failed to fetch students", error);
-            toast({ title: 'Erro', description: 'Não foi possível carregar os alunos.', variant: 'destructive' });
-        }
-    };
+        };
+
+        fetchStudents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen, toast]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -96,8 +97,9 @@ export function NewOccurrence({ onCreated }: { onCreated?: () => void }) {
             setIsOpen(false);
             setFormData({ studentId: '', severity: 'LOW', description: '', status: 'PENDING', type: "", date: new Date().toISOString().split('T')[0] });
             if (onCreated) onCreated();
-        } catch (error: any) {
-            toast({ title: 'Erro', description: error.response?.data?.message || 'Falha ao criar ocorrência.', variant: 'destructive' });
+        } catch (error) {
+            const err = error as { response?: { data?: { message?: string } } };
+            toast({ title: 'Erro', description: err.response?.data?.message || 'Falha ao criar ocorrência.', variant: 'destructive' });
         } finally {
             setIsSubmitting(false);
         }

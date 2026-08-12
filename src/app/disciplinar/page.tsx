@@ -59,8 +59,9 @@ export default function Deicipline() {
           await axiosInstance.delete(`/disciplinary/${id}`);
           toast({ title: 'Sucesso', description: 'Ocorrência apagada com sucesso.' });
           fetchIncidents();
-      } catch (error: any) {
-          toast({ title: 'Erro', description: error.response?.data?.message || 'Falha ao apagar ocorrência.', variant: 'destructive' });
+      } catch (error) {
+          const err = error as { response?: { data?: { message?: string } } };
+          toast({ title: 'Erro', description: err.response?.data?.message || 'Falha ao apagar ocorrência.', variant: 'destructive' });
       }
   };
 
@@ -68,8 +69,9 @@ export default function Deicipline() {
       try {
           const response = await axiosInstance.post(`/disciplinary/${id}/notify`);
           toast({ title: 'Sucesso', description: response.data?.message || 'Notificação enviada com sucesso.' });
-      } catch (error: any) {
-          toast({ title: 'Erro', description: error.response?.data?.message || 'Falha ao notificar encarregado.', variant: 'destructive' });
+      } catch (error) {
+          const err = error as { response?: { data?: { message?: string } } };
+          toast({ title: 'Erro', description: err.response?.data?.message || 'Falha ao notificar encarregado.', variant: 'destructive' });
       }
   };
 
@@ -86,8 +88,9 @@ export default function Deicipline() {
           await axiosInstance.patch(`/disciplinary/${id}/status`, { status: newStatus });
           toast({ title: 'Sucesso', description: 'Status atualizado com sucesso.' });
           fetchIncidents();
-      } catch (error: any) {
-          toast({ title: 'Erro', description: error.response?.data?.message || 'Falha ao atualizar status.', variant: 'destructive' });
+      } catch (error) {
+          const err = error as { response?: { data?: { message?: string } } };
+          toast({ title: 'Erro', description: err.response?.data?.message || 'Falha ao atualizar status.', variant: 'destructive' });
       }
   };
 

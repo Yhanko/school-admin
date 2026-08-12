@@ -5,8 +5,26 @@ import { useEffect, useState } from "react";
 import axiosInstance from "@/service/api";
 import { Loader2 } from "@/lib/icons";
 
+interface TeacherData {
+  name: string;
+  email?: string;
+  createdAt?: string;
+  profile?: {
+    photoUrl?: string;
+    phone?: string;
+    city?: string;
+    biography?: string;
+    qualification?: string;
+  };
+  employeeProfile?: {
+    phone?: string;
+    biography?: string;
+    qualification?: string;
+  };
+}
+
 export function TeacherProfile ({ id }: { id: string | null }) {
-  const [teacher, setTeacher] = useState<any>(null);
+  const [teacher, setTeacher] = useState<TeacherData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -53,6 +71,7 @@ export function TeacherProfile ({ id }: { id: string | null }) {
             {/* Foto do Professor */}
             <div className="w-32 h-32 bg-indigo-100 rounded-full flex items-center justify-center overflow-hidden shrink-0 shadow-sm border-4 border-white">
               {teacher.profile?.photoUrl ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
                 <img src={teacher.profile.photoUrl} alt="Teacher" className="w-full h-full object-cover" />
               ) : (
                 <span className="text-4xl font-bold text-indigo-500">

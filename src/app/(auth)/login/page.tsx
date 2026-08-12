@@ -5,7 +5,6 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from 'next/navigation'
-import { AxiosError } from "axios";
 import axiosInstance from "@/service/api";
 //components
 import { ToastAction } from "@/components/ui/toast";
@@ -50,7 +49,6 @@ const toggleCheck = () => {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
   } = useForm<LoginFormData>({
     resolver: zodResolver( loginSchema),
   });
@@ -91,9 +89,10 @@ const toggleCheck = () => {
         
         router.push("/dashboard");
       }
-    } catch (error: any) {
+    } catch (error) {
       setIsLoading(false);
-      const message = error.response?.data?.message || "Erro ao realizar o login.";
+      const err = error as { response?: { data?: { message?: string } } };
+      const message = err.response?.data?.message || "Erro ao realizar o login.";
         toast({
           description: (
             <div className="flex items-center gap-4 ">

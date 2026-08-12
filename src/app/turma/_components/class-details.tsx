@@ -16,22 +16,22 @@ export function ClassDetails({ classId }: ClassDetailsProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (open) {
-      fetchClassDetails();
-    }
-  }, [open, classId]);
+    if (!open) return;
 
-  const fetchClassDetails = async () => {
-    setIsLoading(true);
-    try {
-      const response = await axiosInstance.get(`/classes/${classId}`);
-      setTurma(response.data);
-    } catch (error) {
-      console.error("Failed to fetch class details", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    const fetchClassDetails = async () => {
+      setIsLoading(true);
+      try {
+        const response = await axiosInstance.get(`/classes/${classId}`);
+        setTurma(response.data);
+      } catch (error) {
+        console.error("Failed to fetch class details", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchClassDetails();
+  }, [open, classId]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

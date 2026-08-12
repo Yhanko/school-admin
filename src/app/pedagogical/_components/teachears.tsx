@@ -3,8 +3,6 @@ import { Phone, Mail, MoreHorizontal } from "@/lib/icons";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import axiosInstance from "@/service/api";
 import { Loader2 } from "@/lib/icons";
@@ -52,7 +50,7 @@ export function Teachears ({ activeSearch }: { activeSearch?: string }) {
     const fetchTeachers = async () => {
       try {
         const response = await axiosInstance.get('/users');
-        const teacherList = response.data.filter((user: any) => user.role === 'TEACHER');
+        const teacherList = response.data.filter((user: { role: string }) => user.role === 'TEACHER');
         console.log("Fetched teachers:", teacherList);
         setTeachers(teacherList);
       } catch (error) {
@@ -104,6 +102,7 @@ export function Teachears ({ activeSearch }: { activeSearch?: string }) {
             <div className="mb-4 cursor-pointer">
               <Avatar className="h-16 w-16 mx-auto">
                 {teacher.profile?.photoUrl ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
                     <img src={teacher.profile.photoUrl} alt={teacher.name} className="object-cover w-full h-full rounded-full" />
                 ) : (
                     <AvatarFallback className="bg-purple-200 text-purple-700 text-lg font-medium">
@@ -165,6 +164,7 @@ export function Teachears ({ activeSearch }: { activeSearch?: string }) {
             <div className="flex items-center gap-4 border-b pb-4">
               <Avatar className="h-20 w-20">
                 {selectedTeacher.profile?.photoUrl ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
                     <img src={selectedTeacher.profile.photoUrl} alt={selectedTeacher.name} className="object-cover w-full h-full rounded-full" />
                 ) : (
                     <AvatarFallback className="bg-purple-200 text-purple-700 text-xl font-medium">

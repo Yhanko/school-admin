@@ -6,7 +6,22 @@ import { BarChart, Bar, XAxis, YAxis } from "recharts";
 import { useMemo } from "react";
 import { format, subDays, isSameDay } from "date-fns";
 
-export function SchoolFinance({ report }: { report?: any }) {
+interface FinanceTransaction {
+  date?: string;
+  status?: string;
+  amount?: number;
+}
+
+export interface FinanceReport {
+  recentTransactions?: FinanceTransaction[];
+  overview?: {
+    totalCollected?: number;
+    collectionRate?: number;
+    totalPending?: number;
+  };
+}
+
+export function SchoolFinance({ report }: { report?: FinanceReport | null }) {
   const financeData = useMemo(() => {
     if (!report || !report.recentTransactions) {
       return Array.from({ length: 7 }).map((_, i) => ({
@@ -18,13 +33,13 @@ export function SchoolFinance({ report }: { report?: any }) {
 
     return Array.from({ length: 7 }).map((_, i) => {
       const date = subDays(new Date(), 6 - i);
-      const dayTransactions = report.recentTransactions.filter((t: any) => 
-        isSameDay(new Date(t.date), date)
+      const dayTransactions = (report.recentTransactions || []).filter((t: FinanceTransaction) => 
+        t.date ? isSameDay(new Date(t.date), date) : false
       );
       
       const income = dayTransactions
-        .filter((t: any) => t.status === 'pago' || t.status === 'confirmed')
-        .reduce((sum: number, t: any) => sum + t.amount, 0);
+        .filter((t: FinanceTransaction) => t.status === 'pago' || t.status === 'confirmed')
+        .reduce((sum: number, t: FinanceTransaction) => sum + (t.amount || 0), 0);
         
       return {
         day: format(date, 'E'),

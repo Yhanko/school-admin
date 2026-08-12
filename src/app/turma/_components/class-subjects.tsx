@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -20,7 +20,7 @@ export function ClassSubjects({ classId, className }: { classId: string, classNa
   const [selectedSubjectId, setSelectedSubjectId] = useState("");
   const [selectedTeacherId, setSelectedTeacherId] = useState("");
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
       const [classSubjectsRes, allSubjectsRes, teachersRes] = await Promise.all([
@@ -41,13 +41,13 @@ export function ClassSubjects({ classId, className }: { classId: string, classNa
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [classId, toast]);
 
   useEffect(() => {
     if (open) {
       fetchData();
     }
-  }, [open, classId]);
+  }, [open, fetchData]);
 
   const handleAssignSubject = async () => {
     if (!selectedSubjectId) {

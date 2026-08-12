@@ -80,7 +80,7 @@ export function RelatoriosPage() {
           autoTable(doc, {
             startY: currentY + 4,
             head: [['ID da Turma', 'Nome', 'Quantidade de Alunos']],
-            body: data.classes.map((c: any) => [
+            body: data.classes.map((c: { classId: string; className: string; studentsCount: number }) => [
               c.classId,
               c.className,
               c.studentsCount
@@ -115,7 +115,7 @@ export function RelatoriosPage() {
           autoTable(doc, {
             startY: currentY + 4,
             head: [['Estudante', 'Tipo', 'Valor (Kz)', 'Status', 'Data']],
-            body: data.recentTransactions.map((t: any) => [
+            body: data.recentTransactions.map((t: { studentName: string; type: string; amount: number; status: string; date: string }) => [
               t.studentName,
               t.type,
               t.amount,

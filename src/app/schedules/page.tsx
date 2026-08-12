@@ -1,8 +1,8 @@
 "use client"
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, Loader2, Calendar, Trash2 } from "@/lib/icons";
+import { Loader2, Calendar, Trash2 } from "@/lib/icons";
 import axiosInstance from "@/service/api";
 import { useToast } from "@/hooks/use-toast";
 import { NewSchedule } from "./_components/new-schedule";
@@ -46,7 +46,7 @@ export default function SchedulesPage() {
       fetchClasses();
   }, []);
 
-  const fetchSchedules = async () => {
+  const fetchSchedules = useCallback(async () => {
       if (!selectedClassId) return;
       setIsLoading(true);
       try {
@@ -58,11 +58,11 @@ export default function SchedulesPage() {
       } finally {
           setIsLoading(false);
       }
-  };
+  }, [selectedClassId]);
 
   useEffect(() => {
       fetchSchedules();
-  }, [selectedClassId]);
+  }, [fetchSchedules]);
 
   const handleDelete = async (id: string) => {
     if (!confirm("Tem a certeza que deseja eliminar este horário?")) return;
@@ -70,7 +70,7 @@ export default function SchedulesPage() {
         await axiosInstance.delete(`/schedules/${id}`);
         toast({ title: "Sucesso", description: "Horário eliminado com sucesso!" });
         fetchSchedules();
-    } catch (error) {
+    } catch {
         toast({ title: "Erro", description: "Falha ao eliminar horário.", variant: "destructive" });
     }
   }

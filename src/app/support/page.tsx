@@ -1,12 +1,19 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from 'react';
 import axiosInstance from '@/service/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
+interface SupportTicket {
+  id: string;
+  title: string;
+  status: string;
+  createdAt: string;
+}
+
 export default function SupportPage() {
-  const [tickets, setTickets] = useState([]);
+  const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -34,7 +41,7 @@ export default function SupportPage() {
       setDescription('');
       fetchTickets();
       alert('Ticket criado com sucesso!');
-    } catch (err) {
+    } catch {
       alert('Erro ao criar ticket.');
     }
   };
@@ -78,7 +85,7 @@ export default function SupportPage() {
               </tr>
             </thead>
             <tbody>
-              {tickets.map((t: any) => (
+              {tickets.map((t: SupportTicket) => (
                 <tr key={t.id} className="border-b last:border-0 hover:bg-slate-50 cursor-pointer">
                   <td className="p-4 font-medium">{t.title}</td>
                   <td className="p-4">

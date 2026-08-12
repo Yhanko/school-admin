@@ -3,9 +3,9 @@ import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "@/lib/icons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isSameDay, isSameMonth } from "date-fns";
+import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isSameDay } from "date-fns";
 
-export function SchoolCalendar({ events = [] }: { events?: any[] }) {
+export function SchoolCalendar({ events = [] }: { events?: { date?: string; title?: string; startDate?: string; createdAt?: string }[] }) {
   const [currentDate, setCurrentDate] = useState(new Date());
   
   const daysOfWeek = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
@@ -21,7 +21,7 @@ export function SchoolCalendar({ events = [] }: { events?: any[] }) {
   const daysInMonth = eachDayOfInterval({ start: startDate, end: endDate });
   const startDayOfWeek = getDay(monthStart);
   
-  const blanks = Array.from({ length: startDayOfWeek }).map((_, i) => null);
+  const blanks = Array.from({ length: startDayOfWeek }).map(() => null);
   const calendarDays = [...blanks, ...daysInMonth];
 
   return (
@@ -52,7 +52,7 @@ export function SchoolCalendar({ events = [] }: { events?: any[] }) {
               return <div key={`blank-${index}`} className="py-2" />;
             }
             
-            const hasEvent = events.some(e => isSameDay(new Date(e.startDate || e.date || e.createdAt), day as Date));
+            const hasEvent = events.some(e => isSameDay(new Date(e.startDate || e.date || e.createdAt || 0), day as Date));
             const isToday = isSameDay(new Date(), day as Date);
 
             return (

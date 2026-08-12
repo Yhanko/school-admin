@@ -3,8 +3,8 @@
 import {SchoolCalendar} from "./school-calendar";
 import {StudentTable} from "./StudentTable";
 import {MessagesWidget} from "./messageWidget";
-import {SchoolFinance} from "./schoolFinance";
-import { PerformanceChart } from "./PerformanceChart";
+import { SchoolFinance, FinanceReport } from "./schoolFinance";
+import { PerformanceChart, PerformanceReport } from "./PerformanceChart";
 import { RecentStudents } from "./recentStudent";
 import { DashboardMetrics } from "./dashboardMetrics";
 import { useEffect, useState } from "react";
@@ -12,13 +12,13 @@ import axiosInstance from "@/service/api";
 import { Loader2 } from "lucide-react";
 
 export function DashboardLayout () {
-  const [students, setStudents] = useState<any[]>([]);
-  const [teachers, setTeachers] = useState<any[]>([]);
-  const [payments, setPayments] = useState<any[]>([]);
-  const [financialReport, setFinancialReport] = useState<any>(null);
-  const [academicReport, setAcademicReport] = useState<any>(null);
-  const [events, setEvents] = useState<any[]>([]);
-  const [inbox, setInbox] = useState<any[]>([]);
+  const [students, setStudents] = useState<Record<string, unknown>[]>([]);
+  const [teachers, setTeachers] = useState<Record<string, unknown>[]>([]);
+  const [payments, setPayments] = useState<Record<string, unknown>[]>([]);
+  const [financialReport, setFinancialReport] = useState<FinanceReport | null>(null);
+  const [academicReport, setAcademicReport] = useState<PerformanceReport | null>(null);
+  const [events, setEvents] = useState<Record<string, unknown>[]>([]);
+  const [inbox, setInbox] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -61,11 +61,11 @@ export function DashboardLayout () {
 
   const totalStudents = students.length;
   const totalTeachers = teachers.length;
-  const confirmedPayments = payments.filter((p: any) => p.status === 'confirmed');
+  const confirmedPayments = payments.filter((p: Record<string, unknown>) => p.status === 'confirmed');
   const totalPayments = confirmedPayments.length;
 
   const recentStudentsList = [...students].reverse().slice(0, 5);
-  const recentPaymentsList = payments.filter((p: any) => p.status === 'pending').slice(0, 5);
+  const recentPaymentsList = payments.filter((p: Record<string, unknown>) => p.status === 'pending').slice(0, 5);
 
   if (loading) {
     return (

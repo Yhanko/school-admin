@@ -6,12 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar, MapPin, Plus, Sparkles, Loader2 } from "@/lib/icons";
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import axiosInstance from "@/service/api";
 
 export default function ChangeEvent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
   
@@ -31,43 +30,41 @@ export default function ChangeEvent() {
   });
 
   useEffect(() => {
-    if (id) {
-      fetchEvent(id);
-    } else {
+    if (!id) {
       setIsLoading(false);
       toast({
         title: "Erro",
         description: "Nenhum ID de evento fornecido.",
         variant: "destructive"
       });
+      return;
     }
-  }, [id]);
 
-  const fetchEvent = async (eventId: string) => {
-    try {
-      const response = await axiosInstance.get(`/events`);
-      const event = response.data.find((e: any) => e.id === eventId);
-      
-      if (event) {
-        setFormData({
-          title: event.title,
-          description: event.description,
-          date: event.date.split('T')[0], // format YYYY-MM-DD
-          location: event.location,
-          type: event.type,
-          organizer: event.organizer,
-          participants: event.participants,
-        });
-      } else {
-        toast({ title: 'Aviso', description: 'Evento não encontrado.', variant: 'destructive' });
+    const fetchEvent = async (eventId: string) => {
+      try {
+        const response = await axiosInstance.get(`/events`);
+        const event = response.data.find((e: { id: string }) => e.id === eventId);
+        
+        if (event) {
+          setFormData({
+            title: event.title,
+            description: event.description,
+            date: event.date.split('T')[0], // format YYYY-MM-DD
+            location: event.location,
+            type: event.type,
+            organizer: event.organizer,
+            participants: event.participants,
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch event", error);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Erro ao buscar evento:", error);
-      toast({ title: 'Erro', description: 'Falha ao buscar evento.', variant: 'destructive' });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    };
+
+    fetchEvent(id);
+  }, [id, toast]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;

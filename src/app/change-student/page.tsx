@@ -128,8 +128,9 @@ function StudentParentFormContent() {
 
         toast({ title: 'Sucesso', description: 'Aluno atualizado com sucesso!' });
         router.push('/student');
-    } catch (error: any) {
-        toast({ title: 'Erro', description: error.response?.data?.message || 'Falha ao atualizar aluno', variant: 'destructive' });
+    } catch (error) {
+        const err = error as { response?: { data?: { message?: string } } };
+        toast({ title: 'Erro', description: err.response?.data?.message || 'Falha ao atualizar aluno', variant: 'destructive' });
     } finally {
         setIsLoading(false);
     }

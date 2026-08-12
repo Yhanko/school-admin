@@ -51,41 +51,41 @@ export function NewSchedule({ onCreated }: { onCreated?: () => void }) {
     });
 
     useEffect(() => {
-        if (isOpen) {
-            fetchFormData();
-        }
-    }, [isOpen]);
+        if (!isOpen) return;
 
-    const fetchFormData = async () => {
-        setIsLoadingData(true);
-        try {
-            const [classesRes, subjectsRes, teachersRes, roomsRes] = await Promise.all([
-                axiosInstance.get('/classes'),
-                axiosInstance.get('/subjects'),
-                axiosInstance.get('/users?role=TEACHER'),
-                axiosInstance.get('/rooms')
-            ]);
-            
-            setClasses(classesRes.data);
-            setSubjects(subjectsRes.data);
-            setTeachers(teachersRes.data);
-            setRooms(roomsRes.data);
+        const fetchFormData = async () => {
+            setIsLoadingData(true);
+            try {
+                const [classesRes, subjectsRes, teachersRes, roomsRes] = await Promise.all([
+                    axiosInstance.get('/classes'),
+                    axiosInstance.get('/subjects'),
+                    axiosInstance.get('/users?role=TEACHER'),
+                    axiosInstance.get('/rooms')
+                ]);
+                
+                setClasses(classesRes.data);
+                setSubjects(subjectsRes.data);
+                setTeachers(teachersRes.data);
+                setRooms(roomsRes.data);
 
-            // Pre-select first items if available
-            setFormData(prev => ({
-                ...prev,
-                classId: prev.classId || (classesRes.data[0]?.id || ''),
-                subjectId: prev.subjectId || (subjectsRes.data[0]?.id || ''),
-                teacherId: prev.teacherId || (teachersRes.data[0]?.id || ''),
-                roomId: prev.roomId || (roomsRes.data[0]?.id || '')
-            }));
-        } catch (error) {
-            console.error("Failed to fetch form data", error);
-            toast({ title: 'Erro', description: 'Não foi possível carregar os dados.', variant: 'destructive' });
-        } finally {
-            setIsLoadingData(false);
-        }
-    };
+                // Pre-select first items if available
+                setFormData(prev => ({
+                    ...prev,
+                    classId: prev.classId || (classesRes.data[0]?.id || ''),
+                    subjectId: prev.subjectId || (subjectsRes.data[0]?.id || ''),
+                    teacherId: prev.teacherId || (teachersRes.data[0]?.id || ''),
+                    roomId: prev.roomId || (roomsRes.data[0]?.id || '')
+                }));
+            } catch (error) {
+                console.error("Failed to fetch form data", error);
+                toast({ title: 'Erro', description: 'Não foi possível carregar os dados.', variant: 'destructive' });
+            } finally {
+                setIsLoadingData(false);
+            }
+        };
+
+        fetchFormData();
+    }, [isOpen, toast]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -100,8 +100,9 @@ export function NewSchedule({ onCreated }: { onCreated?: () => void }) {
             toast({ title: 'Sucesso', description: 'Horário criado com sucesso!' });
             setIsOpen(false);
             if (onCreated) onCreated();
-        } catch (error: any) {
-            toast({ title: 'Erro', description: error.response?.data?.message || 'Falha ao criar horário.', variant: 'destructive' });
+        } catch (error) {
+            const err = error as { response?: { data?: { message?: string } } };
+            toast({ title: 'Erro', description: err.response?.data?.message || 'Falha ao criar horário.', variant: 'destructive' });
         } finally {
             setIsSubmitting(false);
         }

@@ -1,10 +1,9 @@
 "use client"
 
-import { Calendar as CalendarIcon, Plus, ChevronDown, Loader2 } from "@/lib/icons";
+import { Calendar as CalendarIcon, ChevronDown, Loader2 } from "@/lib/icons";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import Link from "next/link";
 import { useState, useEffect } from "react";
 import axiosInstance from "@/service/api";
 import { NewEventModal } from "./new-event";
@@ -46,7 +45,7 @@ const mapTypeToColor = (type: string): 'purple' | 'orange' | 'yellow' | 'blue' =
 }
 
 export function CalendarSchedule() {
-  const [events, setEvents] = useState<any[]>([]);
+  const [events, setEvents] = useState<{ id: string; title: string; description?: string; date: string; time?: string; type?: string }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
@@ -74,8 +73,9 @@ export function CalendarSchedule() {
         await axiosInstance.delete(`/events/${id}`);
         toast({ title: 'Sucesso', description: 'Atividade apagada com sucesso.' });
         fetchEvents();
-    } catch (error: any) {
-        toast({ title: 'Erro', description: error.response?.data?.message || 'Falha ao apagar.', variant: 'destructive' });
+    } catch (error) {
+        const err = error as { response?: { data?: { message?: string } } };
+        toast({ title: 'Erro', description: err.response?.data?.message || 'Falha ao apagar.', variant: 'destructive' });
     }
   };
 
@@ -86,7 +86,7 @@ export function CalendarSchedule() {
   };
 
   const getFirstDayOfMonth = (year: number, month: number) => {
-      let day = new Date(year, month, 1).getDay();
+      const day = new Date(year, month, 1).getDay();
       // Adjust to make Monday 0 instead of Sunday 0
       return day === 0 ? 6 : day - 1; 
   };
@@ -101,10 +101,10 @@ export function CalendarSchedule() {
       return {
           id: e.id,
           title: e.title,
-          subject: e.description || e.type,
+          subject: e.description || e.type || "Geral",
           date: d.toLocaleDateString('pt-BR', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' }),
           time: "All day", // Simplified as we only have date right now
-          color: mapTypeToColor(e.type)
+          color: mapTypeToColor(e.type || "")
       };
   });
 
@@ -198,8 +198,6 @@ export function CalendarSchedule() {
                                  eDate.getUTCFullYear() === currentDate.getFullYear();
                       }) : [];
 
-                      const hasEvents = dayEvents.length > 0;
-                      
                       return (
                         <div
                           key={i}

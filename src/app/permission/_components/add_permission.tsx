@@ -79,11 +79,12 @@ export function AddNewUserPermission({ onCreated }: { onCreated?: () => void }) 
       if (onCreated) {
         onCreated();
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error(error);
+      const err = error as { response?: { data?: { message?: string } } };
       toast({
         title: "Erro",
-        description: error.response?.data?.message || "Ocorreu um erro ao criar o utilizador.",
+        description: err.response?.data?.message || "Ocorreu um erro ao criar o utilizador.",
         variant: "destructive"
       });
     } finally {

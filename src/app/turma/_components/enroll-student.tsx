@@ -23,7 +23,7 @@ interface EnrollStudentProps {
 
 export function EnrollStudent({ classId, className, onSuccess }: EnrollStudentProps) {
     const [open, setOpen] = useState(false);
-    const [students, setStudents] = useState<any[]>([]);
+    const [students, setStudents] = useState<{ id: string; name: string }[]>([]);
     const [selectedStudent, setSelectedStudent] = useState<string>("");
     const [loading, setLoading] = useState(false);
     const [fetchingStudents, setFetchingStudents] = useState(false);
@@ -60,8 +60,9 @@ export function EnrollStudent({ classId, className, onSuccess }: EnrollStudentPr
             setOpen(false);
             setSelectedStudent("");
             onSuccess();
-        } catch (error: any) {
-            const message = error.response?.data?.message || "Ocorreu um erro ao matricular o aluno.";
+        } catch (error) {
+            const err = error as { response?: { data?: { message?: string } } };
+            const message = err.response?.data?.message || "Ocorreu um erro ao matricular o aluno.";
             toast({ title: "Erro", description: message, variant: "destructive" });
         } finally {
             setLoading(false);

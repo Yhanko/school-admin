@@ -3,11 +3,8 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  Lock,
-  Unlock,
   Search,
   Download,
-  Edit,
   Trash2,
   Eye,
   EyeOff,
@@ -18,10 +15,19 @@ import {
 import { AddNewUserPermission } from "./_components/add_permission";
 import axiosInstance from "@/service/api";
 import { useToast } from "@/hooks/use-toast";
+import { useCallback } from "react";
+
+interface UserPermissionItem {
+  id: string;
+  name: string;
+  email?: string;
+  role: string;
+  userPermission?: Record<string, boolean>;
+}
 
 export default function Permission(){
   const { toast } = useToast();
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<UserPermissionItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showPermissionDetails, setShowPermissionDetails] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -37,11 +43,7 @@ export default function Permission(){
     }
   };
 
-  useEffect(() => {
-    fetchPermissions();
-  }, []);
-
-  const fetchPermissions = async () => {
+  const fetchPermissions = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await axiosInstance.get('/permissions');
@@ -53,7 +55,11 @@ export default function Permission(){
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchPermissions();
+  }, [fetchPermissions]);
 
   const permissionLabels: Record<string, string> = {
     dashboard: "Dashboard",
@@ -89,18 +95,17 @@ export default function Permission(){
         [permission]: !currentValue
       });
       toast({ title: 'Sucesso', description: 'Permissão atualizada.' });
-    } catch (error) {
+    } catch {
       // Reverter em caso de erro
       fetchPermissions();
       toast({ title: 'Erro', description: 'Falha ao atualizar permissão', variant: 'destructive' });
     }
   };
 
-  const countPermissions = (permissions: any) => {
+  const countPermissions = (permissions: Record<string, unknown> | null | undefined) => {
     if (!permissions) return 0;
-    // Removemos id, userId, createdAt, updatedAt da contagem
-    const { id, userId, createdAt, updatedAt, ...rest } = permissions;
-    return Object.values(rest).filter(Boolean).length;
+    const ignoredKeys = new Set(['id', 'userId', 'createdAt', 'updatedAt']);
+    return Object.entries(permissions).filter(([key, val]) => !ignoredKeys.has(key) && Boolean(val)).length;
   };
 
   const getRoleColor = (role: string) => {

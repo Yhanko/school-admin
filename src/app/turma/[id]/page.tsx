@@ -1,17 +1,42 @@
 "use client"
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowLeft, Users, BookOpen, Clock, MapPin, GraduationCap } from "lucide-react";
 import axiosInstance from "@/service/api";
+
+interface ClassSubject {
+  id: string;
+  subject?: { name: string };
+  teacher?: { name: string };
+}
+
+interface StudentInClass {
+  id: string;
+  name: string;
+  profile?: { studentNumber?: string };
+}
+
+interface TurmaData {
+  name: string;
+  academicLevel?: string;
+  capacity?: number;
+  period?: string;
+  roomName?: string;
+  room?: { name: string } | string;
+  grade?: string;
+  course?: string;
+  students?: StudentInClass[];
+  classSubjects?: ClassSubject[];
+}
 
 export default function TurmaDetails() {
   const params = useParams();
   const id = params.id as string;
   const router = useRouter();
   
-  const [turma, setTurma] = useState<any>(null);
+  const [turma, setTurma] = useState<TurmaData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -105,7 +130,7 @@ export default function TurmaDetails() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Sala</p>
-                <p className="font-semibold">{turma.roomName || turma.room?.name || turma.room || 'Sem sala'}</p>
+                <p className="font-semibold">{turma.roomName || (typeof turma.room === 'object' ? turma.room?.name : turma.room) || 'Sem sala'}</p>
               </div>
             </div>
 
@@ -142,7 +167,7 @@ export default function TurmaDetails() {
               </h3>
               {turma.classSubjects && turma.classSubjects.length > 0 ? (
                 <ul className="space-y-3">
-                  {turma.classSubjects.map((cs: any) => (
+                  {turma.classSubjects.map((cs: ClassSubject) => (
                     <li key={cs.id} className="p-4 border rounded-lg flex justify-between items-center bg-gray-50">
                       <span className="font-semibold">{cs.subject?.name || 'Disciplina Desconhecida'}</span>
                       <span className="text-sm text-muted-foreground bg-white px-3 py-1 rounded-full border">
@@ -163,7 +188,7 @@ export default function TurmaDetails() {
               </h3>
               {turma.students && turma.students.length > 0 ? (
                 <ul className="space-y-3">
-                  {turma.students.map((student: any) => (
+                  {turma.students.map((student: StudentInClass) => (
                     <li key={student.id} className="p-4 border rounded-lg flex justify-between items-center bg-gray-50">
                       <span className="font-semibold">{student.name}</span>
                       <span className="text-sm text-muted-foreground">

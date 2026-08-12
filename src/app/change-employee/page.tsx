@@ -91,8 +91,9 @@ const ChangeEmployeeContent = () => {
 
           toast({ title: 'Sucesso', description: 'Funcionário atualizado com sucesso!' });
           router.push('/employees');
-      } catch (error: any) {
-          toast({ title: 'Erro', description: error.response?.data?.message || 'Falha ao atualizar funcionário', variant: 'destructive' });
+      } catch (error) {
+          const err = error as { response?: { data?: { message?: string } } };
+          toast({ title: 'Erro', description: err.response?.data?.message || 'Falha ao atualizar funcionário', variant: 'destructive' });
       } finally {
           setIsLoading(false);
       }
