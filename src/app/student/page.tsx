@@ -15,12 +15,13 @@ const Student = () => {
   };
 
   return (
-    <section className="pt-4">
-      <div className="pl-4">
-        <h1 className="text-3xl font-bold text-foreground mb-2">Estudantes</h1>
-        <p className="text-muted-foreground">Visualize e gerencie estudantes da instituição</p>
+    <section className="w-full space-y-4">
+      <div className="px-2 sm:px-4">
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">Estudantes</h1>
+        <p className="text-xs sm:text-sm text-gray-500 mt-1">Visualize e gerencie todos os estudantes matriculados na instituição</p>
       </div>
-      <div className="flex flex-col items-center justify-center">
+      
+      <div className="w-full space-y-4">
         <SearchBar 
           onNewStudentClick={() => setIsNewStudentModalOpen(true)}
           searchTerm={searchTerm}
@@ -42,4 +43,4 @@ const Student = () => {
   );
 };
 
-export default Student
+export default Student;

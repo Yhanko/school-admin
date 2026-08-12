@@ -18,7 +18,6 @@ import EyesOff from "../../../assets/eye-off.svg";
 import { GrFormCheckmark, Loader2, AiOutlineClose } from "@/lib/icons";
 import RequestError from "../../../assets/ErroDeResposta.svg";
 import RoundedIcon from "../../../assets/roundedIcon.svg";
-import YhankoIMG from "../../../assets/yhankoIMG.svg";
 // Hook
 import { useAuth } from "@/store/useAuth";
 import { useToast } from "@/hooks/use-toast";

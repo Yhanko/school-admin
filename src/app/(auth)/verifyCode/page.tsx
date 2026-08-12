@@ -1,10 +1,8 @@
 "use client";
 
-//componentes
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
-//configurações
 import axiosInstance from "@/service/api"; 
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
@@ -12,32 +10,29 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState } from "react";
-import { useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { AxiosError } from "axios";
-//imagens e icones
 import { Loader2 } from "lucide-react";
 import { AiOutlineClose } from "@/lib/icons";
 import RequestError from "../../../assets/ErroDeResposta.svg";
 import YhankoIMG from "../../../assets/yhankoIMG.svg";
-//Hooks
 import { useEntityStore } from "@/hooks/useEntityStore";
 
 const verificationSchema = z.object({
   code: z
     .string({
       required_error: "O código de verificação é obrigatório",
-      invalid_type_error: "O código deve ser um número",
     })
-    .min(4, "O código deve ter pelo menos 6 dígitos"),
+    .min(4, "O código deve ter pelo menos 4 dígitos"),
 });
 
-// Tipo inferido do schema do Zod
 type LoginFormData = z.infer<typeof verificationSchema>;
 
 export default function VerifyCode() {
-  const {entidade} = useEntityStore()
+  const { entidade } = useEntityStore();
   const { toast } = useToast();
-  const router = useRouter()
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
   const {
@@ -48,39 +43,34 @@ export default function VerifyCode() {
   } = useForm<LoginFormData>({
     resolver: zodResolver(verificationSchema),
   });
-  
-  function goTo(){
-    router.push("/newPassword")
-  }
-  
+
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true); 
     const responseBody = {
       codigo_seguranca: data.code,
       entidade: entidade
-    }
+    };
     try {
       const response = await axiosInstance.post("clientes/codigo-seguranca/redifinir", responseBody);
-  
+      setIsLoading(false);
+
       if (response.status === 202) {
         reset();
         router.push("/newPassword"); 
       } 
     } catch (error: unknown) {
       setIsLoading(false); 
-      
       if (error instanceof AxiosError) {
         toast({
           description: (
-            <div className="flex items-center gap-4 ">
-              <div className="rounded-full w-8 h-8 flex justify-center items-center bg-[fill: rgba(251, 55, 72, 0.16)]">
-                <Image src={RequestError} alt="icon"  />
+            <div className="flex items-center gap-3">
+              <div className="rounded-full w-8 h-8 flex justify-center items-center shrink-0 bg-red-100">
+                <Image src={RequestError} alt="erro" width={24} height={24} />
               </div>
-              
-              <span className="text-[#717F96]">{error?.response?.data.mensagem}</span>
+              <span className="text-[#717F96] text-sm">{error?.response?.data.mensagem}</span>
             </div>
           ),
-          action: <ToastAction altText="close" className="shadow-none border-none text-[#717F96] hover:bg-transparent"><AiOutlineClose /></ToastAction>,
+          action: <ToastAction altText="fechar" className="shadow-none border-none text-[#717F96] hover:bg-transparent"><AiOutlineClose /></ToastAction>,
           className: "border-l-4 border-l-[#FB3748]",
         });
       }
@@ -88,44 +78,71 @@ export default function VerifyCode() {
   };
       
   return (
-    <main className="2xl:h-screen xl:h-[130vh] flex flex-col bg-[#ffffff]">
-
-      <section className="flex flex-col justify-center items-center mt-12 md:mt-20 sm:mt-8 lg:mt-40 xl:mt-16 px-4 2xl:mt-48">
-        <div className="flex flex-col w-[40rem] h-60 space-y-6 lg:space-y-12 justify-center items-center">
-          <div className="flex justify-center items-center space-x-3">
-            <Image src={YhankoIMG} alt="logo" className="h-12 w-12 xl:h-12 2xl:h-14"/>
-            <h1 className="text-black font-bold">Yhanko</h1>
-          </div>        
-          <div className="flex flex-col justify-center items-center space-y-2 lg:space-y-4">
-            <h1 className="text-[#171718] font-semibold text-lg 2xl:text-lg xl:text-2xl lg:text-lg text-center">
-              Código de Verificação
-            </h1>
-            <span className="text-[#717F96] text-center text-base xl:text-[15px] lg:text-base">
-              Introduza o código que enviamos por <br /> SMS.
-            </span>
+    <main className="min-h-screen w-full flex flex-col justify-center items-center bg-white px-4 sm:px-8 md:px-12 py-10 font-sans antialiased overflow-x-hidden">
+      <div className="w-full max-w-md mx-auto space-y-8">
+        
+        <div className="flex flex-col items-center text-center space-y-3">
+          <div className="flex items-center gap-3">
+            <Image src={YhankoIMG} alt="Yhanko Logo" width={44} height={44} className="w-11 h-11" priority />
+            <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Yhanko</h1>
+          </div>
+          <div className="pt-2">
+            <h2 className="text-xl sm:text-2xl font-bold text-[#171718]">Código de Verificação</h2>
+            <p className="text-sm text-[#717F96] mt-1 max-w-xs sm:max-w-sm mx-auto leading-relaxed">
+              Insira o código enviado por E-mail ou SMS para continuar a redefinição.
+            </p>
           </div>
         </div>
 
-        <form
-          action=""
-          className="flex flex-col w-full max-w-md mt-6 lg:mt-8"
-          onSubmit={handleSubmit(onSubmit)}
-        >
-          <Input
-            className={`w-full h-12 lg:h-14 shadow-none rounded-[6px] focus-visible:border-[#B7BFDE]  border-[2px] placeholder:text-[#B7BFDE] border-[#E2E5F1] appearance-none  ${errors.code && 'border-[#D03816]'}`}
-            type="text"
-            {...register("code")}
-          />
+        <form className="space-y-6 w-full" onSubmit={handleSubmit(onSubmit)}>
           
-          <Button
-            onClick={goTo} 
-              //type="submit" 
-              disabled={isLoading} 
-              className="bg-[#FF5777] hover:bg-[#fc4667] text-white hover:cursor-pointer w-full rounded-[6px] h-12 lg:h-14 shadow-none mt-12">
-                {isLoading ? <Loader2  className="animate-spin" /> : "Validar"}
+          <div className="space-y-1">
+            <div className="relative w-full">
+              <Input
+                id="code-input"
+                type="text"
+                className={`peer w-full h-12 sm:h-14 pl-5 pr-4 pt-4 pb-1 text-center font-mono text-lg tracking-widest rounded-xl border-2 border-[#E2E5F1] text-gray-800 focus:border-[#217EFD] focus-visible:ring-0 placeholder-transparent transition-all ${
+                  errors.code ? 'border-[#FB3748]' : ''
+                }`}
+                placeholder=" " 
+                {...register("code")}
+              />
+              <label
+                htmlFor="code-input"
+                className="absolute left-4 text-xs sm:text-sm font-medium text-[#B7BFDE] bg-white px-1 transition-all duration-200 pointer-events-none
+                top-0 -translate-y-1/2 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm
+                peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs peer-focus:text-[#217EFD]"
+              >
+                Código de 6 dígitos
+              </label>
+            </div>
+            {errors.code && (
+              <p className="text-xs text-[#FB3748] font-medium pl-1 text-center">{errors.code.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-3 pt-2">
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full h-12 sm:h-14 bg-[#FF5777] hover:bg-[#fc4667] text-white font-semibold text-sm sm:text-base rounded-xl transition-all shadow-md hover:shadow-lg hover:shadow-[#FF5777]/30 cursor-pointer"
+            >
+              {isLoading ? <Loader2 className="w-5 h-5 animate-spin mx-auto text-white" /> : "Verificar Código"}
             </Button>
+
+            <Link href="/password" className="block w-full">
+              <Button
+                type="button"
+                className="w-full h-12 sm:h-14 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-sm sm:text-base rounded-xl transition-all border border-[#E2E5F1] shadow-none cursor-pointer"
+              >
+                Voltar
+              </Button>
+            </Link>
+          </div>
+
         </form>
-      </section>
+
+      </div>
     </main>
   );
 }

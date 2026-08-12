@@ -35,8 +35,6 @@ interface ApiStudentUser {
   }>;
 }
 
-// Remove static students mock
-
 export function StudentTable ({ refreshKey, activeSearch }: { refreshKey?: number, activeSearch?: string }){
   const [students, setStudents] = useState<Student[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -65,12 +63,12 @@ export function StudentTable ({ refreshKey, activeSearch }: { refreshKey?: numbe
         const apiStudents = response.data.map((user: ApiStudentUser) => ({
           id: user.id,
           name: user.name,
-          date: new Date(user.createdAt).toLocaleDateString(),
+          date: new Date(user.createdAt).toLocaleDateString('pt-PT'),
           parentName: user.parent?.name || "N/A",
           parentEmail: user.parent?.email || "N/A",
           parentPhone: user.parent?.employeeProfile?.phone || "N/A",
           studentNumber: user.code || "N/A",
-          city: "Luanda", // TODO: Update based on entity
+          city: "Luanda",
           grade: (user.enrollments && user.enrollments.length > 0 && user.enrollments[0].class)
             ? `${user.enrollments[0].class.grade} - ${user.enrollments[0].class.name}` 
             : "N/A",
@@ -89,63 +87,72 @@ export function StudentTable ({ refreshKey, activeSearch }: { refreshKey?: numbe
     fetchStudents();
   }, [refreshKey]);
 
+  const filteredStudents = students.filter(student => 
+    !activeSearch || student.name.toLowerCase().includes(activeSearch)
+  );
+
   return (
-    <div className="bg-card rounded-lg border border-border overflow-hidden w-full">
-      <Table>
-        <TableHeader>
-          <TableRow className="bg-gray-50 border-[1px] border-gray-200">
-            <TableHead className="w-12 px-6 py-4 border-[1px] border-gray-200">
-              <Checkbox />
-            </TableHead>
-            <TableHead className="px-6 py-4 text-gray-700 font-medium">Nº</TableHead>
-            <TableHead className="px-6 py-4 text-gray-700 font-medium">Nome</TableHead>
-            <TableHead className="px-6 py-4 text-gray-700 font-medium">Data</TableHead>
-            <TableHead className="px-6 py-4 text-gray-700 font-medium">Encarregado</TableHead>
-            <TableHead className="px-6 py-4 text-gray-700 font-medium">Cidade</TableHead>
-            <TableHead className="px-6 py-4 text-gray-700 font-medium">Contacto</TableHead>
-            <TableHead className="px-6 py-4 text-gray-700 font-medium">Classe</TableHead>
-            <TableHead className="px-6 py-4 text-gray-700 font-medium">Ação</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody className="border-[1px] border-gray-200">
-          {isLoading ? (
-            <TableRow>
-              <TableCell colSpan={9} className="h-24 text-center">
-                <Loader2 className="h-6 w-6 animate-spin mx-auto text-blue-600" />
-              </TableCell>
-            </TableRow>
-          ) : students.length > 0 ? (
-            students.filter(student => !activeSearch || student.name.toLowerCase().includes(activeSearch)).map((student) => (
-              <StudentRow key={student.id} student={student} onAction={handleAction} />
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={9} className="h-24 text-center text-gray-500">
-                Nenhum estudante encontrado.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-      
-      <div className="flex items-center justify-between px-6 py-4 bg-transparent border-t border-border">
-        <div className="text-sm text-gray-500">
-          Showing {students.length > 0 ? 1 : 0}-{students.length} from {students.length} data
+    <div className="w-full space-y-4 px-2 sm:px-4">
+      {/* Vista de Tabela para Computadores e Tablets */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden w-full">
+        <div className="overflow-x-auto w-full">
+          <Table className="w-full">
+            <TableHeader>
+              <TableRow className="bg-gray-50 border-b border-gray-200">
+                <TableHead className="w-10 px-3 sm:px-4 py-3">
+                  <Checkbox />
+                </TableHead>
+                <TableHead className="px-3 sm:px-4 py-3 text-xs font-bold text-gray-700 uppercase">Nº Registo</TableHead>
+                <TableHead className="px-3 sm:px-4 py-3 text-xs font-bold text-gray-700 uppercase">Nome Estudante</TableHead>
+                <TableHead className="px-3 sm:px-4 py-3 text-xs font-bold text-gray-700 uppercase">Data Matrícula</TableHead>
+                <TableHead className="px-3 sm:px-4 py-3 text-xs font-bold text-gray-700 uppercase">Encarregado</TableHead>
+                <TableHead className="px-3 sm:px-4 py-3 text-xs font-bold text-gray-700 uppercase">Cidade</TableHead>
+                <TableHead className="px-3 sm:px-4 py-3 text-xs font-bold text-gray-700 uppercase">Contactos</TableHead>
+                <TableHead className="px-3 sm:px-4 py-3 text-xs font-bold text-gray-700 uppercase">Turma / Classe</TableHead>
+                <TableHead className="px-3 sm:px-4 py-3 text-xs font-bold text-gray-700 uppercase text-right">Ação</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className="divide-y divide-gray-100">
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={9} className="h-32 text-center">
+                    <Loader2 className="h-6 w-6 animate-spin mx-auto text-[#4D44B5]" />
+                    <span className="text-xs text-gray-500 mt-2 block">Carregando estudantes...</span>
+                  </TableCell>
+                </TableRow>
+              ) : filteredStudents.length > 0 ? (
+                filteredStudents.map((student) => (
+                  <StudentRow key={student.id} student={student} onAction={handleAction} />
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={9} className="h-32 text-center text-gray-500 text-sm">
+                    Nenhum estudante encontrado.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </div>
-        <div className="flex items-center space-x-2">
-          <button className="p-2 text-gray-400 hover:text-gray-600">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <button className="px-3 py-1 bg-blue-600 text-white rounded-md text-sm">1</button>
-          <button className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-md text-sm">2</button>
-          <button className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-md text-sm">3</button>
-          <button className="p-2 text-gray-400 hover:text-gray-600">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
+
+        {/* Rodapé da Tabela com Paginação Traduzida */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 bg-gray-50/80 border-t border-gray-200">
+          <div className="text-xs sm:text-sm text-gray-600 font-medium">
+            Exibindo <span className="font-semibold text-gray-900">{filteredStudents.length > 0 ? 1 : 0}-{filteredStudents.length}</span> de <span className="font-semibold text-gray-900">{filteredStudents.length}</span> estudantes
+          </div>
+          <div className="flex items-center space-x-1">
+            <button className="p-1.5 text-gray-400 hover:text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button className="px-3 py-1 bg-[#4D44B5] text-white rounded-lg text-xs font-semibold shadow-sm">1</button>
+            <button className="p-1.5 text-gray-400 hover:text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -155,7 +162,7 @@ export function StudentTable ({ refreshKey, activeSearch }: { refreshKey?: numbe
         onOpenChange={(isOpen) => setModalType(isOpen ? 'history' : null)}
       />
 
-      {/* View Details Modal */}
+      {/* Modal Visualizar Detalhes */}
       {selectedStudentForAction && (
         <Modal
           isOpen={modalType === 'view'}
@@ -165,107 +172,104 @@ export function StudentTable ({ refreshKey, activeSearch }: { refreshKey?: numbe
         >
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-4">Dados do Aluno</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <h3 className="text-sm font-bold text-[#4D44B5] uppercase tracking-wider border-b pb-2 mb-3">Dados do Aluno</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Nº do Estudante</p>
-                  <p className="text-base text-gray-900">{selectedStudentForAction.studentNumber}</p>
+                  <p className="text-xs font-medium text-gray-500">Nº do Estudante</p>
+                  <p className="text-sm font-semibold text-gray-900">{selectedStudentForAction.studentNumber}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Nome</p>
-                  <p className="text-base text-gray-900">{selectedStudentForAction.name}</p>
+                  <p className="text-xs font-medium text-gray-500">Nome Completo</p>
+                  <p className="text-sm font-semibold text-gray-900">{selectedStudentForAction.name}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Turma/Classe</p>
-                  <p className="text-base text-gray-900">{selectedStudentForAction.grade}</p>
+                  <p className="text-xs font-medium text-gray-500">Turma / Classe</p>
+                  <p className="text-sm font-semibold text-gray-900">{selectedStudentForAction.grade}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Telemóvel</p>
-                  <p className="text-base text-gray-900">{selectedStudentForAction.phone}</p>
+                  <p className="text-xs font-medium text-gray-500">Telemóvel</p>
+                  <p className="text-sm font-semibold text-gray-900">{selectedStudentForAction.phone}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-500">E-mail</p>
-                  <p className="text-base text-gray-900">{selectedStudentForAction.email}</p>
+                  <p className="text-xs font-medium text-gray-500">E-mail</p>
+                  <p className="text-sm font-semibold text-gray-900">{selectedStudentForAction.email}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Data de Matrícula</p>
-                  <p className="text-base text-gray-900">{selectedStudentForAction.date}</p>
+                  <p className="text-xs font-medium text-gray-500">Data de Matrícula</p>
+                  <p className="text-sm font-semibold text-gray-900">{selectedStudentForAction.date}</p>
                 </div>
               </div>
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-4">Dados do Encarregado</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <h3 className="text-sm font-bold text-[#4D44B5] uppercase tracking-wider border-b pb-2 mb-3">Dados do Encarregado</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Nome</p>
-                  <p className="text-base text-gray-900">{selectedStudentForAction.parentName}</p>
+                  <p className="text-xs font-medium text-gray-500">Nome do Encarregado</p>
+                  <p className="text-sm font-semibold text-gray-900">{selectedStudentForAction.parentName}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-500">E-mail</p>
-                  <p className="text-base text-gray-900">{selectedStudentForAction.parentEmail}</p>
+                  <p className="text-xs font-medium text-gray-500">E-mail do Encarregado</p>
+                  <p className="text-sm font-semibold text-gray-900">{selectedStudentForAction.parentEmail}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Telemóvel</p>
-                  <p className="text-base text-gray-900">{selectedStudentForAction.parentPhone}</p>
+                  <p className="text-xs font-medium text-gray-500">Telemóvel do Encarregado</p>
+                  <p className="text-sm font-semibold text-gray-900">{selectedStudentForAction.parentPhone}</p>
                 </div>
               </div>
             </div>
             
             <div className="pt-4 flex justify-end">
-              <Button variant="outline" onClick={() => setModalType(null)}>Fechar</Button>
+              <Button variant="outline" onClick={() => setModalType(null)} className="rounded-xl">Fechar</Button>
             </div>
           </div>
         </Modal>
       )}
 
-      {/* Edit Modal */}
+      {/* Modal Editar Aluno */}
       {selectedStudentForAction && (
         <Modal
           isOpen={modalType === 'edit'}
           onClose={() => setModalType(null)}
-          title="Editar Aluno"
+          title="Editar Estudante"
           size="md"
         >
           <div className="space-y-4">
-            <p className="text-sm text-gray-500 mb-4">
-              Em breve será possível editar as informações completas do estudante através deste painel.
-            </p>
             <div className="space-y-2">
-               <label className="text-sm font-medium text-foreground">Nome do Estudante</label>
-               <input type="text" defaultValue={selectedStudentForAction.name} className="w-full border border-border rounded-lg p-2" />
+               <label className="text-xs font-semibold text-gray-700">Nome do Estudante</label>
+               <input type="text" defaultValue={selectedStudentForAction.name} className="w-full border border-gray-300 rounded-xl p-2.5 text-sm" />
             </div>
             <div className="space-y-2">
-               <label className="text-sm font-medium text-foreground">Telefone</label>
-               <input type="text" defaultValue={selectedStudentForAction.phone} className="w-full border border-border rounded-lg p-2" />
+               <label className="text-xs font-semibold text-gray-700">Telefone</label>
+               <input type="text" defaultValue={selectedStudentForAction.phone} className="w-full border border-gray-300 rounded-xl p-2.5 text-sm" />
             </div>
             <div className="pt-4 flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setModalType(null)}>Cancelar</Button>
-              <Button className="bg-[#5856eb] hover:bg-[#5856eb]/90 text-white" onClick={() => setModalType(null)}>Salvar Alterações</Button>
+              <Button variant="outline" onClick={() => setModalType(null)} className="rounded-xl">Cancelar</Button>
+              <Button className="bg-[#4D44B5] hover:bg-[#3d3695] text-white rounded-xl" onClick={() => setModalType(null)}>Guardar Alterações</Button>
             </div>
           </div>
         </Modal>
       )}
 
-      {/* Delete Modal */}
+      {/* Modal Excluir Aluno */}
       {selectedStudentForAction && (
         <Modal
           isOpen={modalType === 'delete'}
           onClose={() => setModalType(null)}
-          title="Confirmar Exclusão"
+          title="Excluir Estudante"
           size="sm"
         >
           <div className="space-y-4">
-            <p className="text-gray-600">
-              Tem certeza que deseja apagar o registo do aluno <strong className="text-gray-900">{selectedStudentForAction.name}</strong>? Esta ação não pode ser desfeita.
+            <p className="text-sm text-gray-600">
+              Tem a certeza de que deseja excluir o estudante <strong className="text-gray-900">{selectedStudentForAction.name}</strong>? Esta ação não pode ser desfeita.
             </p>
             <div className="pt-4 flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setModalType(null)}>Cancelar</Button>
-              <Button variant="destructive" onClick={() => setModalType(null)}>Sim, Deletar</Button>
+              <Button variant="outline" onClick={() => setModalType(null)} className="rounded-xl">Cancelar</Button>
+              <Button className="bg-[#FF5777] hover:bg-[#fc4667] text-white rounded-xl" onClick={() => setModalType(null)}>Confirmar Exclusão</Button>
             </div>
           </div>
         </Modal>
       )}
     </div>
   );
-};
+}

@@ -12,62 +12,83 @@ interface DashboardPaymentItem {
   createdAt?: string;
 }
 
-export function StudentTable ({ payments = [] }: { payments?: DashboardPaymentItem[] }) {
+export function StudentTable({ payments = [] }: { payments?: DashboardPaymentItem[] }) {
   const getInitials = (name?: string) => {
     return name ? name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() : 'N/A';
   };
 
+  const getStatusBadge = (status?: string) => {
+    if (status === 'pago' || status === 'confirmed') {
+      return <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-100 text-emerald-800">Confirmado</span>;
+    }
+    return <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-100 text-amber-800">Pendente</span>;
+  };
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-xl font-semibold">Pagamentos Pendentes/Recentes</CardTitle>
+    <Card className="bg-white overflow-hidden">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base sm:text-lg font-bold text-gray-900">Pagamentos Recentes</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-0 sm:px-6">
         <div className="overflow-x-auto">
-          <table className="min-w-full boder-[1px] boder-gray-200">
-            <tbody className="divide-y divide-border border-[1px] border-gray-200">
-              {payments.map((payment, index) => (
-                <tr key={index} className="hover:bg-muted/50 transition-colors duration-200">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 h-12 w-12 bg-purple-100 rounded-full flex items-center justify-center">
-                        <span className="text-purple-600 font-semibold text-lg">{getInitials(payment.student?.name)}</span>
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-semibold text-foreground">{payment.student?.name || 'Desconhecido'}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="text-sm text-blue-600 font-medium">{payment.id ? payment.id.split('-')[0] : 'N/A'}</span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center">
-                      <div className="bg-orange-100 p-2 rounded-full mr-2">
-                        <svg className="w-4 h-4 text-orange-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                          <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"></path>
-                        </svg>
-                      </div>
-                      <span className="text-sm text-muted-foreground">{payment.type}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <span className="text-lg font-bold text-foreground">{payment.amount} KZ</span>
-                  </td>
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Aluno</th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Ref. ID</th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Tipo / Estado</th>
+                <th className="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Valor</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200 bg-white">
+              {payments.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="text-center py-6 text-sm text-gray-500">Nenhum pagamento registado.</td>
                 </tr>
-              ))}
+              ) : (
+                payments.map((payment, index) => (
+                  <tr key={index} className="hover:bg-gray-50/80 transition-colors">
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 h-9 w-9 bg-purple-100 rounded-full flex items-center justify-center">
+                          <span className="text-purple-700 font-semibold text-xs">{getInitials(payment.student?.name)}</span>
+                        </div>
+                        <div className="ml-3">
+                          <div className="text-xs sm:text-sm font-semibold text-gray-900 truncate max-w-[150px] sm:max-w-[200px]">
+                            {payment.student?.name || 'Desconhecido'}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <span className="text-xs font-mono text-indigo-600 font-medium">#{payment.id ? payment.id.split('-')[0] : 'N/A'}</span>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-600 font-medium">{payment.type || 'Propina'}</span>
+                        {getStatusBadge(payment.status)}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-right font-bold text-xs sm:text-sm text-gray-900">
+                      {(payment.amount || 0).toLocaleString()} Kz
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
-        <div className="flex justify-between items-center mt-6 pt-4 border-t border-border">
-          <p className="text-sm text-muted-foreground">1-5 of <span className="font-semibold text-foreground">100</span></p>
-          <div className="flex space-x-2">
-            <Button variant="default" size="sm">1</Button>
-            <Button variant="outline" size="sm">2</Button>
-            <Button variant="outline" size="sm">3</Button>
+
+        {payments.length > 0 && (
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-3 mt-4 px-4 pt-3 border-t border-gray-100 text-xs text-gray-500">
+            <p>Exibindo <span className="font-semibold text-gray-900">1-{Math.min(payments.length, 5)}</span> de <span className="font-semibold text-gray-900">{payments.length}</span> pagamentos</p>
+            <div className="flex space-x-1">
+              <Button variant="default" size="sm" className="h-7 w-7 p-0 bg-indigo-600 text-white">1</Button>
+              <Button variant="outline" size="sm" className="h-7 w-7 p-0">2</Button>
+            </div>
           </div>
-        </div>
+        )}
       </CardContent>
     </Card>
-  )
+  );
 }

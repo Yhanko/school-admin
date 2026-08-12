@@ -29,17 +29,17 @@ export default function RootLayout({
   if (!mounted || !isAuthenticated) return null;
 
   return (
-    <div>
-        <SidebarProvider>
-          <AppSidebar />
-          <main className={`flex flex-col h-screen flex-1 sm:w-full md:w-full xl:w-[1100px] 2xl:w-[1100px]`}>
-            <Header />
-            <div className="flex-1 p-4 mt-10">
-              <BroadcastBanner />
-              {children}
-            </div>
-          </main>
-        </SidebarProvider>
+    <div className="min-h-screen w-full bg-[#F3F5F7] overflow-x-hidden">
+      <SidebarProvider>
+        <AppSidebar />
+        <main className="flex flex-col min-h-screen flex-1 w-full max-w-full overflow-x-hidden">
+          <Header />
+          <div className="flex-1 p-4 sm:p-6 md:p-8 mt-2">
+            <BroadcastBanner />
+            {children}
+          </div>
+        </main>
+      </SidebarProvider>
     </div>
   );
 }
