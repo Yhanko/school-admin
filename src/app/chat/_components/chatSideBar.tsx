@@ -43,10 +43,10 @@ export function ChatSidebar ({ onSelectUser, selectedUserId }: ChatSidebarProps)
   });
 
   return (
-    <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
+    <div className="w-full bg-white flex flex-col h-full">
       {/* Header */}
-      <div className="p-6 border-b border-gray-100">
-        <h1 className="text-xl font-semibold text-gray-900 mb-4">Mensagens</h1>
+      <div className="p-4 sm:p-6 border-b border-gray-100">
+        <h1 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">Mensagens</h1>
         
         {/* Search */}
         <div className="relative">

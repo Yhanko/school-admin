@@ -95,21 +95,21 @@ export function AddNewUserPermission({ onCreated }: { onCreated?: () => void }) 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button className="gap-2 rounded-full hover:cursor-pointer bg-[#5856eb] text-white hover:text-white hover:bg-[#2d2add]">
+        <Button size="sm" className="gap-1.5 rounded-xl cursor-pointer bg-indigo-600 text-white hover:bg-indigo-700 text-xs sm:text-sm">
             <Plus className="w-4 h-4" />
-            Novo usuário
+            Novo utilizador
         </Button>
       </SheetTrigger>
-      <SheetContent style={{minWidth:600}} className="w-[70rem] overflow-y-auto scrollbar-none p-8">
+      <SheetContent className="w-full sm:max-w-lg overflow-y-auto p-4 sm:p-6">
         <SheetHeader>
-          <SheetTitle>Utilizador e Permissões</SheetTitle>
-          <SheetDescription>
+          <SheetTitle className="text-base font-bold text-gray-900">Utilizador e Permissões</SheetTitle>
+          <SheetDescription className="text-xs text-gray-500">
             Crie um novo utilizador e atribua as suas permissões de acesso
           </SheetDescription>
         </SheetHeader>
         
-        <form onSubmit={handleSubmit} className="mt-6 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="mt-5 space-y-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Nome
@@ -119,7 +119,7 @@ export function AddNewUserPermission({ onCreated }: { onCreated?: () => void }) 
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
                   placeholder="Nome completo"
                 />
               </div>
@@ -133,7 +133,7 @@ export function AddNewUserPermission({ onCreated }: { onCreated?: () => void }) 
                   required
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
                   placeholder="email@escola.com"
                 />
               </div>
@@ -148,7 +148,7 @@ export function AddNewUserPermission({ onCreated }: { onCreated?: () => void }) 
                   minLength={6}
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
                   placeholder="Mínimo 6 caracteres"
                 />
               </div>
@@ -161,7 +161,7 @@ export function AddNewUserPermission({ onCreated }: { onCreated?: () => void }) 
                   required
                   value={formData.role}
                   onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-400 focus:border-transparent bg-white"
                 >
                   {ROLES.map((role) => (
                     <option key={role.value} value={role.value}>
@@ -173,8 +173,8 @@ export function AddNewUserPermission({ onCreated }: { onCreated?: () => void }) 
           </div>
 
           <div>
-            <h3 className="text-md font-medium text-gray-900 mb-4">Permissões de Acesso</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <h3 className="text-sm font-semibold text-gray-800 mb-3">Permissões de Acesso</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {PERMISSIONS.map((perm) => (
                 <label key={perm.key} className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
                   <input
@@ -189,13 +189,13 @@ export function AddNewUserPermission({ onCreated }: { onCreated?: () => void }) 
             </div>
           </div>
 
-          <SheetFooter className="mt-8">
+          <SheetFooter className="mt-6 pt-4 border-t border-gray-100">
             <Button 
               type="submit" 
               disabled={isSubmitting}
-              className="bg-[#5856eb] rounded-full text-white hover:cursor-pointer hover:text-white hover:bg-[#3c3ad6]"
+              className="w-full bg-indigo-600 rounded-xl text-white cursor-pointer hover:bg-indigo-700 h-11 font-semibold text-sm"
             >
-              {isSubmitting ? "A guardar..." : "Salvar utilizador"}
+              {isSubmitting ? <><span className="mr-2">A guardar...</span></> : "Guardar Utilizador"}
             </Button>
           </SheetFooter>
         </form>

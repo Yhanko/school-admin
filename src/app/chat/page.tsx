@@ -12,11 +12,40 @@ export interface ChatUser {
 
 export default function Chat () {
   const [selectedUser, setSelectedUser] = useState<ChatUser | null>(null);
+  const [showSidebar, setShowSidebar] = useState(true);
+
+  const handleSelectUser = (user: ChatUser) => {
+    setSelectedUser(user);
+    // On mobile, hide the sidebar when a user is selected
+    setShowSidebar(false);
+  };
+
+  const handleBack = () => {
+    setShowSidebar(true);
+  };
 
   return (
-     <section className="h-[calc(100vh-5rem)] flex w-full">
-      <ChatSidebar onSelectUser={setSelectedUser} selectedUserId={selectedUser?.id} />
-      <ChatArea selectedUser={selectedUser} />
+    <section className="h-[calc(100vh-5rem)] flex w-full overflow-hidden">
+      {/* Sidebar: always visible on sm+, toggle on mobile */}
+      <div className={`
+        ${showSidebar ? 'flex' : 'hidden'} sm:flex
+        w-full sm:w-72 lg:w-80
+        flex-col shrink-0
+        border-r border-gray-200
+      `}>
+        <ChatSidebar
+          onSelectUser={handleSelectUser}
+          selectedUserId={selectedUser?.id}
+        />
+      </div>
+
+      {/* Chat area: always visible on sm+, toggle on mobile */}
+      <div className={`
+        ${!showSidebar || selectedUser ? 'flex' : 'hidden'} sm:flex
+        flex-1 flex-col min-w-0
+      `}>
+        <ChatArea selectedUser={selectedUser} onBack={handleBack} />
+      </div>
     </section>
   );
 }

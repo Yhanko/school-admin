@@ -117,10 +117,10 @@ export function NewSchedule({ onCreated }: { onCreated?: () => void }) {
             Novo Horário
         </Button>
       </SheetTrigger>
-      <SheetContent style={{minWidth:600}} className="w-[40rem] overflow-y-auto p-8">
+      <SheetContent className="w-full sm:max-w-lg overflow-y-auto p-4 sm:p-6">
         <SheetHeader>
-          <SheetTitle>Alocar Horário</SheetTitle>
-          <SheetDescription>
+          <SheetTitle className="text-base font-bold">Alocar Horário</SheetTitle>
+          <SheetDescription className="text-xs text-gray-500">
             Adicione uma nova disciplina à grelha horária
           </SheetDescription>
         </SheetHeader>
@@ -130,11 +130,11 @@ export function NewSchedule({ onCreated }: { onCreated?: () => void }) {
                 <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
             </div>
         ) : (
-            <form onSubmit={handleSubmit} className="mt-6 space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <form onSubmit={handleSubmit} className="mt-5 space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Turma *</label>
-                        <select required value={formData.classId} onChange={(e) => setFormData({ ...formData, classId: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white">
+                        <select required value={formData.classId} onChange={(e) => setFormData({ ...formData, classId: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-indigo-400">
                             <option value="" disabled>Selecione...</option>
                             {classes.map((c) => (<option key={c.id} value={c.id}>{c.name} ({c.course})</option>))}
                         </select>
@@ -142,7 +142,7 @@ export function NewSchedule({ onCreated }: { onCreated?: () => void }) {
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Disciplina *</label>
-                        <select required value={formData.subjectId} onChange={(e) => setFormData({ ...formData, subjectId: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white">
+                        <select required value={formData.subjectId} onChange={(e) => setFormData({ ...formData, subjectId: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-indigo-400">
                             <option value="" disabled>Selecione...</option>
                             {subjects.map((s) => (<option key={s.id} value={s.id}>{s.name}</option>))}
                         </select>
@@ -150,7 +150,7 @@ export function NewSchedule({ onCreated }: { onCreated?: () => void }) {
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Professor *</label>
-                        <select required value={formData.teacherId} onChange={(e) => setFormData({ ...formData, teacherId: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white">
+                        <select required value={formData.teacherId} onChange={(e) => setFormData({ ...formData, teacherId: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-indigo-400">
                             <option value="" disabled>Selecione...</option>
                             {teachers.map((t) => (<option key={t.id} value={t.id}>{t.name}</option>))}
                         </select>
@@ -158,7 +158,7 @@ export function NewSchedule({ onCreated }: { onCreated?: () => void }) {
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Sala (Opcional)</label>
-                        <select value={formData.roomId} onChange={(e) => setFormData({ ...formData, roomId: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white">
+                        <select value={formData.roomId} onChange={(e) => setFormData({ ...formData, roomId: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-indigo-400">
                             <option value="">Nenhuma</option>
                             {rooms.map((r) => (<option key={r.id} value={r.id}>{r.name}</option>))}
                         </select>
@@ -166,7 +166,7 @@ export function NewSchedule({ onCreated }: { onCreated?: () => void }) {
 
                     <div className="md:col-span-2">
                         <label className="block text-sm font-medium text-gray-700 mb-2">Dia da Semana *</label>
-                        <select required value={formData.dayOfWeek} onChange={(e) => setFormData({ ...formData, dayOfWeek: Number(e.target.value) })} className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white">
+                        <select required value={formData.dayOfWeek} onChange={(e) => setFormData({ ...formData, dayOfWeek: Number(e.target.value) })} className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-indigo-400">
                             <option value={1}>Segunda-feira</option>
                             <option value={2}>Terça-feira</option>
                             <option value={3}>Quarta-feira</option>
@@ -179,17 +179,17 @@ export function NewSchedule({ onCreated }: { onCreated?: () => void }) {
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Hora de Início *</label>
-                        <input type="time" required value={formData.startTime} onChange={(e) => setFormData({ ...formData, startTime: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" />
+                        <input type="time" required value={formData.startTime} onChange={(e) => setFormData({ ...formData, startTime: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-400" />
                     </div>
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Hora de Fim *</label>
-                        <input type="time" required value={formData.endTime} onChange={(e) => setFormData({ ...formData, endTime: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" />
+                        <input type="time" required value={formData.endTime} onChange={(e) => setFormData({ ...formData, endTime: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-400" />
                     </div>
                 </div>
 
-                <SheetFooter className="mt-8">
-                    <Button disabled={isSubmitting} type="submit" className="bg-indigo-600 rounded-full text-white hover:bg-indigo-700">
+                <SheetFooter className="mt-5 pt-4 border-t border-gray-100">
+                    <Button disabled={isSubmitting} type="submit" className="w-full bg-indigo-600 rounded-xl text-white cursor-pointer hover:bg-indigo-700 h-11 font-semibold text-sm">
                         {isSubmitting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
                         {isSubmitting ? "A guardar..." : "Guardar Horário"}
                     </Button>

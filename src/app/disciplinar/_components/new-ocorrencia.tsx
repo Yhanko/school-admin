@@ -109,21 +109,22 @@ export function NewOccurrence({ onCreated }: { onCreated?: () => void }) {
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         <Button
-            className="gap-2 bg-[#5856eb] rounded-full text-white hover:bg-[#423ff3] hover:text-white hover:cursor-pointer">
+            size="sm"
+            className="gap-1.5 bg-indigo-600 rounded-xl text-white hover:bg-indigo-700 hover:text-white cursor-pointer text-xs sm:text-sm">
             <Plus className="w-4 h-4 " />
             Nova ocorrência
         </Button>
       </SheetTrigger>
-      <SheetContent style={{minWidth:600}} className="w-[70rem] overflow-y-auto scrollbar-none p-8">
+      <SheetContent className="w-full sm:max-w-lg overflow-y-auto p-4 sm:p-6">
         <SheetHeader>
-          <SheetTitle>Ocorrência</SheetTitle>
-          <SheetDescription>
+          <SheetTitle className="text-base font-bold">Ocorrência</SheetTitle>
+          <SheetDescription className="text-xs text-gray-500">
             Adicione uma nova ocorrência disciplinar
           </SheetDescription>
         </SheetHeader>
         
-        <form onSubmit={handleSubmit} className="mt-6 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="mt-5 space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                     Aluno *
@@ -132,7 +133,7 @@ export function NewOccurrence({ onCreated }: { onCreated?: () => void }) {
                     required
                     value={formData.studentId}
                     onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-400 focus:border-transparent bg-white"
                 >
                     <option value="" disabled>Selecione um aluno...</option>
                     {students.map((student) => (
@@ -152,7 +153,7 @@ export function NewOccurrence({ onCreated }: { onCreated?: () => void }) {
                     required
                     value={formData.type}
                     onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
                     placeholder="Ex: Atraso Frequente"
                 />
                 </div>
@@ -166,7 +167,7 @@ export function NewOccurrence({ onCreated }: { onCreated?: () => void }) {
                     required
                     value={formData.date}
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
                 />
                 </div>
 
@@ -178,7 +179,7 @@ export function NewOccurrence({ onCreated }: { onCreated?: () => void }) {
                     required
                     value={formData.severity}
                     onChange={(e) => setFormData({ ...formData, severity: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-400 focus:border-transparent bg-white"
                 >
                     {SEVERITY.map((level) => (
                     <option key={level.value} value={level.value}>
@@ -198,7 +199,7 @@ export function NewOccurrence({ onCreated }: { onCreated?: () => void }) {
                     rows={3}
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-400 focus:border-transparent resize-none"
                     placeholder="Detalhes da ocorrência..."
                 />
             </div>
@@ -211,7 +212,7 @@ export function NewOccurrence({ onCreated }: { onCreated?: () => void }) {
                     required
                     value={formData.status}
                     onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-400 focus:border-transparent bg-white"
                 >
                     {STATUS.map((level) => (
                     <option key={level.value} value={level.value}>
@@ -221,10 +222,10 @@ export function NewOccurrence({ onCreated }: { onCreated?: () => void }) {
                 </select>
             </div>
 
-            <SheetFooter className="mt-8">
-                <Button disabled={isSubmitting} type="submit" className="bg-[#5856eb] rounded-full text-white hover:cursor-pointer hover:text-white hover:bg-[#3c3ad6]">
+            <SheetFooter className="mt-5 pt-4 border-t border-gray-100">
+                <Button disabled={isSubmitting} type="submit" className="w-full bg-indigo-600 rounded-xl text-white cursor-pointer hover:bg-indigo-700 h-11 font-semibold text-sm">
                     {isSubmitting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
-                    {isSubmitting ? "A guardar..." : "Guardar"}
+                    {isSubmitting ? "A guardar..." : "Guardar Ocorrência"}
                 </Button>
             </SheetFooter>
         </form>

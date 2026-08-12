@@ -8,11 +8,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div
-      >
+    <div className="w-full min-h-screen">
         <SidebarProvider>
           <AppSidebar  />
-          <main className={`flex flex-col h-screen flex-1 sm:w-full md:w-full xl:w-[1100px] 2xl:w-[1100px]`}>
+          <main className="flex flex-col min-h-screen flex-1 w-full max-w-full overflow-x-hidden">
             <Header />
             {children}
           </main>

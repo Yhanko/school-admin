@@ -15,12 +15,12 @@ export default function SchedulesLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div>
+    <div className="w-full min-h-screen">
         <SidebarProvider>
           <AppSidebar />
-          <main className={`flex flex-col h-screen flex-1 sm:w-full md:w-full xl:w-[1100px] 2xl:w-[1100px] overflow-y-auto`}>
+          <main className="flex flex-col min-h-screen flex-1 w-full max-w-full overflow-x-hidden">
             <Header />
-            <div className="flex-1 space-y-4 p-8 pt-6">
+            <div className="flex-1 px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
               {children}
             </div>
           </main>

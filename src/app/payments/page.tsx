@@ -217,17 +217,17 @@ export default function Payments() {
   ];
 
   return (
-      <section className="space-y-8 w-[70rem] p-4">
+      <section className="w-full max-w-full px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-5 sm:space-y-8 overflow-x-hidden">
         {/* Header */}
-        <div className="flex justify-between items-start">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
           <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">Relatório de Pagamentos</h1>
-            <p className="text-muted-foreground">Status de pagamentos mensais dos alunos</p>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">Relatório de Pagamentos</h1>
+            <p className="text-sm text-muted-foreground mt-1">Status de pagamentos mensais dos alunos</p>
           </div>
         </div>
 
         {/* Payment Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6">
           {paymentStats.map((stat, index) => {
             const Icon = stat.icon;
             return (
@@ -283,7 +283,7 @@ export default function Payments() {
         </Card>
 
         {/* Search and Filter */}
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1 flex gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -293,67 +293,93 @@ export default function Payments() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="w-full pl-10 pr-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full pl-10 pr-4 py-2.5 bg-card border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
-            <Button onClick={handleSearch} className="bg-primary text-white hover:bg-primary/90 rounded-lg">
+            <Button onClick={handleSearch} size="sm" className="bg-primary text-white hover:bg-primary/90 rounded-xl shrink-0">
               Pesquisar
             </Button>
           </div>
           <Button 
             onClick={exportToPDF}
             disabled={isExporting}
-            className="gap-2 rounded-full hover:cursor-pointer hover:bg-[#5856eb] hover:text-white bg-[#4a47f5] text-white">
+            size="sm"
+            className="gap-2 rounded-xl cursor-pointer bg-indigo-600 text-white hover:bg-indigo-700 shrink-0">
             {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-            {isExporting ? "A Exportar..." : "Exportar"}
+            {isExporting ? "A Exportar..." : "Exportar PDF"}
           </Button>
         </div>
 
         {/* Payments Table */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Pagamentos por Aluno</CardTitle>
+        <Card className="border border-gray-100 shadow-sm rounded-2xl">
+          <CardHeader className="flex flex-row items-center justify-between px-4 sm:px-6 pb-2">
+            <CardTitle className="text-sm sm:text-base font-semibold">Pagamentos por Aluno</CardTitle>
             <Button variant="ghost" size="sm">
               <MoreVertical className="w-4 h-4" />
             </Button>
           </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm border-gray-200 border-[1px]">
+          <CardContent className="px-0 pb-0">
+            {/* Desktop table */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 border-[1px]">
-                    <th className="text-left py-3 px-4 font-semibold text-foreground">Aluno</th>
-                    <th className="text-left py-3 px-4 font-semibold text-foreground">Tipo</th>
-                    <th className="text-right py-3 px-4 font-semibold text-foreground">Valor</th>
-                    <th className="text-left py-3 px-4 font-semibold text-foreground">Status</th>
-                    <th className="text-left py-3 px-4 font-semibold text-foreground">Data Pagamento</th>
+                  <tr className="bg-gray-50 border-b border-gray-100">
+                    <th className="text-left py-3 px-4 font-semibold text-gray-600 text-xs uppercase tracking-wide">Aluno</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-600 text-xs uppercase tracking-wide">Tipo</th>
+                    <th className="text-right py-3 px-4 font-semibold text-gray-600 text-xs uppercase tracking-wide">Valor</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-600 text-xs uppercase tracking-wide">Status</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-600 text-xs uppercase tracking-wide">Data Pagamento</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {payments.filter(payment => 
+                  {payments.filter(payment =>
                     payment.student?.name?.toLowerCase().includes(activeSearch)
                   ).map((payment) => (
-                    <tr key={payment.id} className="border-b hover:bg-muted/50 border-gray-200 border-[1px]">
-                      <td className="py-3 px-4 font-medium text-foreground">{payment.student?.name || 'Desconhecido'}</td>
-                      <td className="py-3 px-4 text-muted-foreground">{payment.type}</td>
-                      <td className="py-3 px-4 text-right font-semibold text-foreground">
+                    <tr key={payment.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                      <td className="py-3 px-4 font-medium text-foreground whitespace-nowrap">{payment.student?.name || 'Desconhecido'}</td>
+                      <td className="py-3 px-4 text-muted-foreground text-sm">{payment.type}</td>
+                      <td className="py-3 px-4 text-right font-semibold text-foreground whitespace-nowrap">
                         {(payment.amount || 0).toLocaleString()} Kz
                       </td>
                       <td className="py-3 px-4">{getStatusBadge(payment.status || "")}</td>
-                      <td className="py-3 px-4 text-muted-foreground">
+                      <td className="py-3 px-4 text-muted-foreground whitespace-nowrap text-sm">
                         {payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString() : "-"}
                       </td>
                     </tr>
                   ))}
                   {payments.length === 0 && (
                     <tr>
-                      <td colSpan={5} className="py-6 text-center text-gray-500">
+                      <td colSpan={5} className="py-8 text-center text-sm text-gray-400">
                         Nenhum pagamento encontrado
                       </td>
                     </tr>
                   )}
                 </tbody>
               </table>
+            </div>
+
+            {/* Mobile card list */}
+            <div className="sm:hidden divide-y divide-gray-100">
+              {payments.filter(payment =>
+                payment.student?.name?.toLowerCase().includes(activeSearch)
+              ).map((payment) => (
+                <div key={payment.id} className="p-4 space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-sm text-gray-900 truncate">{payment.student?.name || 'Desconhecido'}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">{payment.type}</p>
+                    </div>
+                    {getStatusBadge(payment.status || "")}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-sm text-gray-900">{(payment.amount || 0).toLocaleString()} Kz</span>
+                    <span className="text-xs text-gray-400">{payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString() : "-"}</span>
+                  </div>
+                </div>
+              ))}
+              {payments.length === 0 && (
+                <p className="py-8 text-center text-sm text-gray-400">Nenhum pagamento encontrado</p>
+              )}
             </div>
           </CardContent>
         </Card>

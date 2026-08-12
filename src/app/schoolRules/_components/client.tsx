@@ -228,16 +228,16 @@ export function RegulationsClient() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900">
             Regulamentos Internos
           </h1>
-          <p className="text-slate-600">
+          <p className="text-sm text-slate-500 mt-1">
             Crie, gerencie e compartilhe os regulamentos da sua instituição
           </p>
         </div>
-        <div className='flex space-x-4'>
+        <div className='flex flex-wrap gap-2 shrink-0'>
           <input 
             type="file" 
             ref={fileInputRef} 
@@ -246,7 +246,8 @@ export function RegulationsClient() {
             accept=".pdf,.doc,.docx,.txt"
           />
           <Button 
-            className="gap-2 bg-[#6366f1] rounded-full hover:bg-[#4043f8] hover:cursor-pointer"
+            size="sm"
+            className="gap-1.5 bg-indigo-600 rounded-xl hover:bg-indigo-700 cursor-pointer text-xs sm:text-sm"
             onClick={handleImportClick}
             disabled={isUploading}
           >
@@ -256,12 +257,12 @@ export function RegulationsClient() {
           
           <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
             <DialogTrigger asChild>
-              <Button className="gap-2 bg-[#6366f1] rounded-full hover:bg-[#4043f8] hover:cursor-pointer">
+              <Button size="sm" className="gap-1.5 bg-indigo-600 rounded-xl hover:bg-indigo-700 cursor-pointer text-xs sm:text-sm">
                 <Plus className="h-4 w-4" />
                 Criar regulamento
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Criar Novo Regulamento</DialogTitle>
               </DialogHeader>
@@ -368,7 +369,7 @@ export function RegulationsClient() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {regulations.map((regulation) => (
             <Card
               key={regulation.id}
