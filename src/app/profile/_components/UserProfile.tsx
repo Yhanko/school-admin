@@ -3,7 +3,6 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Badge } from '@/components/ui/badge';
 import { ImageUploadButton } from "./UploadImage";
-import RedefinirIcon from "@/assets/redifinirPlavraPass.svg";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import axiosInstance from "@/service/api";
@@ -12,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { KeyRound, User, Mail, Phone, Calendar, Monitor } from "lucide-react";
 
 interface UserProfileData {
   id: string;
@@ -115,8 +115,8 @@ export function ProfilePage() {
 
     if (isLoading) {
         return (
-            <div className="flex justify-center items-center h-[40rem] w-[68rem]">
-                <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+            <div className="flex justify-center items-center w-full min-h-[60vh]">
+                <Loader2 className="w-10 h-10 animate-spin text-indigo-500" />
             </div>
         );
     }
@@ -128,200 +128,228 @@ export function ProfilePage() {
     const phone = user?.employeeProfile?.phone || 'Não informado';
 
     return(
-        <section className="space-y-4 flex flex-col items-center min-h-[40rem] w-[68rem] pt-4">
-            <div className="flex flex-col space-y-4 items-center">
-                <div className="flex items-start relative">
-                    <div className="border-[2px] border-[#80848a] rounded-full w-[12rem] h-[12rem] flex justify-center items-center bg-indigo-50 overflow-hidden">
-                        <span className="text-4xl text-indigo-500 font-bold uppercase">
-                            {userName.substring(0, 2)}
-                        </span>
-                    </div>
-                    <div className="ml-[-27px] -mt-[-2rem]" style={{ zIndex: 1 }}>
-                        <ImageUploadButton />
-                    </div>
-                </div>
-            </div>
-            
-            <span className="text-[#2D3339] font-semibold text-2xl mt-4">
-                {userName}
-            </span>
-            <span className="text-indigo-500 font-medium text-md mt-[-10px] uppercase">
-                {role.replace('_', ' ')}
-            </span>
-
-            <Separator className="w-[33rem] bg-[#80848a] my-6"/>
-
-            <div className="flex justify-between w-[33rem] items-center">
-                <div className="flex space-x-24">
-                    <div className="flex flex-col space-y-4 text-left">
-                        <span className="text-[#2D3339] font-semibold">Email:</span>
-                        <span className="text-[#2D3339] font-semibold">Data de Adesão:</span>
-                        <span className="text-[#2D3339] font-semibold">Telemóvel:</span>
-                    </div>
-                                    
-                    <div className="flex flex-col space-y-4 text-left">
-                        <span className="text-[#2D3339] font-medium">{email}</span>
-                        <span className="text-[#2D3339] font-medium">{joinedAt}</span>
-                        <span className="text-[#2D3339] font-medium">{phone}</span>
-                    </div>
-                </div>
-
-                <Dialog open={isEditProfileOpen} onOpenChange={setIsEditProfileOpen}>
-                    <DialogTrigger asChild>
-                        <Button variant="outline" className="rounded-full cursor-pointer hover:bg-slate-100">Editar Dados</Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
-                        <DialogHeader>
-                            <DialogTitle>Editar Perfil</DialogTitle>
-                        </DialogHeader>
-                        <form onSubmit={handleUpdateProfile} className="space-y-4 mt-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="name">Nome Completo</Label>
-                                <Input 
-                                    id="name" 
-                                    value={editData.name}
-                                    onChange={(e) => setEditData({...editData, name: e.target.value})}
-                                    required
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="email">Email</Label>
-                                <Input 
-                                    id="email" 
-                                    type="email"
-                                    value={editData.email}
-                                    onChange={(e) => setEditData({...editData, email: e.target.value})}
-                                    required
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="phone">Telemóvel</Label>
-                                <Input 
-                                    id="phone" 
-                                    type="tel"
-                                    value={editData.phone}
-                                    onChange={(e) => setEditData({...editData, phone: e.target.value})}
-                                    placeholder="+244 9XX XXX XXX"
-                                />
-                            </div>
-                            <Button type="submit" disabled={isUpdatingProfile} className="w-full bg-[#4a47f5] hover:bg-[#5856eb] cursor-pointer text-white rounded-full">
-                                {isUpdatingProfile ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                                Salvar Alterações
-                            </Button>
-                        </form>
-                    </DialogContent>
-                </Dialog>
-            </div>
-
-            <Separator className="w-[33rem] bg-[#80848a] my-6"/>
-
-            <Card className="w-[33rem] border-none shadow-sm">
-                <CardHeader>
-                    <CardTitle className="flex items-center justify-center p-2 text-lg">Sessões Ativas</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border">
-                            <div>
-                                <p className="font-medium text-slate-900">
-                                    Navegador Atual
-                                </p>
-                                <p className="text-sm text-slate-600">
-                                    Acesso via plataforma Web
-                                </p>
-                            </div>
-                            <Badge className="bg-green-100 text-green-800">
-                                Ativo Agora
-                            </Badge>
+        <section className="w-full max-w-full px-4 sm:px-6 lg:px-8 py-6 overflow-x-hidden">
+            <div className="w-full max-w-2xl mx-auto space-y-6">
+                
+                {/* Avatar + Nome + Role */}
+                <div className="flex flex-col items-center gap-3">
+                    <div className="relative">
+                        <div className="border-2 border-indigo-200 rounded-full w-28 h-28 sm:w-36 sm:h-36 flex justify-center items-center bg-indigo-50 overflow-hidden shadow-md">
+                            <span className="text-3xl sm:text-4xl text-indigo-500 font-bold uppercase">
+                                {userName.substring(0, 2)}
+                            </span>
+                        </div>
+                        <div className="absolute bottom-0 right-0" style={{ zIndex: 1 }}>
+                            <ImageUploadButton />
                         </div>
                     </div>
-                </CardContent>
-            </Card>
+                    <div className="text-center">
+                        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{userName}</h1>
+                        <p className="text-sm sm:text-base text-indigo-500 font-medium uppercase mt-0.5">{role.replace(/_/g, ' ')}</p>
+                    </div>
+                </div>
 
-            <Separator className="w-[33rem] bg-[#80848a] my-6"/>
-            
-            <div className="flex space-x-4 h-[5rem]">
-                <Dialog open={isChangePasswordOpen} onOpenChange={setIsChangePasswordOpen}>
-                    <DialogTrigger asChild>
-                        <Button className="w-[16rem] rounded-full cursor-pointer h-12 bg-[#6366f1] hover:bg-[#5856eb] mt-4 text-white hover:text-white shadow-md">
-                            <svg>
-                                <image xlinkHref={RedefinirIcon.src || RedefinirIcon} className="size-4" />
-                            </svg>
-                            Redefinir Senha
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
-                        <DialogHeader>
-                            <DialogTitle>Alterar Palavra-Passe</DialogTitle>
-                        </DialogHeader>
-                        <form onSubmit={handleChangePassword} className="space-y-4 mt-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="currentPassword">Senha Atual</Label>
-                                <div className="relative">
-                                    <Input 
-                                        id="currentPassword" 
-                                        type={showCurrent ? "text" : "password"}
-                                        value={passwordData.currentPassword}
-                                        onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
-                                        required
-                                        className="pr-10"
-                                    />
-                                    <button 
-                                        type="button" 
-                                        onClick={() => setShowCurrent(!showCurrent)}
-                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                                    >
-                                        {showCurrent ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                    </button>
-                                </div>
+                <Separator className="bg-gray-200" />
+
+                {/* Info Card */}
+                <Card className="w-full border border-gray-100 shadow-sm rounded-2xl">
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-base font-semibold text-gray-800 flex items-center gap-2">
+                            <User className="w-4 h-4 text-indigo-500" />
+                            Dados da Conta
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                        {/* Email */}
+                        <div className="flex items-start sm:items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
+                            <Mail className="w-4 h-4 text-indigo-400 mt-0.5 sm:mt-0 shrink-0" />
+                            <div className="flex-1 min-w-0">
+                                <p className="text-xs text-gray-500 font-medium">Email</p>
+                                <p className="text-sm text-gray-900 font-medium truncate">{email}</p>
                             </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="newPassword">Nova Senha</Label>
-                                <div className="relative">
-                                    <Input 
-                                        id="newPassword" 
-                                        type={showNew ? "text" : "password"}
-                                        value={passwordData.newPassword}
-                                        onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
-                                        required
-                                        className="pr-10"
-                                    />
-                                    <button 
-                                        type="button" 
-                                        onClick={() => setShowNew(!showNew)}
-                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                                    >
-                                        {showNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                    </button>
-                                </div>
+                        </div>
+                        {/* Data Adesão */}
+                        <div className="flex items-start sm:items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
+                            <Calendar className="w-4 h-4 text-indigo-400 mt-0.5 sm:mt-0 shrink-0" />
+                            <div className="flex-1 min-w-0">
+                                <p className="text-xs text-gray-500 font-medium">Data de Adesão</p>
+                                <p className="text-sm text-gray-900 font-medium">{joinedAt}</p>
                             </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="confirmPassword">Confirmar Nova Senha</Label>
-                                <div className="relative">
-                                    <Input 
-                                        id="confirmPassword" 
-                                        type={showConfirm ? "text" : "password"}
-                                        value={passwordData.confirmPassword}
-                                        onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
-                                        required
-                                        className="pr-10"
-                                    />
-                                    <button 
-                                        type="button" 
-                                        onClick={() => setShowConfirm(!showConfirm)}
-                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                                    >
-                                        {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                    </button>
-                                </div>
+                        </div>
+                        {/* Telemóvel */}
+                        <div className="flex items-start sm:items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
+                            <Phone className="w-4 h-4 text-indigo-400 mt-0.5 sm:mt-0 shrink-0" />
+                            <div className="flex-1 min-w-0">
+                                <p className="text-xs text-gray-500 font-medium">Telemóvel</p>
+                                <p className="text-sm text-gray-900 font-medium">{phone}</p>
                             </div>
-                            <Button type="submit" disabled={isChangingPassword} className="w-full bg-[#4a47f5] hover:bg-[#5856eb] text-white cursor-pointer rounded-full">
-                                {isChangingPassword ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                                Atualizar Senha
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Sessões Ativas */}
+                <Card className="w-full border border-gray-100 shadow-sm rounded-2xl">
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-base font-semibold text-gray-800 flex items-center gap-2">
+                            <Monitor className="w-4 h-4 text-indigo-500" />
+                            Sessões Ativas
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-xl border border-gray-100">
+                            <div>
+                                <p className="font-medium text-sm text-gray-900">Navegador Atual</p>
+                                <p className="text-xs text-gray-500 mt-0.5">Acesso via plataforma Web</p>
+                            </div>
+                            <Badge className="bg-green-100 text-green-800 text-xs">Ativo Agora</Badge>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Separator className="bg-gray-200" />
+
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row gap-3 w-full pb-6">
+                    {/* Editar Dados */}
+                    <Dialog open={isEditProfileOpen} onOpenChange={setIsEditProfileOpen}>
+                        <DialogTrigger asChild>
+                            <Button variant="outline" className="flex-1 rounded-xl cursor-pointer border-indigo-200 text-indigo-600 hover:bg-indigo-50 font-semibold h-11">
+                                <User className="w-4 h-4 mr-2" />
+                                Editar Dados
                             </Button>
-                        </form>
-                    </DialogContent>
-                </Dialog>
+                        </DialogTrigger>
+                        <DialogContent className="w-[95vw] max-w-md rounded-2xl">
+                            <DialogHeader>
+                                <DialogTitle className="flex items-center gap-2 text-gray-900">
+                                    <User className="w-4 h-4 text-indigo-500" />
+                                    Editar Perfil
+                                </DialogTitle>
+                            </DialogHeader>
+                            <form onSubmit={handleUpdateProfile} className="space-y-4 mt-2">
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="name" className="text-xs font-semibold text-gray-700">Nome Completo</Label>
+                                    <Input 
+                                        id="name" 
+                                        value={editData.name}
+                                        onChange={(e) => setEditData({...editData, name: e.target.value})}
+                                        required
+                                        className="rounded-xl border-gray-200 text-sm"
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="email" className="text-xs font-semibold text-gray-700">Email</Label>
+                                    <Input 
+                                        id="email" 
+                                        type="email"
+                                        value={editData.email}
+                                        onChange={(e) => setEditData({...editData, email: e.target.value})}
+                                        required
+                                        className="rounded-xl border-gray-200 text-sm"
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="phone" className="text-xs font-semibold text-gray-700">Telemóvel</Label>
+                                    <Input 
+                                        id="phone" 
+                                        type="tel"
+                                        value={editData.phone}
+                                        onChange={(e) => setEditData({...editData, phone: e.target.value})}
+                                        placeholder="+244 9XX XXX XXX"
+                                        className="rounded-xl border-gray-200 text-sm"
+                                    />
+                                </div>
+                                <Button type="submit" disabled={isUpdatingProfile} className="w-full bg-indigo-600 hover:bg-indigo-700 cursor-pointer text-white rounded-xl h-11 font-semibold">
+                                    {isUpdatingProfile ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                                    Salvar Alterações
+                                </Button>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
+
+                    {/* Redefinir Senha */}
+                    <Dialog open={isChangePasswordOpen} onOpenChange={setIsChangePasswordOpen}>
+                        <DialogTrigger asChild>
+                            <Button className="flex-1 rounded-xl cursor-pointer h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-sm">
+                                <KeyRound className="w-4 h-4 mr-2" />
+                                Redefinir Senha
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="w-[95vw] max-w-md rounded-2xl">
+                            <DialogHeader>
+                                <DialogTitle className="flex items-center gap-2 text-gray-900">
+                                    <KeyRound className="w-4 h-4 text-indigo-500" />
+                                    Alterar Palavra-Passe
+                                </DialogTitle>
+                            </DialogHeader>
+                            <form onSubmit={handleChangePassword} className="space-y-4 mt-2">
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="currentPassword" className="text-xs font-semibold text-gray-700">Senha Atual</Label>
+                                    <div className="relative">
+                                        <Input 
+                                            id="currentPassword" 
+                                            type={showCurrent ? "text" : "password"}
+                                            value={passwordData.currentPassword}
+                                            onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
+                                            required
+                                            className="pr-10 rounded-xl border-gray-200 text-sm"
+                                        />
+                                        <button 
+                                            type="button" 
+                                            onClick={() => setShowCurrent(!showCurrent)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
+                                        >
+                                            {showCurrent ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="newPassword" className="text-xs font-semibold text-gray-700">Nova Senha</Label>
+                                    <div className="relative">
+                                        <Input 
+                                            id="newPassword" 
+                                            type={showNew ? "text" : "password"}
+                                            value={passwordData.newPassword}
+                                            onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                                            required
+                                            className="pr-10 rounded-xl border-gray-200 text-sm"
+                                        />
+                                        <button 
+                                            type="button" 
+                                            onClick={() => setShowNew(!showNew)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
+                                        >
+                                            {showNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="confirmPassword" className="text-xs font-semibold text-gray-700">Confirmar Nova Senha</Label>
+                                    <div className="relative">
+                                        <Input 
+                                            id="confirmPassword" 
+                                            type={showConfirm ? "text" : "password"}
+                                            value={passwordData.confirmPassword}
+                                            onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                                            required
+                                            className="pr-10 rounded-xl border-gray-200 text-sm"
+                                        />
+                                        <button 
+                                            type="button" 
+                                            onClick={() => setShowConfirm(!showConfirm)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
+                                        >
+                                            {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                        </button>
+                                    </div>
+                                </div>
+                                <Button type="submit" disabled={isChangingPassword} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer rounded-xl h-11 font-semibold">
+                                    {isChangingPassword ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                                    Atualizar Senha
+                                </Button>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
+                </div>
             </div>
         </section>
     )
