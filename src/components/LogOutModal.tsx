@@ -22,28 +22,29 @@ interface LogOutProps {
 }
 
 export function LogOutModal({ children }: LogOutProps) {
-  const [close, setClosed] = useState(false);
+  const [open, setOpen] = useState(false);
   const router = useRouter();
   const { logout } = useAuth();
 
-  const closeDialog = (value: boolean) => setClosed(value);
-
   const removeCookie = async function() {
+    // Close dialog first to avoid blocking navigation
+    setOpen(false);
     try {
       await axiosInstance.post(`/auth/logout`).catch(() => {});
     } catch (e) {
       console.error(e);
     } finally {
-      // Clear global state
+      // Clear global state and cookies
       logout();
-      // Temporarily remove token from axios
+      // Remove token from axios defaults
       axiosInstance.defaults.headers.common['Authorization'] = '';
-      router.push("/");
+      // Use replace so the protected page is removed from history
+      router.replace("/");
     }
   };
 
   return (
-    <Dialog onOpenChange={closeDialog} open={close} >
+    <Dialog onOpenChange={setOpen} open={open} >
       <DialogTrigger asChild>
           { children }
       </DialogTrigger>
@@ -56,7 +57,7 @@ export function LogOutModal({ children }: LogOutProps) {
         </DialogHeader>
         <DialogFooter className="flex justify-center w-full space-x-4">
           <Button 
-            onClick={() => {setClosed(false)}} 
+            onClick={() => {setOpen(false)}} 
             variant="default"
             className="w-28 h-12 cursor-pointer shadow-none focus-visible:ring-0 text-[#717F96] hover:bg-[#F1F5F7] bg-[#F1F5F7]">
               Cancelar
