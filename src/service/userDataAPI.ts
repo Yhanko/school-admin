@@ -43,7 +43,8 @@ export const userData = async (): Promise<{ user: UserDataType; userLogo: string
                     arquivo_do_contrato: "" // afiliado não tem contrato
                 };
 
-            const userLogo: string = `${env.API_BASE_URL}images/${user.logo}`;
+            const baseUrl = (env.API_BASE_URL || "").replace(/\/$/, "");
+            const userLogo: string = `${baseUrl}/images/${user.logo}`;
 
             return { user, userLogo };
         } else {
