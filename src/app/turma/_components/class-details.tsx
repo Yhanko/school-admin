@@ -90,7 +90,7 @@ export function ClassDetails({ classId }: ClassDetailsProps) {
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Sala</p>
-                    <p className="font-semibold text-sm">{turma.roomName || turma.room?.name || turma.room || 'Sem sala'}</p>
+                    <p className="font-semibold text-sm">{turma.roomName || (typeof turma.room === 'object' && turma.room !== null ? turma.room.name : typeof turma.room === 'string' ? turma.room : 'Sem sala')}</p>
                   </div>
                 </div>
 

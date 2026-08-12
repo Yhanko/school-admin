@@ -23,7 +23,7 @@ interface EnrollStudentProps {
 
 export function EnrollStudent({ classId, className, onSuccess }: EnrollStudentProps) {
     const [open, setOpen] = useState(false);
-    const [students, setStudents] = useState<{ id: string; name: string }[]>([]);
+    const [students, setStudents] = useState<{ id: string; name: string; email?: string }[]>([]);
     const [selectedStudent, setSelectedStudent] = useState<string>("");
     const [loading, setLoading] = useState(false);
     const [fetchingStudents, setFetchingStudents] = useState(false);
@@ -93,7 +93,7 @@ export function EnrollStudent({ classId, className, onSuccess }: EnrollStudentPr
                             <SelectContent>
                                 {students.map((student) => (
                                     <SelectItem key={student.id} value={student.id}>
-                                        {student.name} ({student.email})
+                                        {student.name} {student.email ? `(${student.email})` : ''}
                                     </SelectItem>
                                 ))}
                             </SelectContent>

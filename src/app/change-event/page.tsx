@@ -5,12 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar, MapPin, Plus, Sparkles, Loader2 } from "@/lib/icons";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import axiosInstance from "@/service/api";
 
-export default function ChangeEvent() {
+function ChangeEventContent() {
   const searchParams = useSearchParams();
   const { toast } = useToast();
   
@@ -249,5 +249,13 @@ export default function ChangeEvent() {
         }
       `}</style>
     </div>
+  );
+}
+
+export default function ChangeEvent() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-indigo-500" /></div>}>
+      <ChangeEventContent />
+    </Suspense>
   );
 }
