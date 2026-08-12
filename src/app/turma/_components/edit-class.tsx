@@ -60,7 +60,7 @@ export function EditClass() {
             <Edit className="w-4 h-4" />
         </Button>
       </SheetTrigger>
-      <SheetContent style={{minWidth:600}} className="w-[70rem] overflow-y-auto scrollbar-none p-8">
+      <SheetContent className="w-full sm:max-w-xl overflow-y-auto p-4 sm:p-6">
         <SheetHeader>
           <SheetTitle>Turma</SheetTitle>
           <SheetDescription>

@@ -4,20 +4,16 @@ import { NewClass } from "./_components/new-class";
 import { NewRoom } from "./_components/new-room";
 import { NewSubject } from "./_components/new-subject";
 import { Button } from "@/components/ui/button";
-import {
-  Search,
-  Trash2,
-} from "@/lib/icons";
+import { Search } from "@/lib/icons";
 import { EditClass } from "./_components/edit-class";
 import { ClassSubjects } from "./_components/class-subjects";
 import { ClassDetails } from "./_components/class-details";
-
 
 import { useState, useEffect } from "react";
 import axiosInstance from "@/service/api";
 import { Loader2 } from "lucide-react";
 
-export default function Turma(){
+export default function Turma() {
   const [classes, setClasses] = useState<{id: string, name: string, level: string, teacher: string, room: string, students: number, capacity: number, schedule: string, status: string}[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -36,7 +32,6 @@ export default function Turma(){
   const fetchClasses = async () => {
     try {
       const response = await axiosInstance.get('/classes');
-      // Map API response to required UI format
       const mappedClasses = response.data.map((c: {id: string, name: string, academicLevel: string, teachers?: {name: string}[], room?: string, students?: unknown[], capacity?: number, period?: string}) => ({
         id: c.id,
         name: c.name,
@@ -59,167 +54,158 @@ export default function Turma(){
   useEffect(() => {
     fetchClasses();
   }, []);
-// Remove static classes array
 
   const getOccupancyPercentage = (students: number, capacity: number) => {
     return Math.round((students / capacity) * 100);
   };
 
   const getOccupancyColor = (percentage: number) => {
-    if (percentage >= 90) return "text-red-600";
-    if (percentage >= 80) return "text-orange-600";
-    return "text-green-600";
+    if (percentage >= 90) return "text-red-600 font-bold";
+    if (percentage >= 80) return "text-amber-600 font-bold";
+    return "text-emerald-600 font-bold";
   };
 
-  return(
-      <section className="space-y-4 p-4 w-[70rem]">
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Gestão de Turmas</h1>
-            <p className="text-muted-foreground mt-1">Gerencie as turmas, alunos e professores da sua instituição</p>
-          </div>
-        </div>
+  const filteredClasses = classes.filter(c => !activeSearch || c.name.toLowerCase().includes(activeSearch));
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <p className="text-sm text-muted-foreground mb-2">Total de Turmas</p>
-                <p className="text-4xl font-bold text-primary">{classes.length}</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <p className="text-sm text-muted-foreground mb-2">Total de Alunos</p>
-                <p className="text-4xl font-bold text-green-600">
-                  {classes.reduce((sum, c) => sum + c.students, 0)}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <p className="text-sm text-muted-foreground mb-2">Capacidade Total</p>
-                <p className="text-4xl font-bold text-blue-600">
-                  {classes.reduce((sum, c) => sum + c.capacity, 0)}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <p className="text-sm text-muted-foreground mb-2">Taxa de Ocupação</p>
-                <p className="text-4xl font-bold text-orange-600">
-                  {Math.round(
+  return (
+    <section className="w-full max-w-full space-y-6 px-2 sm:px-4 py-4">
+      <div>
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">Gestão de Turmas</h1>
+        <p className="text-xs sm:text-sm text-gray-500 mt-1">Gerencie as turmas, salas, disciplinas e alunos da sua instituição</p>
+      </div>
+
+      {/* Estatísticas */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="bg-white border border-gray-200">
+          <CardContent className="pt-5 pb-5 text-center">
+            <p className="text-xs font-medium text-gray-500 mb-1">Total de Turmas</p>
+            <p className="text-2xl sm:text-3xl font-extrabold text-[#4D44B5]">{classes.length}</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-white border border-gray-200">
+          <CardContent className="pt-5 pb-5 text-center">
+            <p className="text-xs font-medium text-gray-500 mb-1">Total de Alunos</p>
+            <p className="text-2xl sm:text-3xl font-extrabold text-emerald-600">
+              {classes.reduce((sum, c) => sum + c.students, 0)}
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="bg-white border border-gray-200">
+          <CardContent className="pt-5 pb-5 text-center">
+            <p className="text-xs font-medium text-gray-500 mb-1">Capacidade Total</p>
+            <p className="text-2xl sm:text-3xl font-extrabold text-blue-600">
+              {classes.reduce((sum, c) => sum + c.capacity, 0)}
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="bg-white border border-gray-200">
+          <CardContent className="pt-5 pb-5 text-center">
+            <p className="text-xs font-medium text-gray-500 mb-1">Taxa de Ocupação</p>
+            <p className="text-2xl sm:text-3xl font-extrabold text-amber-600">
+              {classes.length > 0
+                ? Math.round(
                     (classes.reduce((sum, c) => sum + c.students, 0) /
-                      classes.reduce((sum, c) => sum + c.capacity, 0)) *
+                      classes.reduce((sum, c) => sum + (c.capacity || 1), 0)) *
                       100
-                  )}%
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+                  )
+                : 0}%
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Ações e Pesquisa */}
+      <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center justify-between gap-3 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+        <div className="flex items-center gap-2 flex-1 min-w-[240px]">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Pesquisar turma por nome..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="w-full pl-9 pr-3 h-11 bg-gray-50 border-2 border-gray-200 rounded-xl text-xs sm:text-sm text-gray-800 focus:border-[#4D44B5] focus:bg-white focus:outline-none transition-all"
+            />
+          </div>
+          <Button onClick={handleSearch} className="bg-[#4D44B5] hover:bg-[#3d3695] text-white h-11 px-4 text-xs sm:text-sm font-semibold rounded-xl transition-all cursor-pointer">
+            Pesquisar
+          </Button>
         </div>
 
-        {/* Search and Filter */}
-        <div className="flex gap-4 flex-col sm:flex-row">
-          <div className="relative flex-1 flex gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Pesquisar por turma"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyDown={handleKeyDown}
-                className="w-full pl-10 pr-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
-            <Button onClick={handleSearch} className="bg-primary text-white hover:bg-primary/90">
-              Pesquisar
-            </Button>
-          </div>
-
+        <div className="flex flex-wrap items-center gap-2">
           <NewSubject onCreated={fetchClasses} />
           <NewRoom />
           <NewClass />
         </div>
+      </div>
 
-        {/* Classes Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Lista Completa de Turmas</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm border-gray-200 border-[1px]">
-                <thead>
-                  <tr className="border-b border-gray-200 border-[1px]">
-                    <th className="text-left py-3 px-4 font-semibold text-foreground">Turma</th>
-                    <th className="text-left py-3 px-4 font-semibold text-foreground">Nível</th>
-                    <th className="text-left py-3 px-4 font-semibold text-foreground">Professor</th>
-                    <th className="text-left py-3 px-4 font-semibold text-foreground">Sala</th>
-                    <th className="text-center py-3 px-4 font-semibold text-foreground">Alunos</th>
-                    <th className="text-center py-3 px-4 font-semibold text-foreground">Ocupação</th>
-                    <th className="text-left py-3 px-4 font-semibold text-foreground">Horário</th>
-                    <th className="text-center py-3 px-4 font-semibold text-foreground">Ações</th>
+      {/* Tabela de Turmas */}
+      <Card className="bg-white border border-gray-200 shadow-sm overflow-hidden">
+        <CardHeader className="pb-3 border-b border-gray-100">
+          <CardTitle className="text-base sm:text-lg font-bold text-gray-900">Lista Completa de Turmas</CardTitle>
+        </CardHeader>
+        <CardContent className="px-0 sm:px-6">
+          <div className="overflow-x-auto w-full">
+            <table className="w-full text-xs sm:text-sm text-left divide-y divide-gray-200">
+              <thead className="bg-gray-50 text-gray-700 uppercase font-bold text-[11px]">
+                <tr>
+                  <th className="py-3 px-4">Turma</th>
+                  <th className="py-3 px-4">Nível</th>
+                  <th className="py-3 px-4">Professor(es)</th>
+                  <th className="py-3 px-4">Sala</th>
+                  <th className="py-3 px-4 text-center">Alunos</th>
+                  <th className="py-3 px-4 text-center">Ocupação</th>
+                  <th className="py-3 px-4">Horário</th>
+                  <th className="py-3 px-4 text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 bg-white">
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={8} className="py-8 text-center">
+                      <Loader2 className="w-8 h-8 animate-spin mx-auto text-[#4D44B5]" />
+                      <span className="text-xs text-gray-500 mt-2 block">Carregando turmas...</span>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {isLoading ? (
-                    <tr>
-                      <td colSpan={8} className="py-8 text-center">
-                        <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
-                      </td>
-                    </tr>
-                  ) : classes.length > 0 ? (
-                    classes.filter(c => c.name.toLowerCase().includes(activeSearch)).map((cls) => {
-                      const occupancy = getOccupancyPercentage(cls.students, cls.capacity);
-                      return (
-                        <tr key={cls.id} className="border-b border-gray-200 border-[1px] hover:bg-muted/50">
-                          <td className="py-3 px-4 font-bold text-foreground text-lg">{cls.name}</td>
-                          <td className="py-3 px-4 text-muted-foreground">{cls.level}</td>
-                          <td className="py-3 px-4 text-muted-foreground text-xs">{cls.teacher}</td>
-                          <td className="py-3 px-4 text-muted-foreground text-xs">{cls.room}</td>
-                          <td className="py-3 px-4 text-center font-semibold text-foreground">
-                            {cls.students}/{cls.capacity}
-                          </td>
-                          <td className="py-3 px-4 text-center">
-                            <span className={`font-semibold ${getOccupancyColor(occupancy)}`}>
-                              {occupancy}%
-                            </span>
-                          </td>
-                          <td className="py-3 px-4 text-muted-foreground text-xs">{cls.schedule}</td>
-                          <td className="py-3 px-4 text-center">
-                            <div className="flex gap-2 justify-center">
-                              <ClassDetails classId={cls.id} />
-                              <ClassSubjects classId={cls.id} className={cls.name} />
-                              <EditClass/>
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-600">
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  ) : (
-                    <tr>
-                      <td colSpan={8} className="py-8 text-center text-muted-foreground">
-                        Nenhuma turma encontrada.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
+                ) : filteredClasses.length > 0 ? (
+                  filteredClasses.map((cls) => {
+                    const percentage = getOccupancyPercentage(cls.students, cls.capacity);
+                    return (
+                      <tr key={cls.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="py-3 px-4 font-bold text-gray-900 whitespace-nowrap">{cls.name}</td>
+                        <td className="py-3 px-4 text-gray-600 whitespace-nowrap">{cls.level}</td>
+                        <td className="py-3 px-4 text-gray-800 font-medium max-w-[180px] truncate" title={cls.teacher}>{cls.teacher}</td>
+                        <td className="py-3 px-4 text-gray-600 whitespace-nowrap">{cls.room}</td>
+                        <td className="py-3 px-4 text-center font-semibold text-gray-900 whitespace-nowrap">
+                          {cls.students} / {cls.capacity}
+                        </td>
+                        <td className="py-3 px-4 text-center whitespace-nowrap">
+                          <span className={getOccupancyColor(percentage)}>{percentage}%</span>
+                        </td>
+                        <td className="py-3 px-4 text-gray-600 whitespace-nowrap">{cls.schedule}</td>
+                        <td className="py-3 px-4 text-right whitespace-nowrap">
+                          <div className="flex items-center justify-end space-x-1">
+                            <ClassDetails classId={cls.id} />
+                            <ClassSubjects classId={cls.id} className={cls.name} />
+                            <EditClass />
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan={8} className="py-8 text-center text-gray-500 text-sm">
+                      Nenhuma turma encontrada.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
     </section>
-  )
+  );
 }

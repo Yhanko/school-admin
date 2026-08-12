@@ -66,55 +66,55 @@ export function NewEventModal({ onSuccess }: NewEventModalProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-[#6366f1] hover:bg-[#5856eb] text-white rounded-full px-4 py-2 hover:cursor-pointer">
-          <Plus className="mr-2 h-4 w-4" />
-          New events
+        <Button className="bg-[#FF5777] hover:bg-[#fc4667] text-white rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold cursor-pointer shadow-sm transition-all flex items-center gap-1.5">
+          <Plus className="h-4 w-4" />
+          <span>Novo Evento</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] overflow-hidden">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-2xl font-bold text-[#303972]">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <Calendar className="h-6 w-6 text-[#646cffaa]" />
+      <DialogContent className="w-[95vw] max-w-[550px] max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden rounded-2xl border-none shadow-2xl bg-white">
+        <DialogHeader className="p-4 sm:p-5 border-b border-gray-100 bg-gray-50/80 shrink-0">
+          <DialogTitle className="flex items-center gap-2.5 text-base sm:text-lg font-bold text-gray-900">
+            <div className="p-2 rounded-xl bg-purple-100 text-[#4D44B5]">
+              <Calendar className="h-5 w-5" />
             </div>
-            Criar Nova Atividade
+            <span>Criar Nova Atividade</span>
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-5 py-4">
-          <div className="space-y-2 group">
-            <Label htmlFor="title" className="text-sm font-medium flex items-center gap-2">
-              <Sparkles className="h-3.5 w-3.5 text-[#646cffaa]" />
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 max-h-[calc(90vh-100px)]">
+          <div className="space-y-1.5">
+            <Label htmlFor="title" className="text-xs font-semibold text-gray-700 flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5 text-[#4D44B5]" />
               Título da Atividade *
             </Label>
             <Input 
               id="title" 
-              placeholder="Ex: Feira Cultural 2024" 
+              placeholder="Ex: Feira Cultural 2026" 
               value={formData.title}
               onChange={handleChange}
-              className="transition-all duration-200 focus:ring-2 focus:ring-primary/20 border-border hover:border-primary/50"
+              className="bg-white border-2 border-gray-200 rounded-xl h-11 text-xs sm:text-sm text-gray-800 focus:border-[#4D44B5] focus-visible:ring-0"
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description" className="text-sm font-medium flex items-center gap-2">
-              <Sparkles className="h-3.5 w-3.5 text-[#646cffaa]" />
+          <div className="space-y-1.5">
+            <Label htmlFor="description" className="text-xs font-semibold text-gray-700 flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5 text-[#4D44B5]" />
               Descrição
             </Label>
             <Textarea 
               id="description" 
               placeholder="Descreva os detalhes da atividade..." 
-              rows={3}
+              rows={2}
               value={formData.description}
               onChange={handleChange}
-              className="transition-all duration-200 focus:ring-2 focus:ring-primary/20 border-border hover:border-primary/50 resize-none"
+              className="bg-white border-2 border-gray-200 rounded-xl text-xs sm:text-sm text-gray-800 focus:border-[#4D44B5] focus-visible:ring-0 resize-none p-3"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="date" className="text-sm font-medium flex items-center gap-2">
-                <Calendar className="h-3.5 w-3.5 text-[#646cffaa]" />
+            <div className="space-y-1.5">
+              <Label htmlFor="date" className="text-xs font-semibold text-gray-700 flex items-center gap-1.5">
+                <Calendar className="h-3.5 w-3.5 text-[#4D44B5]" />
                 Data *
               </Label>
               <Input 
@@ -122,59 +122,59 @@ export function NewEventModal({ onSuccess }: NewEventModalProps) {
                 type="date" 
                 value={formData.date}
                 onChange={handleChange}
-                className="transition-all duration-200 focus:ring-2 focus:ring-primary/20 border-border hover:border-primary/50"
+                className="bg-white border-2 border-gray-200 rounded-xl h-11 text-xs sm:text-sm text-gray-800 focus:border-[#4D44B5] focus-visible:ring-0"
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="type" className="text-sm font-medium flex items-center gap-2">
-                <Sparkles className="h-3.5 w-3.5 text-[#646cffaa]" />
+            <div className="space-y-1.5">
+              <Label htmlFor="type" className="text-xs font-semibold text-gray-700 flex items-center gap-1.5">
+                <Sparkles className="h-3.5 w-3.5 text-[#4D44B5]" />
                 Tipo *
               </Label>
               <Select value={formData.type} onValueChange={handleSelectChange}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-white border-2 border-gray-200 rounded-xl h-11 text-xs sm:text-sm text-gray-800 focus:border-[#4D44B5]">
                   <SelectValue placeholder="Selecione o tipo" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="event">Evento</SelectItem>
-                  <SelectItem value="activity">Atividade</SelectItem>
-                  <SelectItem value="meeting">Reunião</SelectItem>
-                  <SelectItem value="holiday">Feriado</SelectItem>
+                <SelectContent className="bg-white border border-gray-200">
+                  <SelectItem value="event" className="cursor-pointer text-xs font-medium">Evento</SelectItem>
+                  <SelectItem value="activity" className="cursor-pointer text-xs font-medium">Atividade</SelectItem>
+                  <SelectItem value="meeting" className="cursor-pointer text-xs font-medium">Reunião</SelectItem>
+                  <SelectItem value="holiday" className="cursor-pointer text-xs font-medium">Feriado</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="location" className="text-sm font-medium flex items-center gap-2">
-                <MapPin className="h-3.5 w-3.5 text-[#646cffaa]" />
+            <div className="space-y-1.5">
+              <Label htmlFor="location" className="text-xs font-semibold text-gray-700 flex items-center gap-1.5">
+                <MapPin className="h-3.5 w-3.5 text-[#4D44B5]" />
                 Local *
               </Label>
               <Input 
                 id="location" 
-                placeholder="Local do evento" 
+                placeholder="Ex: Auditório Principal" 
                 value={formData.location}
                 onChange={handleChange}
-                className="transition-all duration-200 focus:ring-2 focus:ring-primary/20 border-border hover:border-primary/50"
+                className="bg-white border-2 border-gray-200 rounded-xl h-11 text-xs sm:text-sm text-gray-800 focus:border-[#4D44B5] focus-visible:ring-0"
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="organizer" className="text-sm font-medium flex items-center gap-2">
-                <Users className="h-3.5 w-3.5 text-[#646cffaa]" />
+            <div className="space-y-1.5">
+              <Label htmlFor="organizer" className="text-xs font-semibold text-gray-700 flex items-center gap-1.5">
+                <Users className="h-3.5 w-3.5 text-[#4D44B5]" />
                 Organizador *
               </Label>
               <Input 
                 id="organizer" 
-                placeholder="Ex: Coordenação" 
+                placeholder="Ex: Direção Pedagógica" 
                 value={formData.organizer}
                 onChange={handleChange}
-                className="transition-all duration-200 focus:ring-2 focus:ring-primary/20 border-border hover:border-primary/50"
+                className="bg-white border-2 border-gray-200 rounded-xl h-11 text-xs sm:text-sm text-gray-800 focus:border-[#4D44B5] focus-visible:ring-0"
               />
             </div>
 
-            <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="participants" className="text-sm font-medium flex items-center gap-2">
-                <Users className="h-3.5 w-3.5 text-[#646cffaa]" />
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label htmlFor="participants" className="text-xs font-semibold text-gray-700 flex items-center gap-1.5">
+                <Users className="h-3.5 w-3.5 text-[#4D44B5]" />
                 Participantes Esperados
               </Label>
               <Input 
@@ -183,23 +183,25 @@ export function NewEventModal({ onSuccess }: NewEventModalProps) {
                 min="0"
                 value={formData.participants}
                 onChange={handleChange}
-                className="transition-all duration-200 focus:ring-2 focus:ring-primary/20 border-border hover:border-primary/50"
+                className="bg-white border-2 border-gray-200 rounded-xl h-11 text-xs sm:text-sm text-gray-800 focus:border-[#4D44B5] focus-visible:ring-0"
               />
             </div>
           </div>
 
-          <Button 
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full h-12 rounded-full hover:cursor-pointer bg-[#2d36e9aa] hover:bg-[#2e38f5aa] hover:shadow-lg hover:scale-[1.02] transition-all duration-300 font-semibold group mt-4"
-          >
-            {isSubmitting ? (
-              <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-            ) : (
-              <Plus className="h-5 w-5 mr-2 group-hover:rotate-90 transition-transform duration-300" />
-            )}
-            {isSubmitting ? "A criar..." : "Criar Atividade"}
-          </Button>
+          <div className="pt-2 pb-2">
+            <Button 
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full h-11 rounded-xl bg-[#4D44B5] hover:bg-[#3d3695] text-white font-semibold text-xs sm:text-sm cursor-pointer shadow-md transition-all flex items-center justify-center gap-2"
+            >
+              {isSubmitting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Plus className="h-4 w-4" />
+              )}
+              {isSubmitting ? "A criar..." : "Criar Atividade"}
+            </Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

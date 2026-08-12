@@ -74,7 +74,7 @@ export default function TurmaDetails() {
   }
 
   return (
-    <div className="space-y-6 p-4 w-[70rem]">
+    <div className="w-full max-w-full space-y-6 px-2 sm:px-4 py-4">
       {/* Header Area */}
       <div className="flex items-center gap-4 mb-6">
         <Button variant="outline" size="icon" onClick={() => router.push('/turma')}>

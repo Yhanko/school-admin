@@ -51,7 +51,6 @@ export function Teachears ({ activeSearch }: { activeSearch?: string }) {
       try {
         const response = await axiosInstance.get('/users');
         const teacherList = response.data.filter((user: { role: string }) => user.role === 'TEACHER');
-        console.log("Fetched teachers:", teacherList);
         setTeachers(teacherList);
       } catch (error) {
         console.error("Failed to fetch teachers:", error);
@@ -70,88 +69,92 @@ export function Teachears ({ activeSearch }: { activeSearch?: string }) {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+      <div className="flex flex-col justify-center items-center h-64 w-full">
+        <Loader2 className="w-8 h-8 animate-spin text-[#4D44B5]" />
+        <span className="text-xs text-gray-500 mt-2">Carregando professores...</span>
       </div>
     );
   }
 
+  const filteredTeachers = teachers.filter(t => !activeSearch || t.name.toLowerCase().includes(activeSearch));
+
   return (
-    <div className="bg-card rounded-lg border border-border p-6 w-full max-w-7xl">
-      {/* Grid of Teachers */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {teachers.filter(t => !activeSearch || t.name.toLowerCase().includes(activeSearch)).map((teacher) => (
-          <div key={teacher.id} className="bg-muted/30 border border-border rounded-lg p-6 text-center relative">
-            {/* More Options */}
-            <div className="absolute top-4 right-4">
+    <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 w-full shadow-sm">
+      {/* Grid de Professores */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
+        {filteredTeachers.map((teacher) => (
+          <div key={teacher.id} className="bg-gray-50/80 hover:bg-gray-50 border border-gray-200 rounded-xl p-5 text-center relative transition-all shadow-xs">
+            {/* Opções */}
+            <div className="absolute top-3 right-3">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-6 w-6 text-gray-400 hover:text-gray-600 hover:cursor-pointer">
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-gray-400 hover:text-gray-600 cursor-pointer">
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-popover border-border shadow-lg z-50">
-                  <DropdownMenuItem className="hover:bg-gray-50 hover:cursor-pointer" onClick={() => handleAction('view', teacher)}>Ver Detalhes</DropdownMenuItem>
-                  <DropdownMenuItem className="hover:bg-gray-50 hover:cursor-pointer" onClick={() => handleAction('edit', teacher)}>Editar</DropdownMenuItem>
-                  <DropdownMenuItem className="hover:bg-red-50 text-red-600 cursor-pointer" onClick={() => handleAction('delete', teacher)}>Remover</DropdownMenuItem>
+                <DropdownMenuContent align="end" className="bg-white border-border shadow-lg z-50 rounded-xl">
+                  <DropdownMenuItem className="hover:bg-gray-100 cursor-pointer text-xs font-medium" onClick={() => handleAction('view', teacher)}>Ver Detalhes</DropdownMenuItem>
+                  <DropdownMenuItem className="hover:bg-gray-100 cursor-pointer text-xs font-medium" onClick={() => handleAction('edit', teacher)}>Editar</DropdownMenuItem>
+                  <DropdownMenuItem className="hover:bg-red-50 text-red-600 cursor-pointer text-xs font-medium" onClick={() => handleAction('delete', teacher)}>Remover</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
 
             {/* Avatar */}
-            <div className="mb-4 cursor-pointer">
-              <Avatar className="h-16 w-16 mx-auto">
+            <div className="mb-3 cursor-pointer">
+              <Avatar className="h-16 w-16 mx-auto shadow-xs">
                 {teacher.profile?.photoUrl ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img src={teacher.profile.photoUrl} alt={teacher.name} className="object-cover w-full h-full rounded-full" />
                 ) : (
-                    <AvatarFallback className="bg-purple-200 text-purple-700 text-lg font-medium">
+                    <AvatarFallback className="bg-purple-100 text-purple-700 text-base font-bold">
                       {getInitials(teacher.name)}
                     </AvatarFallback>
                 )}
               </Avatar>
             </div>
 
-            {/* Name */}
-            <h3 className="font-semibold text-gray-900 text-lg mb-1 truncate px-2">{teacher.name}</h3>
+            {/* Nome */}
+            <h3 className="font-bold text-gray-900 text-sm sm:text-base mb-0.5 truncate px-1" title={teacher.name}>{teacher.name}</h3>
             
-            {/* Subject */}
-            <p className="text-gray-500 text-sm mb-4 truncate px-2">{teacher.profile?.degree || 'Professor'}</p>
+            {/* Grau / Especialidade */}
+            <p className="text-gray-500 text-xs mb-4 truncate px-1">{teacher.profile?.degree || 'Professor'}</p>
 
-            {/* Contact Buttons */}
+            {/* Botões de Contacto */}
             <div className="flex justify-center space-x-2">
               <Button 
                 size="icon" 
-                className="h-8 w-8 bg-[#6366f1] hover:bg-[#5856eb] text-white rounded-full"
+                className="h-8 w-8 bg-[#4D44B5] hover:bg-[#3d3695] text-white rounded-full cursor-pointer"
+                title={teacher.profile?.phone || "Sem telefone"}
               >
-                <Phone className="h-4 w-4" />
+                <Phone className="h-3.5 w-3.5" />
               </Button>
               <Button 
                 size="icon" 
-                className="h-8 w-8 bg-[#6366f1] hover:bg-[#5856eb] text-white rounded-full"
+                className="h-8 w-8 bg-[#4D44B5] hover:bg-[#3d3695] text-white rounded-full cursor-pointer"
+                title={teacher.email}
               >
-                <Mail className="h-4 w-4" />
+                <Mail className="h-3.5 w-3.5" />
               </Button>
             </div>
           </div>
         ))}
-        {teachers.length === 0 && (
-          <div className="col-span-full text-center py-12 text-gray-500">
+
+        {filteredTeachers.length === 0 && (
+          <div className="col-span-full text-center py-12 text-gray-500 text-sm">
             Nenhum professor encontrado.
           </div>
         )}
       </div>
 
-      {/* Pagination */}
-      {teachers.length > 0 && (
-        <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-500">
-            Mostrando {teachers.length} professores
-            </div>
+      {/* Paginação */}
+      {filteredTeachers.length > 0 && (
+        <div className="flex items-center justify-between pt-2 text-xs sm:text-sm text-gray-500 border-t border-gray-100">
+          <div>Exibindo <span className="font-semibold text-gray-900">{filteredTeachers.length}</span> professores</div>
         </div>
       )}
 
-      {/* View Modal */}
+      {/* Modal Ver Detalhes */}
       {selectedTeacher && (
         <Modal
           isOpen={modalType === 'view'}
@@ -160,100 +163,71 @@ export function Teachears ({ activeSearch }: { activeSearch?: string }) {
           size="lg"
         >
           <div className="space-y-6">
-            {/* Secção de Perfil Pessoal */}
             <div className="flex items-center gap-4 border-b pb-4">
-              <Avatar className="h-20 w-20">
+              <Avatar className="h-16 w-16">
                 {selectedTeacher.profile?.photoUrl ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img src={selectedTeacher.profile.photoUrl} alt={selectedTeacher.name} className="object-cover w-full h-full rounded-full" />
                 ) : (
-                    <AvatarFallback className="bg-purple-200 text-purple-700 text-xl font-medium">
+                    <AvatarFallback className="bg-purple-100 text-purple-700 text-lg font-bold">
                       {getInitials(selectedTeacher.name)}
                     </AvatarFallback>
                 )}
               </Avatar>
               <div>
-                <h3 className="text-xl font-bold text-gray-900">{selectedTeacher.name}</h3>
-                <p className="text-gray-500">{selectedTeacher.profile?.degree || 'Professor'}</p>
+                <h3 className="text-lg font-bold text-gray-900">{selectedTeacher.name}</h3>
+                <p className="text-xs text-gray-500">{selectedTeacher.profile?.degree || 'Professor'}</p>
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-4 border-b pb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b pb-6 text-xs sm:text-sm">
               <div>
-                <p className="text-sm font-medium text-gray-500">E-mail</p>
-                <p className="text-base text-gray-900">{selectedTeacher.email || "N/A"}</p>
+                <p className="font-medium text-gray-500">E-mail</p>
+                <p className="font-semibold text-gray-900">{selectedTeacher.email || "N/A"}</p>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-500">Número de Celular</p>
-                <p className="text-base text-gray-900">{selectedTeacher.profile?.phone || "N/A"}</p>
+                <p className="font-medium text-gray-500">Telemóvel</p>
+                <p className="font-semibold text-gray-900">{selectedTeacher.profile?.phone || "N/A"}</p>
               </div>
             </div>
 
-            {/* Secção de Informações Pedagógicas */}
             <div>
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">Informações Pedagógicas</h4>
+              <h4 className="text-sm font-bold text-[#4D44B5] uppercase tracking-wider mb-3">Informações Pedagógicas</h4>
               
               {selectedTeacher.classSubjects && selectedTeacher.classSubjects.length > 0 ? (
-                <div className="overflow-x-auto rounded-lg border border-border">
-                  <table className="w-full text-sm text-left">
-                    <thead className="bg-muted text-gray-700">
+                <div className="overflow-x-auto rounded-xl border border-gray-200">
+                  <table className="w-full text-xs sm:text-sm text-left">
+                    <thead className="bg-gray-50 text-gray-700 uppercase font-bold text-[11px]">
                       <tr>
-                        <th className="px-4 py-3 font-medium">Disciplina</th>
-                        <th className="px-4 py-3 font-medium">Turma</th>
-                        <th className="px-4 py-3 font-medium">Classe</th>
-                        <th className="px-4 py-3 font-medium">Período</th>
-                        <th className="px-4 py-3 font-medium">Ano Letivo</th>
+                        <th className="p-3">Disciplina</th>
+                        <th className="p-3">Turma</th>
+                        <th className="p-3">Ano Lectivo</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-border">
+                    <tbody className="divide-y divide-gray-100">
                       {selectedTeacher.classSubjects.map((cs, idx) => (
-                        <tr key={idx} className="hover:bg-muted/50">
-                          <td className="px-4 py-3">{cs.subject.name}</td>
-                          <td className="px-4 py-3">{cs.class.name}</td>
-                          <td className="px-4 py-3">{cs.class.grade || "N/A"}</td>
-                          <td className="px-4 py-3">{cs.class.period}</td>
-                          <td className="px-4 py-3">{cs.class.academicYear?.year || "N/A"}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : selectedTeacher.classesTeaching && selectedTeacher.classesTeaching.length > 0 ? (
-                <div className="overflow-x-auto rounded-lg border border-border">
-                  <table className="w-full text-sm text-left">
-                    <thead className="bg-muted text-gray-700">
-                      <tr>
-                        <th className="px-4 py-3 font-medium">Turma</th>
-                        <th className="px-4 py-3 font-medium">Classe</th>
-                        <th className="px-4 py-3 font-medium">Período</th>
-                        <th className="px-4 py-3 font-medium">Ano Letivo</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border">
-                      {selectedTeacher.classesTeaching.map((ct, idx) => (
-                        <tr key={idx} className="hover:bg-muted/50">
-                          <td className="px-4 py-3">{ct.name}</td>
-                          <td className="px-4 py-3">{ct.grade || "N/A"}</td>
-                          <td className="px-4 py-3">{ct.period}</td>
-                          <td className="px-4 py-3">{ct.academicYear?.year || "N/A"}</td>
+                        <tr key={idx} className="hover:bg-gray-50">
+                          <td className="p-3 font-semibold text-gray-900">{cs.subject.name}</td>
+                          <td className="p-3 text-gray-700">{cs.class.grade} - {cs.class.name} ({cs.class.period})</td>
+                          <td className="p-3 text-gray-500">{cs.class.academicYear?.year || "Atual"}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
               ) : (
-                <p className="text-sm text-gray-500 italic">Nenhuma disciplina ou turma atribuída atualmente.</p>
+                <p className="text-xs text-gray-500 italic">Nenhuma disciplina ou turma atribuída atualmente.</p>
               )}
             </div>
             
             <div className="pt-4 flex justify-end">
-              <Button onClick={() => setModalType(null)} className="bg-[#5856eb] hover:bg-[#5856eb]/90 text-white">Fechar</Button>
+              <Button variant="outline" onClick={() => setModalType(null)} className="rounded-xl">Fechar</Button>
             </div>
           </div>
         </Modal>
       )}
 
-      {/* Edit Modal */}
+      {/* Modal Editar */}
       {selectedTeacher && (
         <Modal
           isOpen={modalType === 'edit'}
@@ -262,44 +236,41 @@ export function Teachears ({ activeSearch }: { activeSearch?: string }) {
           size="md"
         >
           <div className="space-y-4">
-            <p className="text-sm text-gray-500 mb-4">
-              Em breve será possível editar as informações completas do professor através deste painel.
-            </p>
             <div className="space-y-2">
-               <label className="text-sm font-medium text-foreground">Nome do Professor</label>
-               <input type="text" defaultValue={selectedTeacher.name} className="w-full border border-border rounded-lg p-2" />
+               <label className="text-xs font-semibold text-gray-700">Nome do Professor</label>
+               <input type="text" defaultValue={selectedTeacher.name} className="w-full border border-gray-300 rounded-xl p-2.5 text-sm" />
             </div>
             <div className="space-y-2">
-               <label className="text-sm font-medium text-foreground">Telefone</label>
-               <input type="text" defaultValue={selectedTeacher.profile?.phone} className="w-full border border-border rounded-lg p-2" />
+               <label className="text-xs font-semibold text-gray-700">E-mail</label>
+               <input type="text" defaultValue={selectedTeacher.email} className="w-full border border-gray-300 rounded-xl p-2.5 text-sm" />
             </div>
             <div className="pt-4 flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setModalType(null)}>Cancelar</Button>
-              <Button className="bg-[#5856eb] hover:bg-[#5856eb]/90 text-white" onClick={() => setModalType(null)}>Salvar Alterações</Button>
+              <Button variant="outline" onClick={() => setModalType(null)} className="rounded-xl">Cancelar</Button>
+              <Button className="bg-[#4D44B5] hover:bg-[#3d3695] text-white rounded-xl" onClick={() => setModalType(null)}>Guardar Alterações</Button>
             </div>
           </div>
         </Modal>
       )}
 
-      {/* Delete Modal */}
+      {/* Modal Remover */}
       {selectedTeacher && (
         <Modal
           isOpen={modalType === 'delete'}
           onClose={() => setModalType(null)}
-          title="Confirmar Exclusão"
+          title="Remover Professor"
           size="sm"
         >
           <div className="space-y-4">
-            <p className="text-gray-600">
-              Tem certeza que deseja apagar o registo do professor <strong className="text-gray-900">{selectedTeacher.name}</strong>? Esta ação não pode ser desfeita.
+            <p className="text-sm text-gray-600">
+              Tem a certeza que deseja remover o professor <strong className="text-gray-900">{selectedTeacher.name}</strong>?
             </p>
             <div className="pt-4 flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setModalType(null)}>Cancelar</Button>
-              <Button variant="destructive" onClick={() => setModalType(null)}>Sim, Deletar</Button>
+              <Button variant="outline" onClick={() => setModalType(null)} className="rounded-xl">Cancelar</Button>
+              <Button className="bg-[#FF5777] hover:bg-[#fc4667] text-white rounded-xl" onClick={() => setModalType(null)}>Confirmar Remoção</Button>
             </div>
           </div>
         </Modal>
       )}
     </div>
   );
-};
+}
