@@ -30,7 +30,7 @@ export default function PasswordChangedPage() {
           </div>
 
           <Link href="login" className="2xl:w-[28rem] lg:w-[28rem] xl:w-[28rem] md:w-[28rem] w-full">
-            <Button className="bg-[#FF5777] shadow-none hover:bg-[#fc4667] hover:cursor-pointer text-white w-full h-12 lg:h-14 rounded-md mt-4">
+            <Button className="bg-[#FF5777] shadow-none hover:bg-[#fc4667] hover:cursor-pointer text-white w-full h-12 lg:h-14 rounded-xl mt-4">
               Login
             </Button>
           </Link>

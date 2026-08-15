@@ -67,7 +67,7 @@ export function SchoolCalendar({ events = [] }: { events?: { date?: string; titl
                       ? "bg-[#6366f1] text-white rounded-full shadow-sm"
                       : hasEvent
                         ? "bg-[#FF5777] text-white rounded-full shadow-sm font-bold"
-                        : "text-gray-700 hover:bg-gray-100 rounded-lg cursor-pointer"
+                        : "text-gray-700 hover:bg-gray-100 rounded-xl cursor-pointer"
                   }`}
                 >
                   {format(day as Date, 'd')}

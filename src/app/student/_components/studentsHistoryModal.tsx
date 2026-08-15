@@ -241,20 +241,20 @@ export function StudentHistoryModal({
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="text-center p-3 bg-muted/50 rounded-lg">
+                      <div className="text-center p-3 bg-muted/50 rounded-xl">
                         <p className="text-2xl font-bold text-primary">{totalYears}</p>
                         <p className="text-xs text-muted-foreground">Anos Letivos</p>
                       </div>
-                      <div className="text-center p-3 bg-emerald-500/10 rounded-lg">
+                      <div className="text-center p-3 bg-emerald-500/10 rounded-xl">
                         <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{passedYears}</p>
                         <p className="text-xs text-muted-foreground">Aprovações</p>
                       </div>
-                      <div className="text-center p-3 bg-red-500/10 rounded-lg">
+                      <div className="text-center p-3 bg-red-500/10 rounded-xl">
                         <p className="text-2xl font-bold text-red-600 dark:text-red-400">{failedYears}</p>
                         <p className="text-xs text-muted-foreground">Reprovações</p>
                       </div>
-                      <div className="text-center p-3 bg-blue-500/10 rounded-lg">
-                        <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                      <div className="text-center p-3 bg-primary/10 rounded-xl">
+                        <p className="text-2xl font-bold text-primary dark:text-blue-400">
                           {student.academicHistory[0]?.average.toFixed(1) || "N/A"}
                         </p>
                         <p className="text-xs text-muted-foreground">Média Atual</p>
@@ -327,7 +327,7 @@ export function StudentHistoryModal({
                   <AccordionItem
                     key={`grades-${year.year}-${year.grade}`}
                     value={`${year.year}-${year.grade}`}
-                    className="border rounded-lg px-4"
+                    className="border rounded-xl px-4"
                   >
                     <AccordionTrigger className="hover:no-underline">
                       <div className="flex items-center gap-3">

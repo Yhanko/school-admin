@@ -259,7 +259,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
               setSelectedLevel(option.level);
               setCurrentStep(2);
             }}
-            className="p-6 border-2 border-border rounded-lg hover:border-primary hover:bg-muted transition-all duration-200 text-left"
+            className="p-6 border-2 border-border rounded-xl hover:border-primary hover:bg-muted transition-all duration-200 text-left"
           >
             <div className="text-3xl mb-2">{option.icon}</div>
             <h3 className="font-semibold text-foreground text-lg">
@@ -288,7 +288,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
               type="text"
               value={formData.studentNumber}
               readOnly
-              className="flex-1 border border-border rounded-lg p-2 bg-muted"
+              className="flex-1 border border-border rounded-xl p-2 bg-muted"
             />
             <Button
               onClick={generateStudentNumber}
@@ -308,7 +308,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="firstName"
             value={formData.firstName}
             onChange={handleInputChange}
-            className="border border-border rounded-lg p-2"
+            className="border border-border rounded-xl p-2"
             placeholder="João"
           />
         </div>
@@ -322,7 +322,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="lastName"
             value={formData.lastName}
             onChange={handleInputChange}
-            className="border border-border rounded-lg p-2"
+            className="border border-border rounded-xl p-2"
             placeholder="Silva"
           />
         </div>
@@ -336,7 +336,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="dateOfBirth"
             value={formData.dateOfBirth}
             onChange={handleInputChange}
-            className="border border-border rounded-lg p-2"
+            className="border border-border rounded-xl p-2"
           />
         </div>
 
@@ -346,7 +346,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="gender"
             value={formData.gender}
             onChange={handleInputChange}
-            className="border border-border rounded-lg p-2"
+            className="border border-border rounded-xl p-2"
           >
             <option value="">Selecione</option>
             <option value="M">Masculino</option>
@@ -361,7 +361,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="email"
             value={formData.email}
             onChange={handleInputChange}
-            className="border border-border rounded-lg p-2"
+            className="border border-border rounded-xl p-2"
             placeholder="joao@example.com"
           />
         </div>
@@ -375,7 +375,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="phone"
             value={formData.phone}
             onChange={handleInputChange}
-            className="border border-border rounded-lg p-2"
+            className="border border-border rounded-xl p-2"
             placeholder="+244 923 456 789"
           />
         </div>
@@ -388,7 +388,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
               name="cycle"
               value={formData.cycle}
               onChange={handleInputChange}
-              className="border border-border rounded-lg p-2"
+              className="border border-border rounded-xl p-2"
             >
               <option value="">Selecione o Ciclo</option>
               <option value="1-6">Ensino Primário (1-6)</option>
@@ -406,7 +406,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
               name="course"
               value={formData.course}
               onChange={handleInputChange}
-              className="border border-border rounded-lg p-2"
+              className="border border-border rounded-xl p-2"
               placeholder="Curso/Especialidade"
             />
           </div>
@@ -418,7 +418,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="classe"
             value={formData.classe || ""}
             onChange={handleInputChange}
-            className="border border-border rounded-lg p-2"
+            className="border border-border rounded-xl p-2"
           >
             <option value="">Selecione uma classe</option>
             {(() => {
@@ -463,7 +463,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="class"
             value={formData.class}
             onChange={handleInputChange}
-            className="border border-border rounded-lg p-2"
+            className="border border-border rounded-xl p-2"
           >
             <option value="">Selecione uma turma</option>
             {availableClasses.filter(c => {
@@ -487,7 +487,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
               name="password"
               value={formData.password}
               onChange={handleInputChange}
-              className="w-full border border-border rounded-lg p-2 pr-10"
+              className="w-full border border-border rounded-xl p-2 pr-10"
             />
             <button
               type="button"
@@ -507,7 +507,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleInputChange}
-              className="w-full border border-border rounded-lg p-2 pr-10"
+              className="w-full border border-border rounded-xl p-2 pr-10"
             />
             <button
               type="button"
@@ -539,7 +539,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="parentFirstName"
             value={formData.parentFirstName}
             onChange={handleInputChange}
-            className="border border-border rounded-lg p-2"
+            className="border border-border rounded-xl p-2"
             placeholder="Maria"
           />
         </div>
@@ -553,7 +553,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="parentLastName"
             value={formData.parentLastName}
             onChange={handleInputChange}
-            className="border border-border rounded-lg p-2"
+            className="border border-border rounded-xl p-2"
             placeholder="Silva"
           />
         </div>
@@ -565,7 +565,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="parentEmail"
             value={formData.parentEmail}
             onChange={handleInputChange}
-            className="border border-border rounded-lg p-2"
+            className="border border-border rounded-xl p-2"
             placeholder="maria@example.com"
           />
         </div>
@@ -579,7 +579,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="parentPhone"
             value={formData.parentPhone}
             onChange={handleInputChange}
-            className="border border-border rounded-lg p-2"
+            className="border border-border rounded-xl p-2"
             placeholder="+244 923 456 789"
           />
         </div>
@@ -592,7 +592,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
               name="parentPassword"
               value={formData.parentPassword}
               onChange={handleInputChange}
-              className="w-full border border-border rounded-lg p-2 pr-10"
+              className="w-full border border-border rounded-xl p-2 pr-10"
             />
             <button
               type="button"
@@ -612,7 +612,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
               name="parentConfirmPassword"
               value={formData.parentConfirmPassword}
               onChange={handleInputChange}
-              className="w-full border border-border rounded-lg p-2 pr-10"
+              className="w-full border border-border rounded-xl p-2 pr-10"
             />
             <button
               type="button"
@@ -643,7 +643,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="guardianFirstName"
             value={formData.guardianFirstName}
             onChange={handleInputChange}
-            className="border border-border rounded-lg p-2"
+            className="border border-border rounded-xl p-2"
           />
         </div>
 
@@ -656,7 +656,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="guardianLastName"
             value={formData.guardianLastName}
             onChange={handleInputChange}
-            className="border border-border rounded-lg p-2"
+            className="border border-border rounded-xl p-2"
           />
         </div>
 
@@ -668,7 +668,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="guardianRelationship"
             value={formData.guardianRelationship}
             onChange={handleInputChange}
-            className="border border-border rounded-lg p-2"
+            className="border border-border rounded-xl p-2"
           >
             <option value="">Selecione</option>
             <option value="Pai">Pai</option>
@@ -688,7 +688,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="guardianEmail"
             value={formData.guardianEmail}
             onChange={handleInputChange}
-            className="border border-border rounded-lg p-2"
+            className="border border-border rounded-xl p-2"
           />
         </div>
 
@@ -701,7 +701,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="guardianPhone"
             value={formData.guardianPhone}
             onChange={handleInputChange}
-            className="border border-border rounded-lg p-2"
+            className="border border-border rounded-xl p-2"
           />
         </div>
 
@@ -713,7 +713,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
               name="guardianPassword"
               value={formData.guardianPassword}
               onChange={handleInputChange}
-              className="w-full border border-border rounded-lg p-2 pr-10"
+              className="w-full border border-border rounded-xl p-2 pr-10"
             />
             <button
               type="button"
@@ -733,7 +733,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
               name="guardianConfirmPassword"
               value={formData.guardianConfirmPassword}
               onChange={handleInputChange}
-              className="w-full border border-border rounded-lg p-2 pr-10"
+              className="w-full border border-border rounded-xl p-2 pr-10"
             />
             <button
               type="button"
@@ -758,7 +758,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
         <label className="text-sm font-medium text-foreground">
           Declaração ou Certificado das Classes Anteriores *
         </label>
-        <label className="border-2 border-dashed border-border rounded-lg p-6 cursor-pointer hover:border-primary transition-all text-center">
+        <label className="border-2 border-dashed border-border rounded-xl p-6 cursor-pointer hover:border-primary transition-all text-center">
           <FileText className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
           <span className="text-sm text-muted-foreground">
             {formData.previousCertificate
@@ -792,7 +792,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="previousSchool"
             value={formData.previousSchool}
             onChange={handleInputChange}
-            className="border border-border rounded-lg p-2"
+            className="border border-border rounded-xl p-2"
             placeholder="Nome da escola anterior"
           />
         </div>
@@ -806,7 +806,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="previousClass"
             value={formData.previousClass}
             onChange={handleInputChange}
-            className="border border-border rounded-lg p-2"
+            className="border border-border rounded-xl p-2"
             placeholder="Ex: 9ª Classe"
           />
         </div>
@@ -817,7 +817,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
           <label className="text-sm font-medium text-foreground">
             Pedido de Transferência *
           </label>
-          <label className="border-2 border-dashed border-border rounded-lg p-6 cursor-pointer hover:border-primary transition-all text-center">
+          <label className="border-2 border-dashed border-border rounded-xl p-6 cursor-pointer hover:border-primary transition-all text-center">
             <FileText className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
             <span className="text-sm text-muted-foreground">
               {formData.transferRequest
@@ -837,7 +837,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
           <label className="text-sm font-medium text-foreground">
             Declaração da 9ª Classe (se aplicável)
           </label>
-          <label className="border-2 border-dashed border-border rounded-lg p-6 cursor-pointer hover:border-primary transition-all text-center">
+          <label className="border-2 border-dashed border-border rounded-xl p-6 cursor-pointer hover:border-primary transition-all text-center">
             <FileText className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
             <span className="text-sm text-muted-foreground">
               {formData.grade9Certificate
@@ -930,7 +930,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
               variant="outline"
               onClick={handlePrevious}
               disabled={currentStep === 1}
-              className="bg-blue-600 text-white rounded-full hover:bg-blue-500 hover:text-white hover:cursor-pointer"
+              className="bg-primary text-white rounded-full hover:bg-primary hover:text-white hover:cursor-pointer"
             >
               Anterior
             </Button>

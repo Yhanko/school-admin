@@ -79,7 +79,7 @@ export function RegulationsClient() {
   }, [fetchRegulations]);
 
   const shareOptions = [
-    { icon: Users, label: 'Encarregados de Educação', color: 'text-blue-600' },
+    { icon: Users, label: 'Encarregados de Educação', color: 'text-primary' },
     { icon: GraduationCap, label: 'Educandos', color: 'text-purple-600' },
     { icon: Users, label: 'Professores', color: 'text-green-600' },
     { icon: Briefcase, label: 'Funcionários', color: 'text-orange-600' },
@@ -221,7 +221,7 @@ export function RegulationsClient() {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-16">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -247,7 +247,7 @@ export function RegulationsClient() {
           />
           <Button 
             size="sm"
-            className="gap-1.5 bg-indigo-600 rounded-xl hover:bg-indigo-700 cursor-pointer text-xs sm:text-sm"
+            className="gap-1.5 bg-primary rounded-xl hover:bg-indigo-700 cursor-pointer text-xs sm:text-sm"
             onClick={handleImportClick}
             disabled={isUploading}
           >
@@ -257,7 +257,7 @@ export function RegulationsClient() {
           
           <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
             <DialogTrigger asChild>
-              <Button size="sm" className="gap-1.5 bg-indigo-600 rounded-xl hover:bg-indigo-700 cursor-pointer text-xs sm:text-sm">
+              <Button size="sm" className="gap-1.5 bg-primary rounded-xl hover:bg-indigo-700 cursor-pointer text-xs sm:text-sm">
                 <Plus className="h-4 w-4" />
                 Criar regulamento
               </Button>
@@ -288,7 +288,7 @@ export function RegulationsClient() {
                 </div>
 
                 {newRule.fileUrl && (
-                  <div className="p-3 bg-blue-50 text-blue-700 rounded-md border border-blue-200 flex items-center justify-between">
+                  <div className="p-3 bg-blue-50 text-blue-700 rounded-xl border border-blue-200 flex items-center justify-between">
                     <span className="text-sm font-medium flex items-center gap-2">
                       <FileText className="h-4 w-4" /> PDF Anexado
                     </span>
@@ -377,7 +377,7 @@ export function RegulationsClient() {
             >
               <CardHeader>
                 <div className="flex items-start justify-between">
-                  <FileText className="h-8 w-8 text-blue-600" />
+                  <FileText className="h-8 w-8 text-primary" />
                   <Badge
                     variant={
                       regulation.status === 'PUBLISHED'

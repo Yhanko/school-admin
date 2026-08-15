@@ -36,7 +36,7 @@ export function ClassDetails({ classId }: ClassDetailsProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-blue-600 hover:text-blue-800" title="Ver detalhes">
+        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-primary hover:text-blue-800" title="Ver detalhes">
           <Eye className="w-4 h-4" />
         </Button>
       </DialogTrigger>
@@ -55,7 +55,7 @@ export function ClassDetails({ classId }: ClassDetailsProps) {
             <div className="space-y-8">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-3 bg-blue-100 text-blue-600 rounded-lg">
+                  <div className="p-3 bg-blue-100 text-primary rounded-xl">
                     <GraduationCap className="w-6 h-6" />
                   </div>
                   <div>
@@ -65,7 +65,7 @@ export function ClassDetails({ classId }: ClassDetailsProps) {
                 </div>
                 
                 <div className="flex items-center gap-3">
-                  <div className="p-3 bg-green-100 text-green-600 rounded-lg">
+                  <div className="p-3 bg-green-100 text-green-600 rounded-xl">
                     <Users className="w-6 h-6" />
                   </div>
                   <div>
@@ -75,7 +75,7 @@ export function ClassDetails({ classId }: ClassDetailsProps) {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <div className="p-3 bg-orange-100 text-orange-600 rounded-lg">
+                  <div className="p-3 bg-orange-100 text-orange-600 rounded-xl">
                     <Clock className="w-6 h-6" />
                   </div>
                   <div>
@@ -85,7 +85,7 @@ export function ClassDetails({ classId }: ClassDetailsProps) {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <div className="p-3 bg-purple-100 text-purple-600 rounded-lg">
+                  <div className="p-3 bg-purple-100 text-purple-600 rounded-xl">
                     <MapPin className="w-6 h-6" />
                   </div>
                   <div>
@@ -96,7 +96,7 @@ export function ClassDetails({ classId }: ClassDetailsProps) {
 
                 {turma.grade && (
                   <div className="flex items-center gap-3">
-                    <div className="p-3 bg-indigo-100 text-indigo-600 rounded-lg">
+                    <div className="p-3 bg-indigo-100 text-primary rounded-xl">
                       <BookOpen className="w-6 h-6" />
                     </div>
                     <div>
@@ -108,7 +108,7 @@ export function ClassDetails({ classId }: ClassDetailsProps) {
 
                 {turma.course && (
                   <div className="flex items-center gap-3">
-                    <div className="p-3 bg-teal-100 text-teal-600 rounded-lg">
+                    <div className="p-3 bg-teal-100 text-teal-600 rounded-xl">
                       <GraduationCap className="w-6 h-6" />
                     </div>
                     <div>
@@ -127,16 +127,16 @@ export function ClassDetails({ classId }: ClassDetailsProps) {
                   {turma.classSubjects && turma.classSubjects.length > 0 ? (
                     <ul className="space-y-2">
                       {turma.classSubjects.map((cs) => (
-                        <li key={cs.id} className="p-3 border rounded-lg flex justify-between items-center bg-gray-50/50">
+                        <li key={cs.id} className="p-3 border rounded-xl flex justify-between items-center bg-gray-50/50">
                           <span className="font-medium text-sm">{cs.subject?.name || 'Disciplina Desconhecida'}</span>
-                          <span className="text-xs text-muted-foreground bg-white px-2 py-1 rounded-md border">
+                          <span className="text-xs text-muted-foreground bg-white px-2 py-1 rounded-xl border">
                             {cs.teacher?.name || 'Sem Professor'}
                           </span>
                         </li>
                       ))}
                     </ul>
                   ) : (
-                    <p className="text-sm text-muted-foreground p-3 border rounded-lg bg-gray-50/50 text-center">Nenhuma disciplina associada.</p>
+                    <p className="text-sm text-muted-foreground p-3 border rounded-xl bg-gray-50/50 text-center">Nenhuma disciplina associada.</p>
                   )}
                 </div>
 
@@ -147,7 +147,7 @@ export function ClassDetails({ classId }: ClassDetailsProps) {
                   {turma.students && turma.students.length > 0 ? (
                     <ul className="space-y-2">
                       {turma.students.map((student) => (
-                        <li key={student.id} className="p-3 border rounded-lg flex justify-between items-center bg-gray-50/50">
+                        <li key={student.id} className="p-3 border rounded-xl flex justify-between items-center bg-gray-50/50">
                           <span className="font-medium text-sm">{student.name}</span>
                           <span className="text-xs text-muted-foreground">
                             {student.profile?.studentNumber ? `Nº ${student.profile.studentNumber}` : ''}
@@ -156,7 +156,7 @@ export function ClassDetails({ classId }: ClassDetailsProps) {
                       ))}
                     </ul>
                   ) : (
-                    <p className="text-sm text-muted-foreground p-3 border rounded-lg bg-gray-50/50 text-center">Nenhum aluno matriculado.</p>
+                    <p className="text-sm text-muted-foreground p-3 border rounded-xl bg-gray-50/50 text-center">Nenhum aluno matriculado.</p>
                   )}
                 </div>
               </div>

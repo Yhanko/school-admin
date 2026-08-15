@@ -80,7 +80,7 @@ interface RegulationDetailContentProps {
 }
 
 const shareOptions = [
-  { icon: Users, label: 'Encarregados de Educação', color: 'text-blue-600' },
+  { icon: Users, label: 'Encarregados de Educação', color: 'text-primary' },
   { icon: GraduationCap, label: 'Educandos', color: 'text-purple-600' },
   { icon: Users, label: 'Professores', color: 'text-green-600' },
   { icon: Briefcase, label: 'Funcionários', color: 'text-orange-600' },
@@ -203,7 +203,7 @@ export function RegulationDetailContent({
               return (
                 <div
                   key={index}
-                  className="p-4 bg-white rounded-lg border text-center"
+                  className="p-4 bg-white rounded-xl border text-center"
                 >
                   <Icon className={`h-6 w-6 mx-auto mb-2 ${option.color}`} />
                   <p className="text-sm font-medium text-slate-900">

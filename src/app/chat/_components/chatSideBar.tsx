@@ -69,7 +69,7 @@ export function ChatSidebar ({ onSelectUser, selectedUserId }: ChatSidebarProps)
           <div className="space-y-2">
             {isLoading ? (
                 <div className="flex justify-center p-4">
-                    <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
+                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
                 </div>
             ) : filteredUsers.length === 0 ? (
                 <p className="text-sm text-gray-400 text-center py-4">Nenhum utilizador encontrado.</p>
@@ -84,10 +84,10 @@ export function ChatSidebar ({ onSelectUser, selectedUserId }: ChatSidebarProps)
                     <div 
                         key={user.id} 
                         onClick={() => onSelectUser(user)}
-                        className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${selectedUserId === user.id ? 'bg-indigo-50 border-indigo-100' : 'hover:bg-gray-50'}`}
+                        className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors ${selectedUserId === user.id ? 'bg-indigo-50 border-indigo-100' : 'hover:bg-gray-50'}`}
                     >
                         <Avatar className="w-10 h-10">
-                        <AvatarFallback className={`${selectedUserId === user.id ? 'bg-indigo-600 text-white' : 'bg-indigo-100 text-indigo-600'} text-sm transition-colors`}>
+                        <AvatarFallback className={`${selectedUserId === user.id ? 'bg-primary text-white' : 'bg-indigo-100 text-primary'} text-sm transition-colors`}>
                             {initials}
                         </AvatarFallback>
                         </Avatar>

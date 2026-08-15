@@ -132,7 +132,7 @@ export function ParentDashboard  ({ parentId, student }: ParentDashboardProps) {
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="bg-white rounded-xl shadow-sm p-6">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Painel do Encarregado</h1>
@@ -218,9 +218,9 @@ export function ParentDashboard  ({ parentId, student }: ParentDashboardProps) {
                       key={message.id}
                       className={`flex ${message.senderId === parentId ? 'justify-end' : 'justify-start'}`}
                     >
-                      <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                      <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-xl ${
                         message.senderId === parentId
-                          ? 'bg-blue-500 text-white'
+                          ? 'bg-primary text-white'
                           : 'bg-gray-100 text-gray-900'
                       }`}>
                         <div className="flex items-center gap-2 mb-1">
@@ -254,7 +254,7 @@ export function ParentDashboard  ({ parentId, student }: ParentDashboardProps) {
                     <select
                       value={selectedTeacher}
                       onChange={(e) => setSelectedTeacher(e.target.value)}
-                      className="w-full p-2 border rounded-lg"
+                      className="w-full p-2 border rounded-xl"
                     >
                       <option value="">Selecionar professor...</option>
                       {teachers.map((teacher) => (
@@ -300,7 +300,7 @@ export function ParentDashboard  ({ parentId, student }: ParentDashboardProps) {
               <CardContent>
                 <div className="space-y-4">
                   {assessments.map((assessment) => (
-                    <div key={assessment.id} className="border rounded-lg p-4 space-y-3">
+                    <div key={assessment.id} className="border rounded-xl p-4 space-y-3">
                       <div className="flex items-start justify-between">
                         <div className="space-y-1">
                           <h3 className="font-semibold text-lg">{assessment.title}</h3>
@@ -356,7 +356,7 @@ export function ParentDashboard  ({ parentId, student }: ParentDashboardProps) {
                       : 0;
                     
                     return (
-                      <div key={subject} className="text-center p-4 border rounded-lg">
+                      <div key={subject} className="text-center p-4 border rounded-xl">
                         <h4 className="font-medium">{subject}</h4>
                         <div className={`text-2xl font-bold ${getScoreColor(average)}`}>
                           {average.toFixed(1)}%

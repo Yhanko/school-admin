@@ -77,12 +77,12 @@ export function SchoolFinance({ report }: { report?: FinanceReport | null }) {
       <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4">
         <CardTitle className="text-base sm:text-lg font-bold text-gray-900">Finanças da Escola</CardTitle>
         <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm">
-          <div className="flex items-center gap-1.5 bg-amber-50 text-amber-800 px-2.5 py-1 rounded-lg border border-amber-200">
+          <div className="flex items-center gap-1.5 bg-amber-50 text-amber-800 px-2.5 py-1 rounded-xl border border-amber-200">
             <div className="w-2.5 h-2.5 rounded-full bg-[#f59e0b]"></div>
             <span className="font-semibold">Kz {totalCollected.toLocaleString()}</span>
             <span className="text-[11px] opacity-75">Recebido</span>
           </div>
-          <div className="flex items-center gap-1.5 bg-rose-50 text-rose-800 px-2.5 py-1 rounded-lg border border-rose-200">
+          <div className="flex items-center gap-1.5 bg-rose-50 text-rose-800 px-2.5 py-1 rounded-xl border border-rose-200">
             <div className="w-2.5 h-2.5 rounded-full bg-[#FF5777]"></div>
             <span className="font-semibold">Kz {totalPending.toLocaleString()}</span>
             <span className="text-[11px] opacity-75">Pendente</span>

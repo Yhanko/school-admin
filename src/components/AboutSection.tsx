@@ -172,7 +172,7 @@ const AboutSection: React.FC<AboutSectionProps> = ({ className = '' }) => {
                   onMouseEnter={() => setActiveFeature(index)}
                   onMouseLeave={() => setActiveFeature(null)}
                 >
-                  <div className="relative overflow-hidden rounded-lg sm:rounded-xl bg-white/5 backdrop-blur-md border border-[#FF5777]/20 group-hover:border-[#FF5777]/40 transition-all duration-300 group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-[#FF5777]/20">
+                  <div className="relative overflow-hidden rounded-xl sm:rounded-xl bg-white/5 backdrop-blur-md border border-[#FF5777]/20 group-hover:border-[#FF5777]/40 transition-all duration-300 group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-[#FF5777]/20">
                     
                     {/* Placeholder para imagem */}
                     <div className="aspect-square bg-gradient-to-br from-[#FF5777]/20 to-[#FF5777]/5 flex items-center justify-center">

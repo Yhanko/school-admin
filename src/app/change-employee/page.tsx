@@ -102,7 +102,7 @@ const ChangeEmployeeContent = () => {
   if (isFetching) {
     return (
         <div className="flex justify-center items-center h-64">
-          <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
     );
   }
@@ -114,9 +114,9 @@ const ChangeEmployeeContent = () => {
   return (
     <div className="min-h-screen p-10 w-[70rem]">
       <h1 className="text-2xl font-semibold text-center text-gray-800 p-5">Editar Funcionário</h1>
-      <form onSubmit={handleSubmit} className="mx-auto shadow-lg rounded-lg flex space-x-20 bg-white">
+      <form onSubmit={handleSubmit} className="mx-auto shadow-lg rounded-xl flex space-x-20 bg-white">
         <div className="flex-1">
-          <div className="bg-indigo-600 text-white p-5 rounded-t-lg">
+          <div className="bg-primary text-white p-5 rounded-t-lg">
             <h2 className="text-lg font-semibold">Dados Pessoais</h2>
           </div>
           
@@ -165,7 +165,7 @@ const ChangeEmployeeContent = () => {
         </div>
 
         <div className='w-[30rem] border-l'>
-          <div className="bg-indigo-600 text-white p-5 rounded-tr-lg">
+          <div className="bg-primary text-white p-5 rounded-tr-lg">
             <h2 className="text-lg font-semibold">Formação Académica</h2>
           </div>
           
@@ -191,7 +191,7 @@ const ChangeEmployeeContent = () => {
             </div>
           </div>
           <div className="flex justify-end mt-5 p-5">
-            <button disabled={isLoading} type="submit" className="bg-indigo-600 rounded-full text-white p-2 w-36 hover:bg-indigo-700 flex justify-center cursor-pointer">
+            <button disabled={isLoading} type="submit" className="bg-primary rounded-full text-white p-2 w-36 hover:bg-indigo-700 flex justify-center cursor-pointer">
               {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Atualizar"}
             </button>
           </div>

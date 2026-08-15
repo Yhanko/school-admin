@@ -166,7 +166,7 @@ export function RelatoriosPage() {
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-4">
-                    <div className="p-3 bg-blue-100 rounded-lg">
+                    <div className="p-3 bg-blue-100 rounded-xl">
                       <FileText className="h-6 w-6 text-[#5856eb]" />
                     </div>
                     <div>
@@ -208,19 +208,19 @@ export function RelatoriosPage() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 border rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
+              <div className="p-4 border rounded-xl hover:bg-slate-50 cursor-pointer transition-colors">
                 <h3 className="font-medium text-slate-900 mb-2">Acadêmico</h3>
                 <p className="text-sm text-slate-500">
                   Notas médias da instituição, taxa de frequência e alunos por turma.
                 </p>
               </div>
-              <div className="p-4 border rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
+              <div className="p-4 border rounded-xl hover:bg-slate-50 cursor-pointer transition-colors">
                 <h3 className="font-medium text-slate-900 mb-2">Financeiro</h3>
                 <p className="text-sm text-slate-500">
                   Receitas totais, status de pagamentos pendentes, confirmados e cancelados.
                 </p>
               </div>
-              <div className="p-4 border rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
+              <div className="p-4 border rounded-xl hover:bg-slate-50 cursor-pointer transition-colors">
                 <h3 className="font-medium text-slate-900 mb-2">Administrativo</h3>
                 <p className="text-sm text-slate-500">
                   Métricas de recursos humanos, como número de professores, administradores e espaços físicos.

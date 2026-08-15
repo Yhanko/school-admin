@@ -150,7 +150,7 @@ export default function Deicipline() {
               className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
             />
           </div>
-          <Button onClick={handleSearch} size="sm" className="bg-indigo-600 text-white hover:bg-indigo-700 rounded-xl px-4 text-sm shrink-0">
+          <Button onClick={handleSearch} size="sm" className="bg-primary text-white hover:bg-indigo-700 rounded-xl px-4 text-sm shrink-0">
             Pesquisar
           </Button>
         </div>
@@ -174,7 +174,7 @@ export default function Deicipline() {
                 {isLoading ? (
                   <tr>
                     <td colSpan={7} className="py-10 text-center">
-                      <Loader2 className="w-6 h-6 animate-spin mx-auto text-indigo-500" />
+                      <Loader2 className="w-6 h-6 animate-spin mx-auto text-primary" />
                     </td>
                   </tr>
                 ) : filteredIncidents.length === 0 ? (
@@ -212,7 +212,7 @@ export default function Deicipline() {
                           <Button variant="ghost" size="sm" onClick={() => handleDelete(incident.id)} className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50" title="Apagar">
                             <Trash2 className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleNotify(incident.id)} className="h-8 w-8 p-0 text-blue-500 hover:text-blue-700 hover:bg-blue-50" title="Notificar por Email">
+                          <Button variant="ghost" size="sm" onClick={() => handleNotify(incident.id)} className="h-8 w-8 p-0 text-primary hover:text-blue-700 hover:bg-blue-50" title="Notificar por Email">
                             <Mail className="w-4 h-4" />
                           </Button>
                         </div>
@@ -227,7 +227,7 @@ export default function Deicipline() {
           {/* Mobile card list */}
           <div className="sm:hidden divide-y divide-gray-100">
             {isLoading ? (
-              <div className="py-10 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-indigo-500" /></div>
+              <div className="py-10 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
             ) : filteredIncidents.length === 0 ? (
               <p className="py-10 text-center text-sm text-gray-400">Nenhuma ocorrência encontrada.</p>
             ) : filteredIncidents.map((incident) => {
@@ -258,7 +258,7 @@ export default function Deicipline() {
                       <Button variant="ghost" size="sm" onClick={() => handleDelete(incident.id)} className="h-8 w-8 p-0 text-red-500 hover:text-red-700">
                         <Trash2 className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleNotify(incident.id)} className="h-8 w-8 p-0 text-blue-500 hover:text-blue-700">
+                      <Button variant="ghost" size="sm" onClick={() => handleNotify(incident.id)} className="h-8 w-8 p-0 text-primary hover:text-blue-700">
                         <Mail className="w-4 h-4" />
                       </Button>
                     </div>

@@ -63,7 +63,7 @@ export default function SupportPage() {
             <div>
               <label className="block text-sm font-medium mb-1">Descrição</label>
               <textarea 
-                className="w-full border rounded-md p-2 min-h-[120px]" 
+                className="w-full border rounded-xl p-2 min-h-[120px]" 
                 value={description} 
                 onChange={e => setDescription(e.target.value)} 
                 required 

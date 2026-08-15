@@ -110,7 +110,7 @@ export function NewOccurrence({ onCreated }: { onCreated?: () => void }) {
       <SheetTrigger asChild>
         <Button
             size="sm"
-            className="gap-1.5 bg-indigo-600 rounded-xl text-white hover:bg-indigo-700 hover:text-white cursor-pointer text-xs sm:text-sm">
+            className="gap-1.5 bg-primary rounded-xl text-white hover:bg-indigo-700 hover:text-white cursor-pointer text-xs sm:text-sm">
             <Plus className="w-4 h-4 " />
             Nova ocorrência
         </Button>
@@ -223,7 +223,7 @@ export function NewOccurrence({ onCreated }: { onCreated?: () => void }) {
             </div>
 
             <SheetFooter className="mt-5 pt-4 border-t border-gray-100">
-                <Button disabled={isSubmitting} type="submit" className="w-full bg-indigo-600 rounded-xl text-white cursor-pointer hover:bg-indigo-700 h-11 font-semibold text-sm">
+                <Button disabled={isSubmitting} type="submit" className="w-full bg-primary rounded-xl text-white cursor-pointer hover:bg-indigo-700 h-11 font-semibold text-sm">
                     {isSubmitting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
                     {isSubmitting ? "A guardar..." : "Guardar Ocorrência"}
                 </Button>

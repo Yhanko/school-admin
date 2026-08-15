@@ -77,7 +77,7 @@ export function EditClass() {
                 required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Ex: Turma A"
               />
             </div>
@@ -91,7 +91,7 @@ export function EditClass() {
                 required
                 value={formData.room}
                 onChange={(e) => setFormData({ ...formData, room: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Ex: Sala 101"
               />
             </div>
@@ -104,7 +104,7 @@ export function EditClass() {
                 required
                 value={formData.period}
                 onChange={(e) => setFormData({ ...formData, period: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 {PERIODS.map((period) => (
                   <option key={period} value={period}>
@@ -122,7 +122,7 @@ export function EditClass() {
                 required
                 value={formData.academic_level}
                 onChange={(e) => setFormData({ ...formData, academic_level: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 {ACADEMIC_LEVELS.map((level) => (
                   <option key={level} value={level}>
@@ -142,7 +142,7 @@ export function EditClass() {
                 onChange={(e) =>
                   setFormData({ ...formData, student_count: parseInt(e.target.value) || 0 })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
           </div>
@@ -151,14 +151,14 @@ export function EditClass() {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Professores
             </label>
-            <div className="border border-gray-300 rounded-lg p-4 max-h-48 overflow-y-auto">
+            <div className="border border-gray-300 rounded-xl p-4 max-h-48 overflow-y-auto">
               <div className="space-y-2">
                 <label
                     className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded"
                 >
                     <input
                         type="checkbox"
-                        className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                        className="w-4 h-4 text-primary rounded focus:ring-2 focus:ring-blue-500"
                     />
                     <span className="text-sm text-gray-700">Osvaldo Pedro</span>
                 </label>

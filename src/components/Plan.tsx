@@ -63,7 +63,7 @@ const Plane: React.FC = () => {
     const isSelected = selectedPlan === plan.id;
 
     const cardClasses = `
-      relative overflow-hidden rounded-lg p-8 cursor-pointer transition-all duration-500 transform hover:scale-105 hover:-translate-y-3
+      relative overflow-hidden rounded-xl p-8 cursor-pointer transition-all duration-500 transform hover:scale-105 hover:-translate-y-3
       ${plan.popular 
         ? 'bg-gradient-to-br from-[#FF5777]/10 to-[#FF5777]/5 border border-[#FF5777] shadow-[0_0_15px_rgba(255,87,119,0.2)]' 
         : 'bg-gradient-to-br from-white to-gray-50 border border-gray-200 hover:border-[#FF5777]/30'
@@ -178,7 +178,7 @@ const Plane: React.FC = () => {
 
     return (
       <div className="max-w-4xl mx-auto mt-16 px-6">
-        <div className="bg-white backdrop-blur-md rounded-lg p-8 border border-[#FF5777]/20 animate-fade-in-up">
+        <div className="bg-white backdrop-blur-md rounded-xl p-8 border border-[#FF5777]/20 animate-fade-in-up">
           <h2 className="text-3xl font-bold text-center text-[#1B191F] mb-6">
             📋 Resumo do Plano Selecionado
           </h2>

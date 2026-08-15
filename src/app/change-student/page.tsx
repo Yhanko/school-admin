@@ -139,7 +139,7 @@ function StudentParentFormContent() {
   if (isFetching) {
     return (
         <div className="flex justify-center items-center h-64">
-          <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
     );
   }
@@ -151,7 +151,7 @@ function StudentParentFormContent() {
   return (
     <form onSubmit={handleSubmit} className="container p-2">
       {/* Student Details */}
-      <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+      <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
         <h2 className="text-2xl font-bold text-purple-600">Editar Dados do Aluno</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -167,7 +167,7 @@ function StudentParentFormContent() {
               id="firstName"
               name="firstName"
               type="text"
-              className="border rounded-lg p-2"
+              className="border rounded-xl p-2"
               value={studentData.firstName}
               onChange={handleStudentChange}
               required
@@ -179,7 +179,7 @@ function StudentParentFormContent() {
               id="lastName"
               name="lastName"
               type="text"
-              className="border rounded-lg p-2"
+              className="border rounded-xl p-2"
               value={studentData.lastName}
               onChange={handleStudentChange}
               required
@@ -191,7 +191,7 @@ function StudentParentFormContent() {
               id="birthDate"
               name="birthDate"
               type="date"
-              className="border rounded-lg p-2"
+              className="border rounded-xl p-2"
               value={studentData.birthDate}
               onChange={handleStudentChange}
             />
@@ -201,7 +201,7 @@ function StudentParentFormContent() {
               name="birthCity"
               type="text"
               placeholder="Cidade"
-              className="border rounded-lg p-2 mt-1"
+              className="border rounded-xl p-2 mt-1"
               value={studentData.birthCity}
               onChange={handleStudentChange}
             />
@@ -212,7 +212,7 @@ function StudentParentFormContent() {
               id="parentName"
               name="parentName"
               type="text"
-              className="border rounded-lg p-2"
+              className="border rounded-xl p-2"
               value={studentData.parentName}
               onChange={handleStudentChange}
             />
@@ -223,7 +223,7 @@ function StudentParentFormContent() {
               id="phone"
               name="phone"
               type="text"
-              className="border rounded-lg p-2"
+              className="border rounded-xl p-2"
               value={studentData.phone}
               onChange={handleStudentChange}
             />
@@ -234,7 +234,7 @@ function StudentParentFormContent() {
               id="email"
               name="email"
               type="email"
-              className="border rounded-lg p-2"
+              className="border rounded-xl p-2"
               value={studentData.email}
               onChange={handleStudentChange}
               required
@@ -245,7 +245,7 @@ function StudentParentFormContent() {
             <textarea
               id="address"
               name="address"
-              className="border rounded-lg p-2"
+              className="border rounded-xl p-2"
               rows={4}
               maxLength={200}
               value={studentData.address}
@@ -256,7 +256,7 @@ function StudentParentFormContent() {
       </div>
 
       {/* Parent Details */}
-      <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+      <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
         <h2 className="text-2xl font-bold text-purple-600">Detalhes do Encarregado de Educação</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -266,7 +266,7 @@ function StudentParentFormContent() {
               id="parentFirstName"
               name="firstName"
               type="text"
-              className="border rounded-lg p-2"
+              className="border rounded-xl p-2"
               value={parentData.firstName}
               onChange={handleParentChange}
             />
@@ -277,7 +277,7 @@ function StudentParentFormContent() {
               id="parentLastName"
               name="lastName"
               type="text"
-              className="border rounded-lg p-2"
+              className="border rounded-xl p-2"
               value={parentData.lastName}
               onChange={handleParentChange}
             />
@@ -288,7 +288,7 @@ function StudentParentFormContent() {
               id="parentEmail"
               name="email"
               type="email"
-              className="border rounded-lg p-2"
+              className="border rounded-xl p-2"
               value={parentData.email}
               onChange={handleParentChange}
             />
@@ -299,7 +299,7 @@ function StudentParentFormContent() {
               id="parentPhone"
               name="phone"
               type="text"
-              className="border rounded-lg p-2"
+              className="border rounded-xl p-2"
               value={parentData.phone}
               onChange={handleParentChange}
             />
@@ -309,7 +309,7 @@ function StudentParentFormContent() {
             <input
               id="parentAddress"
               name="address"
-              className="border rounded-lg p-2"
+              className="border rounded-xl p-2"
               value={parentData.address}
               onChange={handleParentChange}
             />

@@ -102,7 +102,7 @@ export function NewRoom() {
                 required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
                 placeholder="Ex: Sala 01 ou Laboratório B"
               />
             </div>
@@ -118,7 +118,7 @@ export function NewRoom() {
                 onChange={(e) =>
                   setFormData({ ...formData, capacity: parseInt(e.target.value) || 0 })
                 }
-                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
 
@@ -130,7 +130,7 @@ export function NewRoom() {
                 type="text"
                 value={formData.floor}
                 onChange={(e) => setFormData({ ...formData, floor: e.target.value })}
-                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
                 placeholder="Ex: 1º Andar"
               />
             </div>
@@ -143,7 +143,7 @@ export function NewRoom() {
                 required
                 value={formData.academic_level}
                 onChange={(e) => setFormData({ ...formData, academic_level: e.target.value, grade: '' })}
-                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
               >
                 {ACADEMIC_LEVELS.map((level) => (
                   <option key={level} value={level}>
@@ -163,7 +163,7 @@ export function NewRoom() {
               <select
                 value={formData.grade}
                 onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
-                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
               >
                 <option value="">-- Disponível para todas as classes do Cíclo --</option>
                 {formData.academic_level === '1-6' && (

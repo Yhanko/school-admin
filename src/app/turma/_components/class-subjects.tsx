@@ -116,7 +116,7 @@ export function ClassSubjects({ classId, className }: { classId: string, classNa
         </DialogHeader>
         
         <div className="grid gap-6 py-4">
-          <div className="bg-muted/30 p-4 rounded-lg border border-border">
+          <div className="bg-muted/30 p-4 rounded-xl border border-border">
             <h3 className="font-semibold text-lg mb-4">Adicionar Disciplina</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
               <div className="space-y-2">
@@ -160,7 +160,7 @@ export function ClassSubjects({ classId, className }: { classId: string, classNa
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
               </div>
             ) : subjects.length > 0 ? (
-              <div className="rounded-md border">
+              <div className="rounded-xl border">
                 <table className="w-full text-sm">
                   <thead className="bg-muted/50 border-b">
                     <tr>
@@ -185,7 +185,7 @@ export function ClassSubjects({ classId, className }: { classId: string, classNa
                 </table>
               </div>
             ) : (
-              <div className="text-center p-8 border rounded-lg bg-muted/20 text-muted-foreground">
+              <div className="text-center p-8 border rounded-xl bg-muted/20 text-muted-foreground">
                 Esta turma ainda não tem disciplinas associadas.
               </div>
             )}

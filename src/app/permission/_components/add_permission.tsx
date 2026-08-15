@@ -95,7 +95,7 @@ export function AddNewUserPermission({ onCreated }: { onCreated?: () => void }) 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button size="sm" className="gap-1.5 rounded-xl cursor-pointer bg-indigo-600 text-white hover:bg-indigo-700 text-xs sm:text-sm">
+        <Button size="sm" className="gap-1.5 rounded-xl cursor-pointer bg-primary text-white hover:bg-indigo-700 text-xs sm:text-sm">
             <Plus className="w-4 h-4" />
             Novo utilizador
         </Button>
@@ -176,12 +176,12 @@ export function AddNewUserPermission({ onCreated }: { onCreated?: () => void }) 
             <h3 className="text-sm font-semibold text-gray-800 mb-3">Permissões de Acesso</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {PERMISSIONS.map((perm) => (
-                <label key={perm.key} className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                <label key={perm.key} className="flex items-center space-x-3 p-3 border rounded-xl hover:bg-gray-50 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={permissions[perm.key]}
                     onChange={(e) => setPermissions({ ...permissions, [perm.key]: e.target.checked })}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-primary focus:ring-blue-500 border-gray-300 rounded"
                   />
                   <span className="text-sm font-medium text-gray-700">{perm.label}</span>
                 </label>
@@ -193,7 +193,7 @@ export function AddNewUserPermission({ onCreated }: { onCreated?: () => void }) 
             <Button 
               type="submit" 
               disabled={isSubmitting}
-              className="w-full bg-indigo-600 rounded-xl text-white cursor-pointer hover:bg-indigo-700 h-11 font-semibold text-sm"
+              className="w-full bg-primary rounded-xl text-white cursor-pointer hover:bg-indigo-700 h-11 font-semibold text-sm"
             >
               {isSubmitting ? <><span className="mr-2">A guardar...</span></> : "Guardar Utilizador"}
             </Button>

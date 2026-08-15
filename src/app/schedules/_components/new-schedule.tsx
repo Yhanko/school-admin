@@ -112,7 +112,7 @@ export function NewSchedule({ onCreated }: { onCreated?: () => void }) {
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         <Button
-            className="gap-2 bg-indigo-600 rounded-full text-white hover:bg-indigo-700 transition-colors shadow-sm">
+            className="gap-2 bg-primary rounded-full text-white hover:bg-indigo-700 transition-colors shadow-sm">
             <Plus className="w-4 h-4 " />
             Novo Horário
         </Button>
@@ -127,7 +127,7 @@ export function NewSchedule({ onCreated }: { onCreated?: () => void }) {
         
         {isLoadingData ? (
             <div className="flex justify-center items-center py-20">
-                <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
         ) : (
             <form onSubmit={handleSubmit} className="mt-5 space-y-4">
@@ -189,7 +189,7 @@ export function NewSchedule({ onCreated }: { onCreated?: () => void }) {
                 </div>
 
                 <SheetFooter className="mt-5 pt-4 border-t border-gray-100">
-                    <Button disabled={isSubmitting} type="submit" className="w-full bg-indigo-600 rounded-xl text-white cursor-pointer hover:bg-indigo-700 h-11 font-semibold text-sm">
+                    <Button disabled={isSubmitting} type="submit" className="w-full bg-primary rounded-xl text-white cursor-pointer hover:bg-indigo-700 h-11 font-semibold text-sm">
                         {isSubmitting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
                         {isSubmitting ? "A guardar..." : "Guardar Horário"}
                     </Button>

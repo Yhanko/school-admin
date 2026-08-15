@@ -136,7 +136,7 @@ export default function Permission(){
   if (isLoading) {
     return (
       <div className="flex justify-center items-center w-full min-h-[60vh]">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -156,7 +156,7 @@ export default function Permission(){
           <p className="text-sm text-gray-500 mt-0.5">Controle de acesso e permissões de utilizadores</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" className="gap-1.5 rounded-xl cursor-pointer border-indigo-200 text-indigo-600 hover:bg-indigo-50 text-xs sm:text-sm">
+          <Button variant="outline" size="sm" className="gap-1.5 rounded-xl cursor-pointer border-indigo-200 text-primary hover:bg-indigo-50 text-xs sm:text-sm">
             <Download className="w-4 h-4" />
             <span>Exportar</span>
           </Button>
@@ -170,11 +170,11 @@ export default function Permission(){
           <CardContent className="p-3 sm:p-5">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-xl bg-indigo-100 shrink-0">
-                <Users className="w-4 h-4 text-indigo-600" />
+                <Users className="w-4 h-4 text-primary" />
               </div>
               <div>
                 <p className="text-xs text-gray-500">Total</p>
-                <p className="text-2xl font-bold text-indigo-600">{users.length}</p>
+                <p className="text-2xl font-bold text-primary">{users.length}</p>
               </div>
             </div>
           </CardContent>
@@ -211,11 +211,11 @@ export default function Permission(){
           <CardContent className="p-3 sm:p-5">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-xl bg-blue-100 shrink-0">
-                <GraduationCap className="w-4 h-4 text-blue-600" />
+                <GraduationCap className="w-4 h-4 text-primary" />
               </div>
               <div>
                 <p className="text-xs text-gray-500">Professores</p>
-                <p className="text-2xl font-bold text-blue-600">
+                <p className="text-2xl font-bold text-primary">
                   {users.filter(u => u.role === "TEACHER").length}
                 </p>
               </div>
@@ -237,7 +237,7 @@ export default function Permission(){
             className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
           />
         </div>
-        <Button onClick={handleSearch} size="sm" className="bg-indigo-600 text-white hover:bg-indigo-700 rounded-xl px-4 text-sm shrink-0">
+        <Button onClick={handleSearch} size="sm" className="bg-primary text-white hover:bg-indigo-700 rounded-xl px-4 text-sm shrink-0">
           Pesquisar
         </Button>
       </div>
@@ -278,7 +278,7 @@ export default function Permission(){
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-8 w-8 p-0 text-gray-500 hover:text-indigo-600"
+                          className="h-8 w-8 p-0 text-gray-500 hover:text-primary"
                           onClick={() =>
                             setShowPermissionDetails(
                               showPermissionDetails === user.id ? null : user.id
@@ -332,7 +332,7 @@ export default function Permission(){
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-8 w-8 p-0 text-gray-500 hover:text-indigo-600"
+                      className="h-8 w-8 p-0 text-gray-500 hover:text-primary"
                       onClick={() =>
                         setShowPermissionDetails(
                           showPermissionDetails === user.id ? null : user.id
@@ -390,7 +390,7 @@ export default function Permission(){
                       variant="outline"
                       size="sm"
                       onClick={() => togglePermission(showPermissionDetails, key, value)}
-                      className={`shrink-0 text-xs rounded-lg h-7 px-2 ${value ? 'border-red-200 text-red-600 hover:bg-red-50' : 'border-green-200 text-green-600 hover:bg-green-50'}`}
+                      className={`shrink-0 text-xs rounded-xl h-7 px-2 ${value ? 'border-red-200 text-red-600 hover:bg-red-50' : 'border-green-200 text-green-600 hover:bg-green-50'}`}
                     >
                       {value ? "Revogar" : "Conceder"}
                     </Button>

@@ -104,7 +104,7 @@ export function NewSubject({ onCreated }: { onCreated?: () => void }) {
             />
           </div>
 
-          <div className="space-y-4 bg-muted/20 p-4 rounded-lg border">
+          <div className="space-y-4 bg-muted/20 p-4 rounded-xl border">
             <h4 className="font-semibold">Vincular a Ciclos (Opcional)</h4>
             <p className="text-sm text-muted-foreground mb-2">Selecione para vincular automaticamente a todas as turmas deste ciclo.</p>
             <div className="flex flex-wrap gap-4">
@@ -121,7 +121,7 @@ export function NewSubject({ onCreated }: { onCreated?: () => void }) {
             </div>
           </div>
 
-          <div className="space-y-4 bg-muted/20 p-4 rounded-lg border">
+          <div className="space-y-4 bg-muted/20 p-4 rounded-xl border">
             <h4 className="font-semibold">Vincular a Turmas Específicas (Opcional)</h4>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {classes.length === 0 ? (

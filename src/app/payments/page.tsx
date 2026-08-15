@@ -97,7 +97,7 @@ export default function Payments() {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -239,7 +239,7 @@ export default function Payments() {
                       <p className="text-2xl font-bold text-foreground">{stat.value}</p>
                       <p className={`text-sm font-semibold mt-2 ${stat.color}`}>{stat.percentage}</p>
                     </div>
-                    <div className={`${stat.bgColor} p-3 rounded-lg`}>
+                    <div className={`${stat.bgColor} p-3 rounded-xl`}>
                       <Icon className={`w-6 h-6 ${stat.color}`} />
                     </div>
                   </div>
@@ -266,7 +266,7 @@ export default function Payments() {
               </div>
               <div className="space-y-2">
                 <p className="text-sm text-muted-foreground">Taxa de Recebimento</p>
-                <p className="text-2xl font-bold text-blue-600">{paidRate.toFixed(1)}%</p>
+                <p className="text-2xl font-bold text-primary">{paidRate.toFixed(1)}%</p>
               </div>
             </div>
 
@@ -304,7 +304,7 @@ export default function Payments() {
             onClick={exportToPDF}
             disabled={isExporting}
             size="sm"
-            className="gap-2 rounded-xl cursor-pointer bg-indigo-600 text-white hover:bg-indigo-700 shrink-0">
+            className="gap-2 rounded-xl cursor-pointer bg-primary text-white hover:bg-indigo-700 shrink-0">
             {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
             {isExporting ? "A Exportar..." : "Exportar PDF"}
           </Button>

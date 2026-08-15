@@ -116,7 +116,7 @@ export function ProfilePage() {
     if (isLoading) {
         return (
             <div className="flex justify-center items-center w-full min-h-[60vh]">
-                <Loader2 className="w-10 h-10 animate-spin text-indigo-500" />
+                <Loader2 className="w-10 h-10 animate-spin text-primary" />
             </div>
         );
     }
@@ -135,7 +135,7 @@ export function ProfilePage() {
                 <div className="flex flex-col items-center gap-3">
                     <div className="relative">
                         <div className="border-2 border-indigo-200 rounded-full w-28 h-28 sm:w-36 sm:h-36 flex justify-center items-center bg-indigo-50 overflow-hidden shadow-md">
-                            <span className="text-3xl sm:text-4xl text-indigo-500 font-bold uppercase">
+                            <span className="text-3xl sm:text-4xl text-primary font-bold uppercase">
                                 {userName.substring(0, 2)}
                             </span>
                         </div>
@@ -145,7 +145,7 @@ export function ProfilePage() {
                     </div>
                     <div className="text-center">
                         <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{userName}</h1>
-                        <p className="text-sm sm:text-base text-indigo-500 font-medium uppercase mt-0.5">{role.replace(/_/g, ' ')}</p>
+                        <p className="text-sm sm:text-base text-primary font-medium uppercase mt-0.5">{role.replace(/_/g, ' ')}</p>
                     </div>
                 </div>
 
@@ -155,7 +155,7 @@ export function ProfilePage() {
                 <Card className="w-full border border-gray-100 shadow-sm rounded-2xl">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-base font-semibold text-gray-800 flex items-center gap-2">
-                            <User className="w-4 h-4 text-indigo-500" />
+                            <User className="w-4 h-4 text-primary" />
                             Dados da Conta
                         </CardTitle>
                     </CardHeader>
@@ -191,7 +191,7 @@ export function ProfilePage() {
                 <Card className="w-full border border-gray-100 shadow-sm rounded-2xl">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-base font-semibold text-gray-800 flex items-center gap-2">
-                            <Monitor className="w-4 h-4 text-indigo-500" />
+                            <Monitor className="w-4 h-4 text-primary" />
                             Sessões Ativas
                         </CardTitle>
                     </CardHeader>
@@ -213,7 +213,7 @@ export function ProfilePage() {
                     {/* Editar Dados */}
                     <Dialog open={isEditProfileOpen} onOpenChange={setIsEditProfileOpen}>
                         <DialogTrigger asChild>
-                            <Button variant="outline" className="flex-1 rounded-xl cursor-pointer border-indigo-200 text-indigo-600 hover:bg-indigo-50 font-semibold h-11">
+                            <Button variant="outline" className="flex-1 rounded-xl cursor-pointer border-indigo-200 text-primary hover:bg-indigo-50 font-semibold h-11">
                                 <User className="w-4 h-4 mr-2" />
                                 Editar Dados
                             </Button>
@@ -221,7 +221,7 @@ export function ProfilePage() {
                         <DialogContent className="w-[95vw] max-w-md rounded-2xl">
                             <DialogHeader>
                                 <DialogTitle className="flex items-center gap-2 text-gray-900">
-                                    <User className="w-4 h-4 text-indigo-500" />
+                                    <User className="w-4 h-4 text-primary" />
                                     Editar Perfil
                                 </DialogTitle>
                             </DialogHeader>
@@ -258,7 +258,7 @@ export function ProfilePage() {
                                         className="rounded-xl border-gray-200 text-sm"
                                     />
                                 </div>
-                                <Button type="submit" disabled={isUpdatingProfile} className="w-full bg-indigo-600 hover:bg-indigo-700 cursor-pointer text-white rounded-xl h-11 font-semibold">
+                                <Button type="submit" disabled={isUpdatingProfile} className="w-full bg-primary hover:bg-indigo-700 cursor-pointer text-white rounded-xl h-11 font-semibold">
                                     {isUpdatingProfile ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                                     Salvar Alterações
                                 </Button>
@@ -269,7 +269,7 @@ export function ProfilePage() {
                     {/* Redefinir Senha */}
                     <Dialog open={isChangePasswordOpen} onOpenChange={setIsChangePasswordOpen}>
                         <DialogTrigger asChild>
-                            <Button className="flex-1 rounded-xl cursor-pointer h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-sm">
+                            <Button className="flex-1 rounded-xl cursor-pointer h-11 bg-primary hover:bg-indigo-700 text-white font-semibold shadow-sm">
                                 <KeyRound className="w-4 h-4 mr-2" />
                                 Redefinir Senha
                             </Button>
@@ -277,7 +277,7 @@ export function ProfilePage() {
                         <DialogContent className="w-[95vw] max-w-md rounded-2xl">
                             <DialogHeader>
                                 <DialogTitle className="flex items-center gap-2 text-gray-900">
-                                    <KeyRound className="w-4 h-4 text-indigo-500" />
+                                    <KeyRound className="w-4 h-4 text-primary" />
                                     Alterar Palavra-Passe
                                 </DialogTitle>
                             </DialogHeader>
@@ -342,7 +342,7 @@ export function ProfilePage() {
                                         </button>
                                     </div>
                                 </div>
-                                <Button type="submit" disabled={isChangingPassword} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer rounded-xl h-11 font-semibold">
+                                <Button type="submit" disabled={isChangingPassword} className="w-full bg-primary hover:bg-indigo-700 text-white cursor-pointer rounded-xl h-11 font-semibold">
                                     {isChangingPassword ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                                     Atualizar Senha
                                 </Button>

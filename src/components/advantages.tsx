@@ -45,7 +45,7 @@ export function UseCase(){
                         {/* Ícone e título */}
                         <div className="flex items-start space-x-4 mb-6 relative z-10">
                           <div className="flex-shrink-0 p-3 bg-[#FF5777]/20 rounded-xl group-hover:bg-[#FF5777]/30 transition-colors duration-300">
-                            <Image src={Support} alt="support" className="w-8 h-8 rounded-lg"/>
+                            <Image src={Support} alt="support" className="w-8 h-8 rounded-xl"/>
                           </div>
                           <div className="flex-1">
                             <h3 className="text-xl font-bold text-[#FF5777] mb-2 group-hover:text-[#FF5777]/90 transition-colors duration-300">
@@ -80,7 +80,7 @@ export function UseCase(){
                         
                         <div className="flex items-start space-x-4 mb-6 relative z-10">
                           <div className="flex-shrink-0 p-3 bg-[#FF5777]/20 rounded-xl group-hover:bg-[#FF5777]/30 transition-colors duration-300">
-                            <Image src={Information} alt="information" className="w-8 h-8 rounded-lg"/>
+                            <Image src={Information} alt="information" className="w-8 h-8 rounded-xl"/>
                           </div>
                           <div className="flex-1">
                             <h3 className="text-xl font-bold text-[#FF5777] mb-2 group-hover:text-[#FF5777]/90 transition-colors duration-300">
@@ -112,7 +112,7 @@ export function UseCase(){
                         
                         <div className="flex items-start space-x-4 mb-6 relative z-10">
                           <div className="flex-shrink-0 p-3 bg-[#FF5777]/20 rounded-xl group-hover:bg-[#FF5777]/30 transition-colors duration-300">
-                            <Image src={Financial} alt="financial" className="w-8 h-8 rounded-lg"/>
+                            <Image src={Financial} alt="financial" className="w-8 h-8 rounded-xl"/>
                           </div>
                           <div className="flex-1">
                             <h3 className="text-xl font-bold text-[#FF5777] mb-2 group-hover:text-[#FF5777]/90 transition-colors duration-300">

@@ -64,7 +64,7 @@ function StudentDetailsContent() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-100 flex justify-center items-center">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -90,7 +90,7 @@ function StudentDetailsContent() {
             
             <div className="relative z-10 flex items-center gap-6 pt-8 pb-6">
               <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center overflow-hidden">
-                  <span className="text-3xl font-bold text-indigo-500">
+                  <span className="text-3xl font-bold text-primary">
                     {student.fullName[0]}
                   </span>
               </div>

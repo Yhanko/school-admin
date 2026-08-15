@@ -62,7 +62,7 @@ export function AdvantageSection(){
                         { title: "Redução de tarefas repetitivas", desc: "Automatize fluxos que consomem tempo diariamente." },
                         { title: "Mais foco no que importa", desc: "Libere sua equipe para atividades estratégicas e de maior impacto." }
                       ].map((item, index) => (
-                        <div key={index} className="flex items-start space-x-3 group/item hover:bg-white/5 p-3 rounded-lg transition-all duration-300">
+                        <div key={index} className="flex items-start space-x-3 group/item hover:bg-white/5 p-3 rounded-xl transition-all duration-300">
                           <div className="flex-shrink-0 w-6 h-6 bg-[#FF5777]/20 rounded-full flex items-center justify-center mt-1 group-hover/item:bg-[#FF5777]/30 transition-colors duration-300">
                             <svg className="w-3 h-3 text-[#FF5777]" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path>
@@ -88,7 +88,7 @@ export function AdvantageSection(){
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-[#1B191F]/50 to-transparent"></div>
                       <div className="absolute bottom-4 left-4 right-4">
-                        <div className="bg-white/10 backdrop-blur-md rounded-lg p-3">
+                        <div className="bg-white/10 backdrop-blur-md rounded-xl p-3">
                           <p className="text-white font-semibold text-sm">Automatize processos e ganhe eficiência</p>
                         </div>
                       </div>
@@ -113,7 +113,7 @@ export function AdvantageSection(){
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-[#1B191F]/50 to-transparent"></div>
                       <div className="absolute bottom-4 left-4 right-4">
-                        <div className="bg-white/10 backdrop-blur-md rounded-lg p-3">
+                        <div className="bg-white/10 backdrop-blur-md rounded-xl p-3">
                           <p className="text-white font-semibold text-sm">Tecnologia acessível para todos</p>
                         </div>
                       </div>
@@ -144,7 +144,7 @@ export function AdvantageSection(){
                         { title: "Tecnologia como aliada", desc: "Promovemos a igualdade de oportunidades por meio da inovação." },
                         { title: "Educação sem barreiras", desc: "Levamos conhecimento a todos, independentemente de limitações físicas, sociais ou cognitivas." }
                       ].map((item, index) => (
-                        <div key={index} className="flex items-start space-x-3 group/item hover:bg-white/5 p-3 rounded-lg transition-all duration-300">
+                        <div key={index} className="flex items-start space-x-3 group/item hover:bg-white/5 p-3 rounded-xl transition-all duration-300">
                           <div className="flex-shrink-0 w-6 h-6 bg-[#FF5777]/20 rounded-full flex items-center justify-center mt-1 group-hover/item:bg-[#FF5777]/30 transition-colors duration-300">
                             <svg className="w-3 h-3 text-[#FF5777]" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path>
@@ -190,7 +190,7 @@ export function AdvantageSection(){
                         { title: "Monitoramento contínuo", desc: "Monitoramento contínuo contra acessos não autorizados." },
                         { title: "Conformidade", desc: "Conformidade com padrões e boas práticas de segurança digital." }
                       ].map((item, index) => (
-                        <div key={index} className="flex items-start space-x-3 group/item hover:bg-white/5 p-3 rounded-lg transition-all duration-300">
+                        <div key={index} className="flex items-start space-x-3 group/item hover:bg-white/5 p-3 rounded-xl transition-all duration-300">
                           <div className="flex-shrink-0 w-6 h-6 bg-[#FF5777]/20 rounded-full flex items-center justify-center mt-1 group-hover/item:bg-[#FF5777]/30 transition-colors duration-300">
                             <svg className="w-3 h-3 text-[#FF5777]" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path>
@@ -216,7 +216,7 @@ export function AdvantageSection(){
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-[#1B191F]/50 to-transparent"></div>
                       <div className="absolute bottom-4 left-4 right-4">
-                        <div className="bg-white/10 backdrop-blur-md rounded-lg p-3">
+                        <div className="bg-white/10 backdrop-blur-md rounded-xl p-3">
                           <p className="text-white font-semibold text-sm">Máxima segurança para seus dados</p>
                         </div>
                       </div>

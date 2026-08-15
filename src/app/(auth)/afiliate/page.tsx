@@ -229,7 +229,7 @@ export default function LoginAffliantePage() {
                     onChange={toggleCheck}
                   />
                   <div
-                    className={`w-5 h-5 border-2 border-[#E2E5F1] rounded-md flex items-center justify-center transition-all ${
+                    className={`w-5 h-5 border-2 border-[#E2E5F1] rounded-xl flex items-center justify-center transition-all ${
                       isChecked ? "bg-[#217EFD] border-[#217EFD]" : "bg-white"
                     }`}
                   >

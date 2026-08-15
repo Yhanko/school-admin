@@ -266,7 +266,7 @@ export function CalendarSchedule() {
                       variant="ghost" 
                       size="icon" 
                       onClick={() => handleDelete(item.id)} 
-                      className="h-7 w-7 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg cursor-pointer"
+                      className="h-7 w-7 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl cursor-pointer"
                       title="Apagar Evento"
                     >
                       <Trash2 className="w-4 h-4" />

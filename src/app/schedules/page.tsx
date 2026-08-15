@@ -82,7 +82,7 @@ export default function SchedulesPage() {
         <Card className="border-0 shadow-lg">
           <CardHeader className="bg-gradient-to-r from-card to-muted/30 border-b">
             <CardTitle className="text-lg sm:text-2xl font-bold flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-indigo-100 text-indigo-600">
+                <div className="p-2 rounded-xl bg-indigo-100 text-primary">
                     <Calendar className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
                 Gestão de Horários
@@ -126,7 +126,7 @@ export default function SchedulesPage() {
                   {isLoading ? (
                       <tr>
                           <td colSpan={6} className="py-8 text-center">
-                              <Loader2 className="w-6 h-6 animate-spin mx-auto text-indigo-500" />
+                              <Loader2 className="w-6 h-6 animate-spin mx-auto text-primary" />
                           </td>
                       </tr>
                   ) : schedules.length === 0 ? (
@@ -162,7 +162,7 @@ export default function SchedulesPage() {
             {/* Mobile card list */}
             <div className="sm:hidden divide-y divide-gray-100">
               {isLoading ? (
-                <div className="py-8 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-indigo-500" /></div>
+                <div className="py-8 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
               ) : schedules.length === 0 ? (
                 <p className="py-8 text-center text-sm text-gray-400">Nenhum horário definido.</p>
               ) : schedules
@@ -174,7 +174,7 @@ export default function SchedulesPage() {
                       <p className="font-semibold text-sm text-gray-900">{daysOfWeekMap[schedule.dayOfWeek]}</p>
                       <p className="text-xs text-gray-500 mt-0.5">{schedule.subject?.name || 'N/A'}</p>
                     </div>
-                    <span className="font-mono text-xs bg-indigo-50 text-indigo-700 rounded-lg px-2 py-1 whitespace-nowrap shrink-0">
+                    <span className="font-mono text-xs bg-indigo-50 text-indigo-700 rounded-xl px-2 py-1 whitespace-nowrap shrink-0">
                       {schedule.startTime} - {schedule.endTime}
                     </span>
                   </div>

@@ -55,7 +55,7 @@ export function NotificationsHover() {
                         totalNotificationsUnread.slice(0, 4).map((notification) => (
                             <div
                                 key={notification.id}
-                                className="border-[2px] border-[#EDEFF6] flex flex-col space-y-1 border-l-4 rounded-lg p-3"
+                                className="border-[2px] border-[#EDEFF6] flex flex-col space-y-1 border-l-4 rounded-xl p-3"
                                 style={{ borderLeftColor: "#20C06B" }}
                             >
                                 <span className="text-[#474747] font-semibold text-sm line-clamp-1">

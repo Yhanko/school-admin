@@ -25,7 +25,7 @@ interface FormErrors {
 
 // Componentes UI baseados no shadcn/ui
 const Card: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (
-  <div className={`rounded-lg border bg-card text-card-foreground shadow-sm ${className}`}>
+  <div className={`rounded-xl border bg-card text-card-foreground shadow-sm ${className}`}>
     {children}
   </div>
 );
@@ -82,7 +82,7 @@ const Input: React.FC<{
     value={value}
     onChange={onChange}
     maxLength={maxLength}
-    className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
+    className={`flex h-10 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
   />
 );
 
@@ -97,7 +97,7 @@ const Button: React.FC<{
     type={type}
     onClick={onClick}
     disabled={disabled}
-    className={`inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 px-4 py-2 ${className}`}
+    className={`inline-flex items-center justify-center rounded-xl text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 px-4 py-2 ${className}`}
   >
     {children}
   </button>
@@ -282,7 +282,7 @@ const PaymentForm: React.FC = () => {
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-6">
             {/* Plano Selecionado */}
-            <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+            <div className="bg-white/5 rounded-xl p-4 border border-white/10">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-white font-semibold">

@@ -57,22 +57,22 @@ export default function PaymentsSection({ student }: PaymentsSectionProps) {
   return (
     <Card className="p-6 mb-6">
       <div className="flex items-center gap-2 mb-6">
-        <CreditCard className="w-5 h-5 text-blue-600" />
+        <CreditCard className="w-5 h-5 text-primary" />
         <h2 className="text-2xl font-bold text-gray-900">Pagamentos</h2>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+        <div className="bg-green-50 p-4 rounded-xl border border-green-200">
           <p className="text-sm text-gray-600 font-medium mb-1">Total Pago</p>
           <p className="text-2xl font-bold text-green-700">{totalPaid.toFixed(2)} €</p>
         </div>
 
-        <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+        <div className="bg-yellow-50 p-4 rounded-xl border border-yellow-200">
           <p className="text-sm text-gray-600 font-medium mb-1">Pendente</p>
           <p className="text-2xl font-bold text-yellow-700">{totalPending.toFixed(2)} €</p>
         </div>
 
-        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+        <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
           <p className="text-sm text-gray-600 font-medium mb-1">Total de Transações</p>
           <p className="text-2xl font-bold text-blue-700">{student.payments.length}</p>
         </div>
@@ -82,7 +82,7 @@ export default function PaymentsSection({ student }: PaymentsSectionProps) {
         {student.payments.map((payment) => (
           <div
             key={payment.id}
-            className={`p-4 rounded-lg border-2 flex items-center justify-between ${getPaymentStatusColor(payment.status)}`}
+            className={`p-4 rounded-xl border-2 flex items-center justify-between ${getPaymentStatusColor(payment.status)}`}
           >
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-1">

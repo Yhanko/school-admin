@@ -134,7 +134,7 @@ function ChangeEventContent() {
         <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 animate-scale-in">
           <CardHeader className="border-b bg-gradient-to-r from-card to-muted/30 ">
             <CardTitle className="flex items-center gap-3 text-2xl">
-              <div className="p-2 rounded-lg bg-primary/10">
+              <div className="p-2 rounded-xl bg-primary/10">
                 <Calendar className="h-6 w-6 text-[#646cffaa]" />
               </div>
               Atualização da Atividade
@@ -254,7 +254,7 @@ function ChangeEventContent() {
 
 export default function ChangeEvent() {
   return (
-    <Suspense fallback={<div className="p-8 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-indigo-500" /></div>}>
+    <Suspense fallback={<div className="p-8 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" /></div>}>
       <ChangeEventContent />
     </Suspense>
   );

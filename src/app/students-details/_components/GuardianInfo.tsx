@@ -10,11 +10,11 @@ export default function GuardianInfo({ student }: GuardianInfoProps) {
   return (
     <Card className="p-6 mb-6">
       <div className="flex items-center gap-2 mb-6">
-        <Shield className="w-5 h-5 text-blue-600" />
+        <Shield className="w-5 h-5 text-primary" />
         <h2 className="text-2xl font-bold text-gray-900">Encarregado de Educação</h2>
       </div>
 
-      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-lg border-2 border-blue-200">
+      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border-2 border-blue-200">
         <div className="space-y-4">
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center flex-shrink-0">
@@ -38,7 +38,7 @@ export default function GuardianInfo({ student }: GuardianInfoProps) {
               <p className="text-sm text-gray-600 font-medium mb-2">Telefone</p>
               <a
                 href={`tel:${student.guardian.phone}`}
-                className="flex items-center gap-2 text-base font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+                className="flex items-center gap-2 text-base font-semibold text-primary hover:text-blue-700 transition-colors"
               >
                 <Phone className="w-4 h-4" />
                 {student.guardian.phone}
@@ -51,7 +51,7 @@ export default function GuardianInfo({ student }: GuardianInfoProps) {
               <p className="text-sm text-gray-600 font-medium mb-2">Email</p>
               <a
                 href={`mailto:${student.guardian.email}`}
-                className="flex items-center gap-2 text-base font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+                className="flex items-center gap-2 text-base font-semibold text-primary hover:text-blue-700 transition-colors"
               >
                 <Mail className="w-4 h-4" />
                 {student.guardian.email}

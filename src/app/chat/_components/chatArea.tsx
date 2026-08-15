@@ -102,7 +102,7 @@ export function ChatArea ({ selectedUser, onBack }: ChatAreaProps) {
             </Button>
           )}
           <Avatar className="w-9 h-9 sm:w-10 sm:h-10 shrink-0">
-            <AvatarFallback className="bg-indigo-600 text-white text-sm">
+            <AvatarFallback className="bg-primary text-white text-sm">
               {initials}
             </AvatarFallback>
           </Avatar>
@@ -117,7 +117,7 @@ export function ChatArea ({ selectedUser, onBack }: ChatAreaProps) {
       <div className="flex-1 p-3 sm:p-6 space-y-3 sm:space-y-4 overflow-y-auto">
         {isLoading && messages.length === 0 ? (
           <div className="flex justify-center py-8">
-            <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
         ) : messages.length === 0 ? (
           <div className="text-center py-8 text-sm text-gray-400">
@@ -130,14 +130,14 @@ export function ChatArea ({ selectedUser, onBack }: ChatAreaProps) {
               <div key={msg.id} className={`flex items-end gap-2 sm:gap-3 ${isMine ? 'justify-end' : 'justify-start'}`}>
                 {!isMine && (
                   <Avatar className="w-7 h-7 sm:w-8 sm:h-8 shrink-0">
-                    <AvatarFallback className="bg-indigo-100 text-indigo-600 text-xs">
+                    <AvatarFallback className="bg-indigo-100 text-primary text-xs">
                       {initials}
                     </AvatarFallback>
                   </Avatar>
                 )}
                 <div className={`rounded-2xl px-3 py-2.5 sm:px-4 sm:py-3 max-w-[75%] sm:max-w-md shadow-sm ${
                   isMine
-                  ? 'bg-indigo-500 text-white rounded-tr-sm'
+                  ? 'bg-primary text-white rounded-tr-sm'
                   : 'bg-white text-gray-900 rounded-tl-sm'
                 }`}>
                   <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>
@@ -170,7 +170,7 @@ export function ChatArea ({ selectedUser, onBack }: ChatAreaProps) {
           <Button
             type="submit"
             disabled={isSending || !newMessage.trim()}
-            className="bg-indigo-500 hover:bg-indigo-600 rounded-full w-10 h-10 sm:w-12 sm:h-12 p-0 flex items-center justify-center disabled:opacity-50 shrink-0"
+            className="bg-primary hover:bg-primary rounded-full w-10 h-10 sm:w-12 sm:h-12 p-0 flex items-center justify-center disabled:opacity-50 shrink-0"
           >
             {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
           </Button>

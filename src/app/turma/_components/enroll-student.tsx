@@ -72,7 +72,7 @@ export function EnrollStudent({ classId, className, onSuccess }: EnrollStudentPr
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-blue-600 hover:text-blue-800">
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-primary hover:text-blue-800">
                     <UserPlus className="w-4 h-4" />
                 </Button>
             </DialogTrigger>

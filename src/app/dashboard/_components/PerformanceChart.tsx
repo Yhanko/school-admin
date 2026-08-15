@@ -109,12 +109,12 @@ export function PerformanceChart({ report }: { report?: PerformanceReport | null
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <CardTitle className="text-base sm:text-lg font-bold text-gray-900">Desempenho Académico</CardTitle>
           <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm">
-            <div className="flex items-center gap-1.5 bg-amber-50 text-amber-800 px-2.5 py-1 rounded-lg border border-amber-200">
+            <div className="flex items-center gap-1.5 bg-amber-50 text-amber-800 px-2.5 py-1 rounded-xl border border-amber-200">
               <div className="w-2.5 h-2.5 bg-yellow-400 rounded-full"></div>
               <span className="font-semibold">{report?.overview?.attendanceRate || 0}%</span>
               <span className="text-[11px] opacity-75">Assiduidade Média</span>
             </div>
-            <div className="flex items-center gap-1.5 bg-rose-50 text-rose-800 px-2.5 py-1 rounded-lg border border-rose-200">
+            <div className="flex items-center gap-1.5 bg-rose-50 text-rose-800 px-2.5 py-1 rounded-xl border border-rose-200">
               <div className="w-2.5 h-2.5 bg-[#FF5777] rounded-full"></div>
               <span className="font-semibold">{report?.overview?.averageGrade || 0}</span>
               <span className="text-[11px] opacity-75">Nota Média</span>

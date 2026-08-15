@@ -93,7 +93,7 @@ export function NewTeacher() {
       <SheetTrigger asChild>
         <Button
           variant="outline" 
-          className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-md px-6 h-10 font-medium cursor-pointer w-full md:w-auto"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl px-6 h-10 font-medium cursor-pointer w-full md:w-auto"
         >
           <Plus className="mr-2 h-4 w-4" />
           Novo Professor
@@ -107,7 +107,7 @@ export function NewTeacher() {
           </SheetDescription>
         </SheetHeader>
         <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-6">
-            <div className="bg-indigo-600 text-white p-3 rounded-md">
+            <div className="bg-primary text-white p-3 rounded-xl">
               <h2 className="text-sm font-semibold">Dados Pessoais e Acesso</h2>
             </div>
             
@@ -115,39 +115,39 @@ export function NewTeacher() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                     <label className="block text-sm font-medium text-foreground mb-2">Primeiro Nome *</label>
-                    <input required type="text" name="firstName" value={formData.firstName} onChange={handleChange} className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Nome" />
+                    <input required type="text" name="firstName" value={formData.firstName} onChange={handleChange} className="w-full px-3 py-2 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Nome" />
                 </div>
                 <div>
                     <label className="block text-sm font-medium text-foreground mb-2">Último Nome *</label>
-                    <input required type="text" name="lastName" value={formData.lastName} onChange={handleChange} className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Sobrenome" />
+                    <input required type="text" name="lastName" value={formData.lastName} onChange={handleChange} className="w-full px-3 py-2 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Sobrenome" />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                     <label className="block text-sm font-medium text-foreground mb-2">Email *</label>
-                    <input required type="email" name="email" value={formData.email} onChange={handleChange} className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="exemplo@email.com" />
+                    <input required type="email" name="email" value={formData.email} onChange={handleChange} className="w-full px-3 py-2 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="exemplo@email.com" />
                 </div>
                 <div>
                     <label className="block text-sm font-medium text-foreground mb-2">Telemóvel *</label>
-                    <input required type="tel" name="phone" value={formData.phone} onChange={handleChange} className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="(xxx) xxx-xxxx" />
+                    <input required type="tel" name="phone" value={formData.phone} onChange={handleChange} className="w-full px-3 py-2 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="(xxx) xxx-xxxx" />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                     <label className="block text-sm font-medium text-foreground mb-2">Senha de Acesso *</label>
-                    <input required minLength={6} type="password" name="password" value={formData.password} onChange={handleChange} className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Mínimo 6 caracteres" />
+                    <input required minLength={6} type="password" name="password" value={formData.password} onChange={handleChange} className="w-full px-3 py-2 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Mínimo 6 caracteres" />
                 </div>
                 <div>
                     <label className="block text-sm font-medium text-foreground mb-2">Confirmar Senha *</label>
-                    <input required minLength={6} type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Confirme a senha" />
+                    <input required minLength={6} type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} className="w-full px-3 py-2 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Confirme a senha" />
                 </div>
               </div>
 
               <div>
                   <label className="block text-sm font-medium text-foreground mb-2">Vincular a uma Turma (Opcional)</label>
-                  <select name="classId" value={formData.classId} onChange={handleChange} className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                  <select name="classId" value={formData.classId} onChange={handleChange} className="w-full px-3 py-2 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent">
                       <option value="">Nenhuma</option>
                       {classes.map(c => (
                           <option key={c.id} value={c.id}>

@@ -39,7 +39,7 @@ export function Modal({
 
       {/* Modal Content */}
       <div
-        className={`relative bg-card rounded-lg shadow-2xl w-full mx-4 ${sizeClasses[size]} max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-300`}
+        className={`relative bg-card rounded-xl shadow-2xl w-full mx-4 ${sizeClasses[size]} max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-300`}
       >
         {/* Header */}
         <div className="sticky top-0 bg-card border-b border-border px-6 py-4 flex items-center justify-between">

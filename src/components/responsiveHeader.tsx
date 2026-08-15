@@ -98,7 +98,7 @@ const ResponsiveHeader: React.FC<ResponsiveHeaderProps> = ({
         <div className="hidden lg:flex items-center space-x-3 ml-auto">
           <Button
             onClick={goTo} 
-            className="px-6 py-2 w-56 cursor-pointer bg-[#FF5777] text-sm font-medium text-white border border-[#FF5777] rounded-lg hover:bg-[#FF5777] hover:text-white transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-[#FF5777]/25"
+            className="px-6 py-2 w-56 cursor-pointer bg-[#FF5777] text-sm font-medium text-white border border-[#FF5777] rounded-xl hover:bg-[#FF5777] hover:text-white transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-[#FF5777]/25"
           >
             Login
           </Button>
@@ -108,7 +108,7 @@ const ResponsiveHeader: React.FC<ResponsiveHeaderProps> = ({
         <div className='ml-auto'>
             <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden z-50 p-2 rounded-lg bg-[#FF5777]/10 hover:bg-[#FF5777]/20 transition-all duration-300"
+            className="lg:hidden z-50 p-2 rounded-xl bg-[#FF5777]/10 hover:bg-[#FF5777]/20 transition-all duration-300"
             aria-label="Toggle mobile menu"
             >
             <div className="w-6 h-6 flex flex-col justify-center items-center">
@@ -192,7 +192,7 @@ const ResponsiveHeader: React.FC<ResponsiveHeaderProps> = ({
                 goTo();
                 handleMobileMenuClick();
               }}
-              className="w-full py-3 bg-transparent text-lg font-medium text-[#FF5777] border-2 border-[#FF5777] rounded-lg hover:bg-[#FF5777] hover:text-white transition-all duration-300 transform hover:scale-105"
+              className="w-full py-3 bg-transparent text-lg font-medium text-[#FF5777] border-2 border-[#FF5777] rounded-xl hover:bg-[#FF5777] hover:text-white transition-all duration-300 transform hover:scale-105"
             >
               Login
             </button>

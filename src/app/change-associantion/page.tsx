@@ -93,7 +93,7 @@ function ChangeAssociationContent() {
   if (isFetching) {
     return (
         <div className="flex justify-center items-center h-64">
-          <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
     );
   }
@@ -104,7 +104,7 @@ function ChangeAssociationContent() {
 
   return (
     <form onSubmit={handleSubmit} className="container p-2">
-      <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+      <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
         <h2 className="text-2xl font-bold text-purple-600 mb-4">Editar dados do membro da associação</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -114,7 +114,7 @@ function ChangeAssociationContent() {
               id="firstName"
               name="firstName"
               type="text"
-              className="border rounded-lg p-2"
+              className="border rounded-xl p-2"
               value={formData.firstName}
               onChange={handleChange}
               required
@@ -126,7 +126,7 @@ function ChangeAssociationContent() {
               id="lastName"
               name="lastName"
               type="text"
-              className="border rounded-lg p-2"
+              className="border rounded-xl p-2"
               value={formData.lastName}
               onChange={handleChange}
               required
@@ -139,7 +139,7 @@ function ChangeAssociationContent() {
               id="email"
               name="email"
               type="email"
-              className="border rounded-lg p-2"
+              className="border rounded-xl p-2"
               value={formData.email}
               onChange={handleChange}
               required
@@ -152,7 +152,7 @@ function ChangeAssociationContent() {
               id="phone"
               name="phone"
               type="text"
-              className="border rounded-lg p-2"
+              className="border rounded-xl p-2"
               value={formData.phone}
               onChange={handleChange}
               required
@@ -165,7 +165,7 @@ function ChangeAssociationContent() {
               id="degree"
               name="degree"
               type="text"
-              className="border rounded-lg p-2"
+              className="border rounded-xl p-2"
               value={formData.degree}
               onChange={handleChange}
             />
@@ -177,7 +177,7 @@ function ChangeAssociationContent() {
               id="city"
               name="city"
               type="text"
-              className="border rounded-lg p-2"
+              className="border rounded-xl p-2"
               value={formData.city}
               onChange={handleChange}
             />
@@ -188,7 +188,7 @@ function ChangeAssociationContent() {
             <textarea
               id="address"
               name="address"
-              className="border rounded-lg p-2"
+              className="border rounded-xl p-2"
               rows={3}
               maxLength={200}
               value={formData.address}
@@ -202,7 +202,7 @@ function ChangeAssociationContent() {
         <button 
             type="submit" 
             disabled={isLoading}
-            className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition duration-150 flex items-center justify-center w-40"
+            className="bg-purple-600 text-white px-6 py-2 rounded-xl hover:bg-purple-700 transition duration-150 flex items-center justify-center w-40"
         >
             {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Atualizar Membro"}
         </button>

@@ -122,7 +122,7 @@ export function NewClass() {
                 required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
                 placeholder="Ex: 1ª Classe A"
               />
             </div>
@@ -135,7 +135,7 @@ export function NewClass() {
                 required
                 value={formData.academic_level}
                 onChange={(e) => setFormData({ ...formData, academic_level: e.target.value })}
-                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
               >
                 {ACADEMIC_LEVELS.map((level) => (
                   <option key={level} value={level}>
@@ -153,7 +153,7 @@ export function NewClass() {
                 required
                 value={formData.grade}
                 onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
-                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
               >
                 <option value="">Selecione a classe</option>
                 {formData.academic_level === '1-6' && (
@@ -194,7 +194,7 @@ export function NewClass() {
                   required
                   value={formData.course}
                   onChange={(e) => setFormData({ ...formData, course: e.target.value })}
-                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="w-full px-3 py-2 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
                   placeholder="Ex: Ciências Físicas e Biológicas"
                 />
               </div>
@@ -208,7 +208,7 @@ export function NewClass() {
                 required
                 value={formData.period}
                 onChange={(e) => setFormData({ ...formData, period: e.target.value })}
-                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
               >
                 {PERIODS.map((period) => (
                   <option key={period} value={period}>
@@ -226,7 +226,7 @@ export function NewClass() {
                 required
                 value={formData.roomName}
                 onChange={(e) => setFormData({ ...formData, roomName: e.target.value })}
-                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
               >
                 <option value="">Selecione uma sala</option>
                 {rooms.map((room) => (
@@ -253,7 +253,7 @@ export function NewClass() {
                 onChange={(e) =>
                   setFormData({ ...formData, capacity: parseInt(e.target.value) || 0 })
                 }
-                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
           </div>

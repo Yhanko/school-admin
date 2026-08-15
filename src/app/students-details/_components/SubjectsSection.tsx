@@ -17,7 +17,7 @@ export default function SubjectsSection({ student }: SubjectsSectionProps) {
   return (
     <Card className="p-6 mb-6">
       <div className="flex items-center gap-2 mb-6">
-        <BookMarked className="w-5 h-5 text-blue-600" />
+        <BookMarked className="w-5 h-5 text-primary" />
         <h2 className="text-2xl font-bold text-gray-900">Disciplinas e Notas</h2>
       </div>
 
@@ -46,7 +46,7 @@ export default function SubjectsSection({ student }: SubjectsSectionProps) {
         </table>
       </div>
 
-      <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+      <div className="mt-6 p-4 bg-gray-50 rounded-xl">
         <div className="flex justify-between items-center">
           <span className="text-gray-700 font-medium">Total de Disciplinas:</span>
           <span className="text-xl font-bold text-gray-900">{student.subjects.length}</span>

@@ -50,7 +50,7 @@ export function TeacherProfile ({ id }: { id: string | null }) {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex justify-center items-center">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -74,7 +74,7 @@ export function TeacherProfile ({ id }: { id: string | null }) {
                 /* eslint-disable-next-line @next/next/no-img-element */
                 <img src={teacher.profile.photoUrl} alt="Teacher" className="w-full h-full object-cover" />
               ) : (
-                <span className="text-4xl font-bold text-indigo-500">
+                <span className="text-4xl font-bold text-primary">
                   {teacher.name[0]}
                 </span>
               )}
@@ -83,7 +83,7 @@ export function TeacherProfile ({ id }: { id: string | null }) {
             {/* Informações */}
             <div className="flex-1 w-full text-center md:text-left mt-2">
               <h1 className="text-3xl font-bold text-gray-900 mb-1">{teacher.name}</h1>
-              <p className="text-indigo-600 font-medium text-lg mb-8">Professor</p>
+              <p className="text-primary font-medium text-lg mb-8">Professor</p>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="flex items-center gap-3 justify-center md:justify-start">

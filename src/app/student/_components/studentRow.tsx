@@ -40,7 +40,7 @@ export function StudentRow ({ student, onAction }: StudentRowProps) {
       </TableCell>
       
       <TableCell className="px-3 sm:px-4 py-3 whitespace-nowrap">
-        <span className="font-mono text-xs sm:text-sm font-semibold text-indigo-600">#{student.studentNumber}</span>
+        <span className="font-mono text-xs sm:text-sm font-semibold text-primary">#{student.studentNumber}</span>
       </TableCell>
 
       <TableCell className="px-3 sm:px-4 py-3">

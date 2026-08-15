@@ -93,7 +93,7 @@ export default function Turma() {
         <Card className="bg-white border border-gray-200">
           <CardContent className="pt-5 pb-5 text-center">
             <p className="text-xs font-medium text-gray-500 mb-1">Capacidade Total</p>
-            <p className="text-2xl sm:text-3xl font-extrabold text-blue-600">
+            <p className="text-2xl sm:text-3xl font-extrabold text-primary">
               {classes.reduce((sum, c) => sum + c.capacity, 0)}
             </p>
           </CardContent>

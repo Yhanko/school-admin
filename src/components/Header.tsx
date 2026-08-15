@@ -57,7 +57,7 @@ export function Header() {
                     <button
                         onClick={toggleSidebar}
                         type="button"
-                        className="lg:hidden p-2 rounded-lg text-[#303972] hover:bg-slate-100 transition-colors cursor-pointer"
+                        className="lg:hidden p-2 rounded-xl text-[#303972] hover:bg-slate-100 transition-colors cursor-pointer"
                         aria-label="Abrir Menu"
                     >
                         <Menu className="w-6 h-6" />
@@ -73,7 +73,7 @@ export function Header() {
                     <div className="flex items-center space-x-3 md:space-x-6">
                         {/* Academic Year Selector */}
                         {mounted && academicYears.length > 0 && selectedYear && (
-                            <div className="flex items-center space-x-2 bg-slate-100 px-2.5 py-1.5 rounded-md border border-slate-200 text-xs md:text-sm">
+                            <div className="flex items-center space-x-2 bg-slate-100 px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs md:text-sm">
                                 <CalendarDays className="h-4 w-4 text-[#303972]" />
                                 <span className="text-xs md:text-sm font-semibold text-[#303972] hidden md:inline">Ano Letivo:</span>
                                 <Select 

@@ -43,7 +43,7 @@ export default function NotificationsGeral() {
       case 'success': return <CheckCheck className="w-5 h-5 text-green-500" />;
       case 'warning': return <AlertCircle className="w-5 h-5 text-orange-500" />;
       case 'error': return <X className="w-5 h-5 text-red-500" />;
-      default: return <Info className="w-5 h-5 text-blue-500" />;
+      default: return <Info className="w-5 h-5 text-primary" />;
     }
   };
 
@@ -77,7 +77,7 @@ export default function NotificationsGeral() {
         <div className="flex justify-center items-center h-64">
           <div className="relative">
             <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-            <Bell className="w-6 h-6 text-blue-600 absolute top-3 left-3" />
+            <Bell className="w-6 h-6 text-primary absolute top-3 left-3" />
           </div>
         </div>
       </div>
@@ -87,10 +87,10 @@ export default function NotificationsGeral() {
   return (
     <div className="p-6 space-y-6 max-w-4xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-lg shadow-sm border">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-xl shadow-sm border">
         <div className="flex items-center gap-3">
           <div className="relative">
-            <Bell className="w-8 h-8 text-blue-600" />
+            <Bell className="w-8 h-8 text-primary" />
             {unreadNotificationsCount > 0 && (
               <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
                 {unreadNotificationsCount}
@@ -116,7 +116,7 @@ export default function NotificationsGeral() {
 
       {/* Notifications List */}
       {notifications.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-lg shadow-sm border">
+        <div className="text-center py-12 bg-white rounded-xl shadow-sm border">
           <Bell className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <p className="text-gray-500 text-lg">Nenhuma notificação disponível</p>
         </div>
@@ -127,7 +127,7 @@ export default function NotificationsGeral() {
               key={notification.id}
               className={`
                 bg-white border-l-4 ${getPriorityColor(notification.priority)} 
-                rounded-lg shadow-sm hover:shadow-md transition-all duration-300 
+                rounded-xl shadow-sm hover:shadow-md transition-all duration-300 
                 transform hover:-translate-y-1 animate-fade-in
                 ${notification.isRead ? 'opacity-75' : 'border-r-2 border-r-blue-200'}
               `}
@@ -146,7 +146,7 @@ export default function NotificationsGeral() {
                         {notification.title}
                       </h3>
                       {!notification.isRead && (
-                        <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                        <span className="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
                       )}
                     </div>
                     <p className={`text-sm ${notification.isRead ? 'text-gray-500' : 'text-gray-700'}`}>

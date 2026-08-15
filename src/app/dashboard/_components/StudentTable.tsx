@@ -61,7 +61,7 @@ export function StudentTable({ payments = [] }: { payments?: DashboardPaymentIte
                       </div>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <span className="text-xs font-mono text-indigo-600 font-medium">#{payment.id ? payment.id.split('-')[0] : 'N/A'}</span>
+                      <span className="text-xs font-mono text-primary font-medium">#{payment.id ? payment.id.split('-')[0] : 'N/A'}</span>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <div className="flex items-center gap-2">
@@ -83,7 +83,7 @@ export function StudentTable({ payments = [] }: { payments?: DashboardPaymentIte
           <div className="flex flex-col sm:flex-row justify-between items-center gap-3 mt-4 px-4 pt-3 border-t border-gray-100 text-xs text-gray-500">
             <p>Exibindo <span className="font-semibold text-gray-900">1-{Math.min(payments.length, 5)}</span> de <span className="font-semibold text-gray-900">{payments.length}</span> pagamentos</p>
             <div className="flex space-x-1">
-              <Button variant="default" size="sm" className="h-7 w-7 p-0 bg-indigo-600 text-white">1</Button>
+              <Button variant="default" size="sm" className="h-7 w-7 p-0 bg-primary text-white">1</Button>
               <Button variant="outline" size="sm" className="h-7 w-7 p-0">2</Button>
             </div>
           </div>

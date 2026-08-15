@@ -95,7 +95,7 @@ export default function TurmaDetails() {
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-blue-100 text-blue-600 rounded-lg">
+              <div className="p-3 bg-blue-100 text-primary rounded-xl">
                 <GraduationCap className="w-6 h-6" />
               </div>
               <div>
@@ -105,7 +105,7 @@ export default function TurmaDetails() {
             </div>
             
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-green-100 text-green-600 rounded-lg">
+              <div className="p-3 bg-green-100 text-green-600 rounded-xl">
                 <Users className="w-6 h-6" />
               </div>
               <div>
@@ -115,7 +115,7 @@ export default function TurmaDetails() {
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-orange-100 text-orange-600 rounded-lg">
+              <div className="p-3 bg-orange-100 text-orange-600 rounded-xl">
                 <Clock className="w-6 h-6" />
               </div>
               <div>
@@ -125,7 +125,7 @@ export default function TurmaDetails() {
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-purple-100 text-purple-600 rounded-lg">
+              <div className="p-3 bg-purple-100 text-purple-600 rounded-xl">
                 <MapPin className="w-6 h-6" />
               </div>
               <div>
@@ -136,7 +136,7 @@ export default function TurmaDetails() {
 
             {turma.grade && (
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-indigo-100 text-indigo-600 rounded-lg">
+                <div className="p-3 bg-indigo-100 text-primary rounded-xl">
                   <BookOpen className="w-6 h-6" />
                 </div>
                 <div>
@@ -148,7 +148,7 @@ export default function TurmaDetails() {
 
             {turma.course && (
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-teal-100 text-teal-600 rounded-lg">
+                <div className="p-3 bg-teal-100 text-teal-600 rounded-xl">
                   <GraduationCap className="w-6 h-6" />
                 </div>
                 <div>
@@ -168,7 +168,7 @@ export default function TurmaDetails() {
               {turma.classSubjects && turma.classSubjects.length > 0 ? (
                 <ul className="space-y-3">
                   {turma.classSubjects.map((cs: ClassSubject) => (
-                    <li key={cs.id} className="p-4 border rounded-lg flex justify-between items-center bg-gray-50">
+                    <li key={cs.id} className="p-4 border rounded-xl flex justify-between items-center bg-gray-50">
                       <span className="font-semibold">{cs.subject?.name || 'Disciplina Desconhecida'}</span>
                       <span className="text-sm text-muted-foreground bg-white px-3 py-1 rounded-full border">
                         {cs.teacher?.name || 'Sem Professor'}
@@ -177,7 +177,7 @@ export default function TurmaDetails() {
                   ))}
                 </ul>
               ) : (
-                <p className="text-muted-foreground p-4 border rounded-lg bg-gray-50 text-center">Nenhuma disciplina associada a esta turma.</p>
+                <p className="text-muted-foreground p-4 border rounded-xl bg-gray-50 text-center">Nenhuma disciplina associada a esta turma.</p>
               )}
             </div>
 
@@ -189,7 +189,7 @@ export default function TurmaDetails() {
               {turma.students && turma.students.length > 0 ? (
                 <ul className="space-y-3">
                   {turma.students.map((student: StudentInClass) => (
-                    <li key={student.id} className="p-4 border rounded-lg flex justify-between items-center bg-gray-50">
+                    <li key={student.id} className="p-4 border rounded-xl flex justify-between items-center bg-gray-50">
                       <span className="font-semibold">{student.name}</span>
                       <span className="text-sm text-muted-foreground">
                          {student.profile?.studentNumber ? `Nº ${student.profile.studentNumber}` : ''}
@@ -198,7 +198,7 @@ export default function TurmaDetails() {
                   ))}
                 </ul>
               ) : (
-                <p className="text-muted-foreground p-4 border rounded-lg bg-gray-50 text-center">Nenhum aluno matriculado nesta turma.</p>
+                <p className="text-muted-foreground p-4 border rounded-xl bg-gray-50 text-center">Nenhum aluno matriculado nesta turma.</p>
               )}
             </div>
           </div>

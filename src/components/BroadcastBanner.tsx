@@ -27,7 +27,7 @@ export function BroadcastBanner() {
   return (
     <div className="w-full flex flex-col gap-2 mb-4">
       {broadcasts.map(b => (
-        <div key={b.id} className="p-4 rounded-lg flex items-center gap-3 shadow-sm">
+        <div key={b.id} className="p-4 rounded-xl flex items-center gap-3 shadow-sm">
           <div className="font-semibold">{b.type === 'error' ? 'Aviso Crítico' : b.type === 'warning' ? 'Aviso' : 'Informação'}:</div>
           <div>{b.message}</div>
         </div>
