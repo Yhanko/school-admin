@@ -104,7 +104,7 @@ export function Header() {
                 />
               ) : (
                 <span className="text-xs font-bold font-jetbrains text-[#DDD6FE] uppercase">
-                  {initials}
+                  {mounted ? initials : "AD"}
                 </span>
               )}
             </div>

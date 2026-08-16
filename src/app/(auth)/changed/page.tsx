@@ -1,41 +1,52 @@
 "use client";
-//Components
+
 import { Button } from "@/components/ui/button";
 import Image from 'next/image';
 import Link from "next/link";
-//Images and icons
 import PasswordKey from "../../../assets/password.svg";
 import YhankoIMG from "../../../assets/yhankoIMG.svg";
+import { CheckCircle } from "@/lib/icons";
 
 export default function PasswordChangedPage() {
   return (
-    <main className="2xl:h-screen xl:h-[130vh] flex flex-col bg-[#ffffff]">
+    <main className="min-h-screen w-full flex flex-col justify-center items-center bg-background px-4 sm:px-8 md:px-12 py-10 font-hanken text-foreground antialiased overflow-x-hidden">
+      <div className="w-full max-w-md mx-auto space-y-8 bg-card border border-border p-6 sm:p-10 rounded shadow-xs text-center flex flex-col items-center">
+        
+        {/* Logo */}
+        <div className="flex items-center gap-2.5">
+          <Image src={YhankoIMG} alt="Yhanko Logo" width={40} height={40} className="w-10 h-10" priority />
+          <h1 className="text-2xl font-extrabold text-foreground tracking-tight">Yhanko<span className="text-primary">Educa</span></h1>
+        </div>
 
-      <section className="flex flex-col justify-center items-center mt-8 px-4 space-y-8 lg:space-y-12 2xl:mt-40 xl:mt-2">
-        <div className="flex flex-col w-[40rem] h-[40rem] space-y-6 2xl:space-y-8 justify-center items-center">
-          <div className="flex justify-center items-center space-x-3">
-            <Image src={YhankoIMG} alt="logo" className="h-12 w-12 xl:h-12 2xl:h-14"/>
-            <h1 className="text-black font-bold">Yhanko</h1>
+        {/* Ilustração / Ícone */}
+        <div className="flex flex-col justify-center items-center space-y-4 py-2">
+          <div className="relative">
+            <Image src={PasswordKey} alt="Chave de Segurança" width={96} height={96} className="h-24 w-24 object-contain" />
+            <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-white rounded-full p-1 shadow-md">
+              <CheckCircle className="w-5 h-5" />
+            </div>
           </div>
-          <div className="flex flex-col justify-center items-center space-y-8 w-[40rem] h-96">
-            <Image src={PasswordKey} alt="KeyImg" className="h-24 lg:h-28 2xl:h-36 mt-8" />
-            <h1 className="text-[#171718] font-semibold text-lg 2xl:text-lg lg:text-2xl text-center">
-              Senha alterada com sucesso!
-            </h1>
-            <span className="text-[#717F96] text-center text-sm lg:text-base">
-              Clique em fazer login para iniciar
-              <br />
-              sessão com os seus dados de acesso.
-            </span>
+          
+          <div className="space-y-1.5 pt-2">
+            <h2 className="text-2xl font-bold text-foreground">
+              Palavra-passe Alterada!
+            </h2>
+            <p className="text-sm text-muted-foreground max-w-xs mx-auto leading-relaxed">
+              A sua palavra-passe foi atualizada com sucesso. Já pode aceder ao portal com as novas credenciais.
+            </p>
           </div>
+        </div>
 
-          <Link href="login" className="2xl:w-[28rem] lg:w-[28rem] xl:w-[28rem] md:w-[28rem] w-full">
-            <Button className="bg-[#FF5777] shadow-none hover:bg-[#fc4667] hover:cursor-pointer text-white w-full h-12 lg:h-14 rounded-xl mt-4">
-              Login
+        {/* Botão para Login */}
+        <div className="w-full pt-2">
+          <Link href="/login" className="block w-full">
+            <Button className="w-full h-11 bg-primary hover:bg-[#A78BFA] text-white font-semibold text-sm rounded transition-all shadow-xs cursor-pointer">
+              Fazer Login
             </Button>
           </Link>
         </div>
-      </section>
+
+      </div>
     </main>
   );
 }

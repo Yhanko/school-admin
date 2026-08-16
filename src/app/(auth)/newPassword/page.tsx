@@ -1,4 +1,5 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Image from 'next/image';
@@ -11,7 +12,7 @@ import axiosInstance from "@/service/api";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { isStrongPassword } from "@/utils/regex";
-import { AiOutlineClose, Loader2 } from "@/lib/icons";
+import { AiOutlineClose, Loader2, Lock } from "@/lib/icons";
 import RequestError from "../../../assets/ErroDeResposta.svg";
 import EyesOpened from "../../../assets/eye-open.svg";
 import EyesOff from "../../../assets/eye-off.svg";
@@ -25,7 +26,7 @@ const passwordSchema = z
     confirmar_senha: z.string().min(6, "Repetir a senha é obrigatório"),
   })
   .refine((data) => data.senha === data.confirmar_senha, {
-    message: "As senhas não coincidem",
+    message: "As palavras-passe não coincidem",
     path: ["confirmar_senha"],
   });
 
@@ -51,7 +52,7 @@ export default function NewPassword() {
 
   const onSubmit = async (data: FormData) => {
     if (!isStrongPassword(data.senha)) {
-      setPasswordError("A senha deve conter pelo menos 8 caracteres, uma letra maiúscula, um número e um caractere especial.");
+      setPasswordError("A palavra-passe deve conter pelo menos 8 caracteres, uma letra maiúscula, um número e um caractere especial.");
       return;
     } else {
       setPasswordError(null); 
@@ -71,117 +72,113 @@ export default function NewPassword() {
       if (error instanceof AxiosError) {
         toast({
           description: (
-            <div className="flex items-center gap-3">
-              <div className="rounded-full w-8 h-8 flex justify-center items-center shrink-0 bg-red-100">
+            <div className="flex items-center gap-3 font-hanken">
+              <div className="rounded-full w-8 h-8 flex justify-center items-center shrink-0 bg-red-100 dark:bg-red-950/40">
                 <Image src={RequestError} alt="erro" width={24} height={24} />
               </div>
-              <span className="text-[#717F96] text-sm">{error?.response?.data.mensagem}</span>
+              <span className="text-[#334155] dark:text-[#e5e2e1] text-sm font-medium">{error?.response?.data.mensagem || "Erro ao redefinir a palavra-passe."}</span>
             </div>
           ),
           action: <ToastAction altText="fechar" className="shadow-none border-none text-[#717F96] hover:bg-transparent"><AiOutlineClose /></ToastAction>,
-          className: "border-l-4 border-l-[#FB3748]",
+          className: "border-l-4 border-l-[#DC2626]",
         });
       }
     }
   };
 
   return (
-    <main className="min-h-screen w-full flex flex-col justify-center items-center bg-white px-4 sm:px-8 md:px-12 py-10 font-sans antialiased overflow-x-hidden">
-      <div className="w-full max-w-md mx-auto space-y-8">
+    <main className="min-h-screen w-full flex flex-col justify-center items-center bg-background px-4 sm:px-8 md:px-12 py-10 font-hanken text-foreground antialiased overflow-x-hidden">
+      <div className="w-full max-w-md mx-auto space-y-8 bg-card border border-border p-6 sm:p-8 rounded shadow-xs">
         
+        {/* Topo / Logo */}
         <div className="flex flex-col items-center text-center space-y-3">
-          <div className="flex items-center gap-3">
-            <Image src={YhankoIMG} alt="Yhanko Logo" width={44} height={44} className="w-11 h-11" priority />
-            <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Yhanko</h1>
+          <div className="flex items-center gap-2.5">
+            <Image src={YhankoIMG} alt="Yhanko Logo" width={38} height={38} className="w-9 h-9" priority />
+            <h1 className="text-2xl font-extrabold text-foreground tracking-tight">Yhanko<span className="text-primary">Educa</span></h1>
           </div>
           <div className="pt-2">
-            <h2 className="text-xl sm:text-2xl font-bold text-[#171718]">Nova Palavra-passe</h2>
-            <p className="text-sm text-[#717F96] mt-1 max-w-xs sm:max-w-sm mx-auto leading-relaxed">
-              Crie uma nova palavra-passe forte para proteger o seu acesso ao sistema.
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-bold bg-primary/10 text-primary border border-primary/20 uppercase tracking-wide mb-2">
+              <Lock className="w-3 h-3" />
+              Segurança da Conta
+            </div>
+            <h2 className="text-2xl font-bold text-foreground">Definir Nova Palavra-passe</h2>
+            <p className="text-sm text-muted-foreground mt-1 max-w-xs sm:max-w-sm mx-auto leading-relaxed">
+              Crie uma palavra-passe segura para proteger o seu acesso ao portal institucional.
             </p>
           </div>
         </div>
 
-        <form className="space-y-6 w-full" onSubmit={handleSubmit(onSubmit)}>
+        <form className="space-y-5 w-full" onSubmit={handleSubmit(onSubmit)}>
           
           {/* Nova Senha */}
-          <div className="space-y-1">
+          <div className="space-y-1.5">
+            <label htmlFor="new-pass-input" className="block text-xs font-semibold text-foreground uppercase tracking-wide">
+              Nova Palavra-passe
+            </label>
             <div className="relative w-full">
               <Input
                 id="new-pass-input"
                 type={isVisible ? "text" : "password"}
-                className={`peer w-full h-12 sm:h-14 pl-5 pr-12 pt-4 pb-1 rounded-xl border-2 border-[#E2E5F1] text-gray-800 text-sm focus:border-[#217EFD] focus-visible:ring-0 placeholder-transparent transition-all ${
-                  errors.senha || passwordError ? 'border-[#FB3748]' : ''
+                className={`w-full h-11 px-3.5 pr-11 rounded border text-foreground text-sm bg-background focus:border-primary focus:ring-1 focus:ring-primary transition-all ${
+                  errors.senha || passwordError ? 'border-red-500 bg-red-50/50 dark:bg-red-950/20' : 'border-border'
                 }`}
-                placeholder=" "
+                placeholder="••••••••"
                 {...register("senha")} 
               />
-              <label
-                htmlFor="new-pass-input"
-                className="absolute left-4 text-xs sm:text-sm font-medium text-[#B7BFDE] bg-white px-1 transition-all duration-200 pointer-events-none
-                top-0 -translate-y-1/2 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm
-                peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs peer-focus:text-[#217EFD]"
-              >
-                Nova palavra-passe
-              </label>
-
               <button
                 type="button"
-                className="absolute top-1/2 -translate-y-1/2 right-4 p-1 text-gray-400 hover:text-gray-600 focus:outline-none"
+                className="absolute top-1/2 -translate-y-1/2 right-3 p-1 text-muted-foreground hover:text-foreground focus:outline-none cursor-pointer"
                 onClick={() => setIsVisible(!isVisible)}
+                aria-label={isVisible ? "Ocultar palavra-passe" : "Mostrar palavra-passe"}
               >
-                <Image src={isVisible ? EyesOff : EyesOpened} alt="Olho" width={22} height={22} className="w-5 h-5 opacity-70 hover:opacity-100" />
+                <Image src={isVisible ? EyesOff : EyesOpened} alt="Olho" width={18} height={18} className="w-4 h-4 opacity-70 hover:opacity-100" />
               </button>
             </div>
             {errors.senha && (
-              <p className="text-xs text-[#FB3748] font-medium pl-1">{errors.senha.message}</p>
+              <p className="text-xs text-red-600 font-medium pl-0.5">{errors.senha.message}</p>
             )}
             {passwordError && (
-              <p className="text-xs text-[#FB3748] font-medium pl-1 leading-normal">{passwordError}</p>
+              <p className="text-xs text-red-600 font-medium pl-0.5 leading-normal">{passwordError}</p>
             )}
           </div>
 
           {/* Confirmar Senha */}
-          <div className="space-y-1">
+          <div className="space-y-1.5">
+            <label htmlFor="confirm-pass-input" className="block text-xs font-semibold text-foreground uppercase tracking-wide">
+              Confirmar Nova Palavra-passe
+            </label>
             <div className="relative w-full">
               <Input
                 id="confirm-pass-input"
                 type={visible ? "text" : "password"}
-                className={`peer w-full h-12 sm:h-14 pl-5 pr-12 pt-4 pb-1 rounded-xl border-2 border-[#E2E5F1] text-gray-800 text-sm focus:border-[#217EFD] focus-visible:ring-0 placeholder-transparent transition-all ${
-                  errors.confirmar_senha ? 'border-[#FB3748]' : ''
+                className={`w-full h-11 px-3.5 pr-11 rounded border text-foreground text-sm bg-background focus:border-primary focus:ring-1 focus:ring-primary transition-all ${
+                  errors.confirmar_senha ? 'border-red-500 bg-red-50/50 dark:bg-red-950/20' : 'border-border'
                 }`}
-                placeholder=" "
+                placeholder="••••••••"
                 {...register("confirmar_senha")} 
               />
-              <label
-                htmlFor="confirm-pass-input"
-                className="absolute left-4 text-xs sm:text-sm font-medium text-[#B7BFDE] bg-white px-1 transition-all duration-200 pointer-events-none
-                top-0 -translate-y-1/2 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm
-                peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-xs peer-focus:text-[#217EFD]"
-              >
-                Confirmar nova palavra-passe
-              </label>
-
               <button
                 type="button"
-                className="absolute top-1/2 -translate-y-1/2 right-4 p-1 text-gray-400 hover:text-gray-600 focus:outline-none"
+                className="absolute top-1/2 -translate-y-1/2 right-3 p-1 text-muted-foreground hover:text-foreground focus:outline-none cursor-pointer"
                 onClick={() => setVisible(!visible)}
+                aria-label={visible ? "Ocultar confirmação" : "Mostrar confirmação"}
               >
-                <Image src={visible ? EyesOff : EyesOpened} alt="Olho" width={22} height={22} className="w-5 h-5 opacity-70 hover:opacity-100" />
+                <Image src={visible ? EyesOff : EyesOpened} alt="Olho" width={18} height={18} className="w-4 h-4 opacity-70 hover:opacity-100" />
               </button>
             </div>
             {errors.confirmar_senha && (
-              <p className="text-xs text-[#FB3748] font-medium pl-1">{errors.confirmar_senha.message}</p>
+              <p className="text-xs text-red-600 font-medium pl-0.5">{errors.confirmar_senha.message}</p>
             )}
           </div>
 
-          <div className="pt-2">
+          {/* Botão */}
+          <div className="pt-3">
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full h-12 sm:h-14 bg-[#FF5777] hover:bg-[#fc4667] text-white font-semibold text-sm sm:text-base rounded-xl transition-all shadow-md hover:shadow-lg hover:shadow-[#FF5777]/30 cursor-pointer"
+              className="w-full h-11 bg-primary hover:bg-[#A78BFA] text-white font-semibold text-sm rounded transition-all shadow-xs cursor-pointer"
             >
-              {isLoading ? <Loader2 className="w-5 h-5 animate-spin mx-auto text-white" /> : "Guardar Nova Palavra-passe"}
+              {isLoading ? <Loader2 className="w-4 h-4 animate-spin mx-auto text-white" /> : "Atualizar Palavra-passe"}
             </Button>
           </div>
 
