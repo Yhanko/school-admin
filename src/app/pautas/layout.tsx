@@ -8,12 +8,16 @@ export default function PautasLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="w-full min-h-screen bg-[#ECEEF1] dark:bg-[#131313] text-[#090D16] dark:text-[#e5e2e1]">
+    <div className="w-full min-h-screen bg-[#ECEEF1] dark:bg-[#131313] text-[#090D16] dark:text-[#e5e2e1] print:bg-white print:text-black">
       <SidebarProvider>
-        <AppSidebar />
-        <main className="flex flex-col min-h-screen flex-1 w-full max-w-full overflow-x-hidden bg-[#ECEEF1] dark:bg-[#131313]">
-          <Header />
-          <div className="flex-1 p-4 sm:p-6 lg:p-8">
+        <div className="print:hidden">
+          <AppSidebar />
+        </div>
+        <main className="flex flex-col min-h-screen flex-1 w-full max-w-full overflow-x-hidden bg-[#ECEEF1] dark:bg-[#131313] print:bg-white print:m-0 print:p-0 print:block">
+          <div className="print:hidden">
+            <Header />
+          </div>
+          <div className="flex-1 p-4 sm:p-6 lg:p-8 print:p-0">
             {children}
           </div>
         </main>

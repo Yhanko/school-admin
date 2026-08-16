@@ -397,6 +397,7 @@ export default function PautasPage() {
                   
                   {/* MAC Input */}
                   <td className="p-2 text-center">
+                    <span className="hidden print:inline">{row.mac !== "" ? row.mac : "—"}</span>
                     <input
                       type="number"
                       min="0"
@@ -404,12 +405,13 @@ export default function PautasPage() {
                       step="0.1"
                       value={row.mac}
                       onChange={(e) => handleGradeChange(idx, "mac", e.target.value)}
-                      className="w-14 text-center font-mono font-bold text-xs p-1.5 rounded bg-white dark:bg-[#1c1b1b] border border-[#CBD5E1] dark:border-[#414042] focus:border-primary outline-none"
+                      className="print:hidden w-14 text-center font-mono font-bold text-xs p-1.5 rounded bg-white dark:bg-[#1c1b1b] border border-[#CBD5E1] dark:border-[#414042] focus:border-primary outline-none"
                     />
                   </td>
 
                   {/* NPP Input */}
                   <td className="p-2 text-center">
+                    <span className="hidden print:inline">{row.npp !== "" ? row.npp : "—"}</span>
                     <input
                       type="number"
                       min="0"
@@ -417,12 +419,13 @@ export default function PautasPage() {
                       step="0.1"
                       value={row.npp}
                       onChange={(e) => handleGradeChange(idx, "npp", e.target.value)}
-                      className="w-14 text-center font-mono font-bold text-xs p-1.5 rounded bg-white dark:bg-[#1c1b1b] border border-[#CBD5E1] dark:border-[#414042] focus:border-primary outline-none"
+                      className="print:hidden w-14 text-center font-mono font-bold text-xs p-1.5 rounded bg-white dark:bg-[#1c1b1b] border border-[#CBD5E1] dark:border-[#414042] focus:border-primary outline-none"
                     />
                   </td>
 
                   {/* NPT Input */}
                   <td className="p-2 text-center">
+                    <span className="hidden print:inline">{row.npt !== "" ? row.npt : "—"}</span>
                     <input
                       type="number"
                       min="0"
@@ -430,7 +433,7 @@ export default function PautasPage() {
                       step="0.1"
                       value={row.npt}
                       onChange={(e) => handleGradeChange(idx, "npt", e.target.value)}
-                      className="w-14 text-center font-mono font-bold text-xs p-1.5 rounded bg-white dark:bg-[#1c1b1b] border border-[#CBD5E1] dark:border-[#414042] focus:border-primary outline-none"
+                      className="print:hidden w-14 text-center font-mono font-bold text-xs p-1.5 rounded bg-white dark:bg-[#1c1b1b] border border-[#CBD5E1] dark:border-[#414042] focus:border-primary outline-none"
                     />
                   </td>
 
