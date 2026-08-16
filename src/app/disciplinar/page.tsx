@@ -128,11 +128,11 @@ export default function Deicipline() {
   });
 
   return (
-    <div className="w-full max-w-full px-3 sm:px-6 lg:px-8 py-4 sm:py-6 overflow-x-hidden">
-      <Card className="border border-gray-100 shadow-sm rounded-2xl">
+    <div className="w-full max-w-full px-3 sm:px-6 lg:px-8 py-4 sm:py-6 overflow-x-hidden font-hanken">
+      <Card className="border border-border shadow-xs rounded">
         <CardHeader className="px-4 sm:px-6 pb-2">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <CardTitle className="text-base sm:text-lg font-bold text-gray-900">Histório de Ocorrências</CardTitle>
+            <CardTitle className="text-base sm:text-lg font-bold text-foreground">Histórico de Ocorrências</CardTitle>
             <NewOccurrence onCreated={fetchIncidents} />
           </div>
         </CardHeader>
@@ -140,17 +140,17 @@ export default function Deicipline() {
         {/* Search bar */}
         <div className="px-4 sm:px-6 pb-4 flex gap-2">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
               placeholder="Pesquisar por nome, tipo, status..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+              className="w-full pl-10 pr-4 py-2.5 bg-card border border-border rounded text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             />
           </div>
-          <Button onClick={handleSearch} size="sm" className="bg-primary text-white hover:bg-indigo-700 rounded-xl px-4 text-sm shrink-0">
+          <Button onClick={handleSearch} size="sm" className="bg-primary text-white hover:bg-[#A78BFA] rounded px-4 text-sm font-semibold shrink-0 cursor-pointer">
             Pesquisar
           </Button>
         </div>
@@ -160,14 +160,14 @@ export default function Deicipline() {
           <div className="hidden sm:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-gray-50 border-b border-gray-100">
-                  <th className="text-left py-3 px-4 font-semibold text-gray-600 text-xs uppercase tracking-wide">Aluno</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-600 text-xs uppercase tracking-wide">Tipo</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-600 text-xs uppercase tracking-wide">Descrição</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-600 text-xs uppercase tracking-wide">Data</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-600 text-xs uppercase tracking-wide">Severidade</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-600 text-xs uppercase tracking-wide">Status</th>
-                  <th className="text-center py-3 px-4 font-semibold text-gray-600 text-xs uppercase tracking-wide">Ações</th>
+                <tr className="bg-muted/50 border-b border-border">
+                  <th className="text-left py-3 px-4 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Aluno</th>
+                  <th className="text-left py-3 px-4 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Tipo</th>
+                  <th className="text-left py-3 px-4 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Descrição</th>
+                  <th className="text-left py-3 px-4 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Data</th>
+                  <th className="text-left py-3 px-4 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Severidade</th>
+                  <th className="text-left py-3 px-4 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Status</th>
+                  <th className="text-center py-3 px-4 font-semibold text-muted-foreground text-xs uppercase tracking-wide">Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -179,29 +179,29 @@ export default function Deicipline() {
                   </tr>
                 ) : filteredIncidents.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-10 text-center text-sm text-gray-400">
+                    <td colSpan={7} className="py-10 text-center text-sm text-muted-foreground">
                       Nenhuma ocorrência encontrada.
                     </td>
                   </tr>
                 ) : filteredIncidents.map((incident) => {
                   const studentName = incident.student?.name || incident.studentId;
                   return (
-                    <tr key={incident.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                      <td className="py-3 px-4 font-medium text-gray-900 whitespace-nowrap">{studentName}</td>
-                      <td className="py-3 px-4 text-gray-600 text-sm">{incident.type}</td>
-                      <td className="py-3 px-4 text-gray-500 text-xs max-w-[200px] truncate" title={incident.description}>{incident.description}</td>
-                      <td className="py-3 px-4 text-gray-600 text-sm whitespace-nowrap">
+                    <tr key={incident.id} className="border-b border-border hover:bg-muted/40 transition-colors">
+                      <td className="py-3 px-4 font-medium text-foreground whitespace-nowrap">{studentName}</td>
+                      <td className="py-3 px-4 text-muted-foreground text-sm">{incident.type}</td>
+                      <td className="py-3 px-4 text-muted-foreground text-xs max-w-[200px] truncate" title={incident.description}>{incident.description}</td>
+                      <td className="py-3 px-4 text-muted-foreground text-sm whitespace-nowrap">
                         {new Date(incident.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
                       </td>
                       <td className="py-3 px-4">
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${getSeverityColor(incident.severity)}`}>
+                        <span className={`px-2.5 py-1 rounded text-xs font-medium ${getSeverityColor(incident.severity)}`}>
                           {getSeverityLabel(incident.severity)}
                         </span>
                       </td>
                       <td className="py-3 px-4">
                         <span
                           onClick={() => handleStatusChange(incident.id, incident.status)}
-                          className={`px-2.5 py-1 rounded-full text-xs font-medium cursor-pointer hover:opacity-80 transition-opacity ${getStatusColor(incident.status)}`}
+                          className={`px-2.5 py-1 rounded text-xs font-medium cursor-pointer hover:opacity-80 transition-opacity ${getStatusColor(incident.status)}`}
                           title="Clique para avançar o estado"
                         >
                           {getStatusLabel(incident.status)}
@@ -209,10 +209,10 @@ export default function Deicipline() {
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex gap-1 justify-center">
-                          <Button variant="ghost" size="sm" onClick={() => handleDelete(incident.id)} className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50" title="Apagar">
+                          <Button variant="ghost" size="sm" onClick={() => handleDelete(incident.id)} className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20 rounded" title="Apagar">
                             <Trash2 className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleNotify(incident.id)} className="h-8 w-8 p-0 text-primary hover:text-blue-700 hover:bg-blue-50" title="Notificar por Email">
+                          <Button variant="ghost" size="sm" onClick={() => handleNotify(incident.id)} className="h-8 w-8 p-0 text-primary hover:text-primary/80 hover:bg-primary/10 rounded" title="Notificar por Email">
                             <Mail className="w-4 h-4" />
                           </Button>
                         </div>
@@ -225,40 +225,40 @@ export default function Deicipline() {
           </div>
 
           {/* Mobile card list */}
-          <div className="sm:hidden divide-y divide-gray-100">
+          <div className="sm:hidden divide-y divide-border">
             {isLoading ? (
               <div className="py-10 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
             ) : filteredIncidents.length === 0 ? (
-              <p className="py-10 text-center text-sm text-gray-400">Nenhuma ocorrência encontrada.</p>
+              <p className="py-10 text-center text-sm text-muted-foreground">Nenhuma ocorrência encontrada.</p>
             ) : filteredIncidents.map((incident) => {
               const studentName = incident.student?.name || incident.studentId;
               return (
                 <div key={incident.id} className="p-4 space-y-2">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                      <p className="font-semibold text-sm text-gray-900">{studentName}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">{incident.type}</p>
+                      <p className="font-semibold text-sm text-foreground">{studentName}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{incident.type}</p>
                     </div>
                     <div className="flex flex-col items-end gap-1 shrink-0">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getSeverityColor(incident.severity)}`}>
+                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${getSeverityColor(incident.severity)}`}>
                         {getSeverityLabel(incident.severity)}
                       </span>
                       <span
                         onClick={() => handleStatusChange(incident.id, incident.status)}
-                        className={`px-2 py-0.5 rounded-full text-xs font-medium cursor-pointer ${getStatusColor(incident.status)}`}
+                        className={`px-2 py-0.5 rounded text-xs font-medium cursor-pointer ${getStatusColor(incident.status)}`}
                       >
                         {getStatusLabel(incident.status)}
                       </span>
                     </div>
                   </div>
-                  <p className="text-xs text-gray-500 line-clamp-2">{incident.description}</p>
+                  <p className="text-xs text-muted-foreground line-clamp-2">{incident.description}</p>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-400">{new Date(incident.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</span>
+                    <span className="text-xs text-muted-foreground">{new Date(incident.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</span>
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="sm" onClick={() => handleDelete(incident.id)} className="h-8 w-8 p-0 text-red-500 hover:text-red-700">
+                      <Button variant="ghost" size="sm" onClick={() => handleDelete(incident.id)} className="h-8 w-8 p-0 text-red-500 hover:text-red-700 rounded">
                         <Trash2 className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleNotify(incident.id)} className="h-8 w-8 p-0 text-primary hover:text-blue-700">
+                      <Button variant="ghost" size="sm" onClick={() => handleNotify(incident.id)} className="h-8 w-8 p-0 text-primary hover:text-primary/80 rounded">
                         <Mail className="w-4 h-4" />
                       </Button>
                     </div>

@@ -86,7 +86,7 @@ export default function TurmaDetails() {
         </div>
       </div>
 
-      <Card className="bg-white overflow-hidden">
+      <Card className="bg-card overflow-hidden">
         <CardHeader className="relative p-0">
           <div className="bg-gradient-to-r from-blue-600 to-blue-800 h-32 flex items-end p-6">
             <h2 className="text-4xl font-bold text-white">{turma.name}</h2>
@@ -168,16 +168,16 @@ export default function TurmaDetails() {
               {turma.classSubjects && turma.classSubjects.length > 0 ? (
                 <ul className="space-y-3">
                   {turma.classSubjects.map((cs: ClassSubject) => (
-                    <li key={cs.id} className="p-4 border rounded-xl flex justify-between items-center bg-gray-50">
+                    <li key={cs.id} className="p-4 border rounded-xl flex justify-between items-center bg-muted">
                       <span className="font-semibold">{cs.subject?.name || 'Disciplina Desconhecida'}</span>
-                      <span className="text-sm text-muted-foreground bg-white px-3 py-1 rounded-full border">
+                      <span className="text-sm text-muted-foreground bg-card px-3 py-1 rounded-full border">
                         {cs.teacher?.name || 'Sem Professor'}
                       </span>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="text-muted-foreground p-4 border rounded-xl bg-gray-50 text-center">Nenhuma disciplina associada a esta turma.</p>
+                <p className="text-muted-foreground p-4 border rounded-xl bg-muted text-center">Nenhuma disciplina associada a esta turma.</p>
               )}
             </div>
 
@@ -189,7 +189,7 @@ export default function TurmaDetails() {
               {turma.students && turma.students.length > 0 ? (
                 <ul className="space-y-3">
                   {turma.students.map((student: StudentInClass) => (
-                    <li key={student.id} className="p-4 border rounded-xl flex justify-between items-center bg-gray-50">
+                    <li key={student.id} className="p-4 border rounded-xl flex justify-between items-center bg-muted">
                       <span className="font-semibold">{student.name}</span>
                       <span className="text-sm text-muted-foreground">
                          {student.profile?.studentNumber ? `Nº ${student.profile.studentNumber}` : ''}
@@ -198,7 +198,7 @@ export default function TurmaDetails() {
                   ))}
                 </ul>
               ) : (
-                <p className="text-muted-foreground p-4 border rounded-xl bg-gray-50 text-center">Nenhum aluno matriculado nesta turma.</p>
+                <p className="text-muted-foreground p-4 border rounded-xl bg-muted text-center">Nenhum aluno matriculado nesta turma.</p>
               )}
             </div>
           </div>

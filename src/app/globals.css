@@ -7,6 +7,8 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-hanken-grotesk), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, monospace;
+  --font-hanken: var(--font-hanken-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-jetbrains: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, monospace;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -43,6 +45,75 @@
 }
 
 :root {
+  --radius: 0.25rem;
+  --background: #ECEEF1;
+  --foreground: #090D16;
+  --card: #F4F6F8;
+  --card-foreground: #090D16;
+  --popover: #F4F6F8;
+  --popover-foreground: #090D16;
+  --primary: #7C3AED;
+  --primary-foreground: #FFFFFF;
+  --secondary: #E2E6EA;
+  --secondary-foreground: #334155;
+  --muted: #E2E6EA;
+  --muted-foreground: #556575;
+  --accent: #E2E6EA;
+  --accent-foreground: #090D16;
+  --destructive: #EF4444;
+  --border: #CBD5E1;
+  --input: #FAFBFD;
+  --ring: #7C3AED;
+  --chart-1: #7C3AED;
+  --chart-2: #3E4C59;
+  --chart-3: #556575;
+  --chart-4: #EF4444;
+  --chart-5: #8B5CF6;
+  --sidebar: #F4F6F8;
+  --sidebar-foreground: #090D16;
+  --sidebar-primary: #7C3AED;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #E2E6EA;
+  --sidebar-accent-foreground: #090D16;
+  --sidebar-border: #CBD5E1;
+  --sidebar-ring: #7C3AED;
+}
+
+.dark {
+  --background: #131313;
+  --foreground: #e5e2e1;
+  --card: #121212;
+  --card-foreground: #e5e2e1;
+  --popover: #1A1A1A;
+  --popover-foreground: #e5e2e1;
+  --primary: #8B5CF6;
+  --primary-foreground: #FFFFFF;
+  --secondary: transparent;
+  --secondary-foreground: #C0C2C5;
+  --muted: #1c1b1b;
+  --muted-foreground: #d5c4ac;
+  --accent: #1A1A1A;
+  --accent-foreground: #e5e2e1;
+  --destructive: #9B2226;
+  --border: #414042;
+  --input: #0D0D0D;
+  --ring: #8B5CF6;
+  --chart-1: #DDD6FE;
+  --chart-2: #c5c7c8;
+  --chart-3: #dfe1e3;
+  --chart-4: #ffb4ab;
+  --chart-5: #C4B5FD;
+  --sidebar: #131313;
+  --sidebar-foreground: #e5e2e1;
+  --sidebar-primary: #8B5CF6;
+  --sidebar-primary-foreground: #000000;
+  --sidebar-accent: #1A1A1A;
+  --sidebar-accent-foreground: #e5e2e1;
+  --sidebar-border: #414042;
+  --sidebar-ring: #8B5CF6;
+}
+
+.theme-legacy {
   --radius: 0.75rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.141 0.005 285.823);
@@ -77,7 +148,7 @@
   --sidebar-ring: oklch(0.705 0.015 286.067);
 }
 
-.dark {
+.dark.theme-legacy {
   --background: oklch(0.141 0.005 285.823);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.21 0.006 285.885);
@@ -116,7 +187,65 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-hanken;
+  }
+}
+
+@layer utilities {
+  .headline-lg {
+    font-family: var(--font-hanken-grotesk), ui-sans-serif, system-ui, sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 40px;
+    letter-spacing: -0.02em;
+  }
+  .headline-md {
+    font-family: var(--font-hanken-grotesk), ui-sans-serif, system-ui, sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 32px;
+    letter-spacing: -0.01em;
+  }
+  .headline-sm {
+    font-family: var(--font-hanken-grotesk), ui-sans-serif, system-ui, sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 28px;
+  }
+  .body-lg {
+    font-family: var(--font-hanken-grotesk), ui-sans-serif, system-ui, sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px;
+  }
+  .body-md {
+    font-family: var(--font-hanken-grotesk), ui-sans-serif, system-ui, sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+  }
+  .data-mono {
+    font-family: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, monospace;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 18px;
+    letter-spacing: -0.01em;
+  }
+  .label-caps {
+    font-family: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, monospace;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 16px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .gold-glow,
+  .purple-glow {
+    box-shadow: 0 0 16px -2px rgba(139, 92, 246, 0.45);
+  }
+  .gold-glow-subtle,
+  .purple-glow-subtle {
+    box-shadow: 0 0 20px 0 rgba(139, 92, 246, 0.2);
   }
 }
 .default-layout {
@@ -516,4 +645,186 @@ text-shadow: 0 0 8px rgba(255, 87, 119, 0.6);
   border: none;
   padding: 10px 15px;
   border-radius: 5px;
+}
+
+/* ==========================================================================
+   GLOBAL LIGHT MODE OVERRIDES (EYE PROTECTION & HIGH LEGIBILITY)
+   Aplica uma paleta de cinza suave e confortável para proteger os olhos
+   ========================================================================== */
+
+html:not(.dark) body {
+  background-color: #ECEEF1 !important;
+  color: #090D16 !important;
+}
+
+/* Backgrounds de Superfície e Níveis */
+html:not(.dark) .bg-\[\#131313\],
+html:not(.dark) .bg-\[\#0e0e0e\],
+html:not(.dark) .bg-\[\#0D0D0D\] {
+  background-color: #ECEEF1 !important;
+}
+
+html:not(.dark) .bg-\[\#121212\],
+html:not(.dark) .bg-\[\#1c1b1b\],
+html:not(.dark) .bg-\[\#201f1f\] {
+  background-color: #F4F6F8 !important;
+}
+
+html:not(.dark) .bg-\[\#1A1A1A\],
+html:not(.dark) .bg-\[\#2a2a2a\],
+html:not(.dark) .bg-\[\#353534\],
+html:not(.dark) .bg-\[\#252525\] {
+  background-color: #E2E6EA !important;
+}
+
+/* Cores de Texto de Alto Contraste */
+html:not(.dark) .text-\[\#e5e2e1\] {
+  color: #090D16 !important;
+}
+
+html:not(.dark) p.text-white,
+html:not(.dark) h1.text-white,
+html:not(.dark) h2.text-white,
+html:not(.dark) h3.text-white,
+html:not(.dark) span.text-white:not(button span):not(a span) {
+  color: #090D16 !important;
+}
+
+/* GARANTIR TEXTO BRANCO PURO EM BOTÕES E ELEMENTOS COM FUNDO COLORIDO */
+button.bg-primary,
+button.bg-destructive,
+button.bg-\[\#8B5CF6\],
+button.bg-\[\#7C3AED\],
+button.bg-\[\#DC2626\],
+button.bg-\[\#EF4444\],
+button.bg-\[\#9B2226\],
+.bg-destructive,
+.bg-\[\#DC2626\],
+.bg-\[\#EF4444\],
+.bg-\[\#9B2226\],
+button.bg-primary *,
+button.bg-destructive *,
+button.bg-\[\#8B5CF6\] *,
+button.bg-\[\#7C3AED\] *,
+button.bg-\[\#DC2626\] *,
+button.bg-\[\#EF4444\] *,
+button.bg-\[\#9B2226\] *,
+.bg-destructive *,
+.bg-\[\#DC2626\] *,
+.bg-\[\#EF4444\] *,
+.bg-\[\#9B2226\] * {
+  color: #FFFFFF !important;
+}
+
+/* Botões Vermelhos Vivos e Nítidos no Modo Claro */
+html:not(.dark) .bg-\[\#9B2226\],
+html:not(.dark) .bg-destructive {
+  background-color: #DC2626 !important;
+}
+
+html:not(.dark) .hover\:bg-\[\#9B2226\]:hover,
+html:not(.dark) .hover\:bg-destructive:hover,
+html:not(.dark) button.bg-\[\#9B2226\]:hover,
+html:not(.dark) button.bg-destructive:hover {
+  background-color: #B91C1C !important;
+}
+
+html:not(.dark) .text-\[\#d5c4ac\],
+html:not(.dark) .text-\[\#c5c7c8\],
+html:not(.dark) .text-\[\#babcbd\],
+html:not(.dark) .text-\[\#C0C2C5\] {
+  color: #334155 !important;
+}
+
+html:not(.dark) .text-\[\#9d8f78\],
+html:not(.dark) .text-\[\#504533\] {
+  color: #556575 !important;
+}
+
+html:not(.dark) .text-\[\#DDD6FE\],
+html:not(.dark) .text-\[\#C4B5FD\],
+html:not(.dark) .text-\[\#8B5CF6\],
+html:not(.dark) .text-\[\#A78BFA\] {
+  color: #6D28D9 !important;
+}
+
+/* Bordas e Divisórias Suaves */
+html:not(.dark) .border-\[\#414042\],
+html:not(.dark) .border-\[\#333\],
+html:not(.dark) .border-\[\#222\],
+html:not(.dark) .border-\[\#504533\],
+html:not(.dark) .border-\[\#9d8f78\] {
+  border-color: #CBD5E1 !important;
+}
+
+html:not(.dark) .border-\[\#C0C2C5\] {
+  border-color: #B0BCC9 !important;
+}
+
+/* Inputs, Textareas e Selects */
+html:not(.dark) input,
+html:not(.dark) textarea,
+html:not(.dark) select {
+  background-color: #FAFBFD !important;
+  color: #090D16 !important;
+  border-color: #CBD5E1 !important;
+}
+
+html:not(.dark) input::placeholder,
+html:not(.dark) textarea::placeholder {
+  color: #718096 !important;
+}
+
+/* Modais e Dialogs */
+html:not(.dark) [role="dialog"],
+html:not(.dark) [data-state="open"] > div {
+  background-color: #F4F6F8 !important;
+  color: #090D16 !important;
+  border-color: #CBD5E1 !important;
+}
+
+/* Tabelas e Linhas de Dados - Garantia Total de Hover Claro */
+html:not(.dark) table {
+  background-color: #F4F6F8 !important;
+  color: #090D16 !important;
+}
+
+html:not(.dark) thead,
+html:not(.dark) thead tr,
+html:not(.dark) th {
+  background-color: #E2E6EA !important;
+  color: #0F172A !important;
+  border-color: #CBD5E1 !important;
+}
+
+html:not(.dark) tbody tr {
+  background-color: #FAFBFD !important;
+  border-color: #CBD5E1 !important;
+  color: #090D16 !important;
+}
+
+html:not(.dark) tbody tr:nth-child(even) {
+  background-color: #FAFBFD !important;
+}
+
+html:not(.dark) tbody tr:nth-child(odd) {
+  background-color: #EDF0F3 !important;
+}
+
+html:not(.dark) table tr:hover,
+html:not(.dark) tbody tr:hover,
+html:not(.dark) table tr:hover > td,
+html:not(.dark) tbody tr:hover > td,
+html:not(.dark) .hover\:bg-\[\#1A1A1A\]:hover,
+html:not(.dark) .hover\:bg-\[\#201f1f\]:hover,
+html:not(.dark) tr.hover\:\!bg-\[\#1A1A1A\]:hover,
+html:not(.dark) [class*="hover:!bg-[#1A1A1A]"]:hover,
+html:not(.dark) [class*="hover:bg-[#1A1A1A]"]:hover {
+  background-color: #DDE2E7 !important;
+  color: #090D16 !important;
+}
+
+/* Transições suaves de Tema */
+body, header, aside, main, div, section {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease;
 }

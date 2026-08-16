@@ -14,6 +14,7 @@ import { Plus } from "@/lib/icons";
 import axiosInstance from "@/service/api";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
 
 const PERIODS = ['Manhã', 'Tarde', 'Noite', 'Integral'];
 const ACADEMIC_LEVELS = [
@@ -32,6 +33,18 @@ export interface ClassFormData {
   capacity: number;
 }
 
+const safeStringRegex = /^[^<>';=]*$/;
+
+const classSchema = z.object({
+  name: z.string().trim().min(1, "Campo obrigatório").max(100, "Texto demasiado longo").regex(safeStringRegex, "Caracteres inválidos"),
+  period: z.string().min(1, "Selecione um período"),
+  academic_level: z.string().min(1, "Selecione o nível académico"),
+  grade: z.string().min(1, "Selecione a classe"),
+  course: z.string().regex(safeStringRegex, "Caracteres inválidos").optional(),
+  roomName: z.string().min(1, "Selecione uma sala"),
+  capacity: z.number().min(1, "A capacidade deve ser maior que 0"),
+});
+
 export function NewClass() {
   const [formData, setFormData] = useState<ClassFormData>({
       name: '',
@@ -43,6 +56,7 @@ export function NewClass() {
       capacity: 35,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [rooms, setRooms] = useState<{ id: string; name: string; floor?: string; capacity?: number }[]>([]);
   const { toast } = useToast();
 
@@ -64,7 +78,29 @@ export function NewClass() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Zod Validation Execution
+    const result = classSchema.safeParse(formData);
+    
+    if (!result.success) {
+      const newErrors: Record<string, string> = {};
+      result.error.errors.forEach(err => {
+        if (err.path[0]) {
+          newErrors[err.path[0].toString()] = err.message;
+        }
+      });
+      setErrors(newErrors);
+      return;
+    }
+    
+    if (formData.academic_level === '10-13' && !formData.course?.trim()) {
+      setErrors({ ...errors, course: "Curso é obrigatório no Secundário II" });
+      return;
+    }
+    
+    setErrors({});
     setIsSubmitting(true);
+    
     try {
       await axiosInstance.post('/classes', {
         name: formData.name,
@@ -94,17 +130,16 @@ export function NewClass() {
     }
   };
 
-
   return (
     <Sheet>
       <SheetTrigger asChild>
         <Button
-            className="gap-2 bg-[#5856eb] rounded-full text-white hover:bg-[#423ff3] hover:text-white hover:cursor-pointer">
+            className="gap-2 flex items-center bg-primary text-primary-foreground border-none rounded-sm hover:bg-[#A78BFA] hover:shadow-[0_0_12px_rgba(139, 92, 246,0.4)] transition-all font-bold font-hanken text-sm px-4 py-2 h-10">
             <Plus className="w-4 h-4 " />
             Nova Turma
         </Button>
       </SheetTrigger>
-      <SheetContent style={{minWidth:600}} className="w-[70rem] overflow-y-auto scrollbar-none p-8">
+      <SheetContent style={{minWidth:600}} className="w-[70rem] border-secondary-foreground bg-popover shadow-[0_0_15px_rgba(0,0,0,0.5)] overflow-y-auto scrollbar-none p-8">
         <SheetHeader>
           <SheetTitle>Turma</SheetTitle>
           <SheetDescription>
@@ -114,7 +149,7 @@ export function NewClass() {
         <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
+              <label className="block text-sm font-bold font-hanken text-secondary-foreground mb-2">
                 Nome da Turma
               </label>
               <input
@@ -122,20 +157,21 @@ export function NewClass() {
                 required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3 py-2 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:ring-2 focus:ring-primary focus:border-transparent"
                 placeholder="Ex: 1ª Classe A"
               />
+              {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
+              <label className="block text-sm font-bold font-hanken text-secondary-foreground mb-2">
                 Nível Acadêmico *
               </label>
               <select
                 required
                 value={formData.academic_level}
                 onChange={(e) => setFormData({ ...formData, academic_level: e.target.value })}
-                className="w-full px-3 py-2 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:ring-2 focus:ring-primary focus:border-transparent"
               >
                 {ACADEMIC_LEVELS.map((level) => (
                   <option key={level} value={level}>
@@ -143,17 +179,18 @@ export function NewClass() {
                   </option>
                 ))}
               </select>
+              {errors.academic_level && <p className="text-red-500 text-xs mt-1">{errors.academic_level}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
+              <label className="block text-sm font-bold font-hanken text-secondary-foreground mb-2">
                 Classe / Ano
               </label>
               <select
                 required
                 value={formData.grade}
                 onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
-                className="w-full px-3 py-2 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:ring-2 focus:ring-primary focus:border-transparent"
               >
                 <option value="">Selecione a classe</option>
                 {formData.academic_level === '1-6' && (
@@ -182,11 +219,12 @@ export function NewClass() {
                   </>
                 )}
               </select>
+              {errors.grade && <p className="text-red-500 text-xs mt-1">{errors.grade}</p>}
             </div>
 
             {formData.academic_level === '10-13' && (
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
+                <label className="block text-sm font-bold font-hanken text-secondary-foreground mb-2">
                   Curso / Profissão
                 </label>
                 <input
@@ -194,21 +232,22 @@ export function NewClass() {
                   required
                   value={formData.course}
                   onChange={(e) => setFormData({ ...formData, course: e.target.value })}
-                  className="w-full px-3 py-2 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="w-full px-3 py-2 bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:ring-2 focus:ring-primary focus:border-transparent"
                   placeholder="Ex: Ciências Físicas e Biológicas"
                 />
+                {errors.course && <p className="text-red-500 text-xs mt-1">{errors.course}</p>}
               </div>
             )}
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
+              <label className="block text-sm font-bold font-hanken text-secondary-foreground mb-2">
                 Período
               </label>
               <select
                 required
                 value={formData.period}
                 onChange={(e) => setFormData({ ...formData, period: e.target.value })}
-                className="w-full px-3 py-2 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:ring-2 focus:ring-primary focus:border-transparent"
               >
                 {PERIODS.map((period) => (
                   <option key={period} value={period}>
@@ -216,17 +255,18 @@ export function NewClass() {
                   </option>
                 ))}
               </select>
+              {errors.period && <p className="text-red-500 text-xs mt-1">{errors.period}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
+              <label className="block text-sm font-bold font-hanken text-secondary-foreground mb-2">
                 Sala
               </label>
               <select
                 required
                 value={formData.roomName}
                 onChange={(e) => setFormData({ ...formData, roomName: e.target.value })}
-                className="w-full px-3 py-2 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:ring-2 focus:ring-primary focus:border-transparent"
               >
                 <option value="">Selecione uma sala</option>
                 {rooms.map((room) => (
@@ -235,6 +275,7 @@ export function NewClass() {
                   </option>
                 ))}
               </select>
+              {errors.roomName && <p className="text-red-500 text-xs mt-1">{errors.roomName}</p>}
               {rooms.length === 0 && (
                 <p className="text-xs text-orange-600 mt-1">
                   Nenhuma sala cadastrada para este Cíclo/Classe.
@@ -243,23 +284,22 @@ export function NewClass() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
+              <label className="block text-sm font-bold font-hanken text-secondary-foreground mb-2">
                 Capacidade Máxima (Alunos)
               </label>
               <input
                 type="number"
                 required
                 value={formData.capacity}
-                onChange={(e) =>
-                  setFormData({ ...formData, capacity: parseInt(e.target.value) || 0 })
-                }
-                className="w-full px-3 py-2 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
+                onChange={(e) => setFormData({ ...formData, capacity: parseInt(e.target.value) || 0 })}
+                className="w-full px-3 py-2 bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:ring-2 focus:ring-primary focus:border-transparent"
               />
+              {errors.capacity && <p className="text-red-500 text-xs mt-1">{errors.capacity}</p>}
             </div>
           </div>
 
         <SheetFooter className="mt-8">
-          <Button type="submit" disabled={isSubmitting} className="bg-[#5856eb] rounded-full text-white hover:cursor-pointer hover:text-white hover:bg-[#3c3ad6]">
+          <Button type="submit" disabled={isSubmitting} className="bg-primary text-primary-foreground border-none rounded-sm hover:bg-[#A78BFA] hover:shadow-[0_0_12px_rgba(139, 92, 246,0.4)] transition-all font-bold font-hanken text-sm px-4 py-2 h-10">
             {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
             Salvar Turma
           </Button>

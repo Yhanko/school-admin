@@ -8,12 +8,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="min-h-screen w-full bg-[#F3F5F7] overflow-x-hidden">
+    <div className="min-h-screen w-full bg-[#ECEEF1] dark:bg-[#ECEEF1] dark:bg-[#131313] text-[#090D16] dark:text-[#e5e2e1] overflow-x-hidden">
       <SidebarProvider>
         <AppSidebar />
-        <main className="flex flex-col min-h-screen flex-1 w-full max-w-full overflow-x-hidden">
+        <main className="flex flex-col min-h-screen flex-1 w-full max-w-full overflow-x-hidden bg-[#ECEEF1] dark:bg-[#ECEEF1] dark:bg-[#131313]">
           <Header />
-          <div className="flex-1 p-3 sm:p-6 md:p-8 mt-2">
+          <div className="flex-1 p-4 sm:p-6 lg:p-8">
             {children}
           </div>
         </main>

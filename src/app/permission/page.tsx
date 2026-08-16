@@ -1,6 +1,6 @@
-"use client"
+"use client";
+
 import { useState, useEffect, useCallback } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Search,
@@ -27,7 +27,7 @@ interface UserPermissionItem {
   userPermission?: Record<string, boolean>;
 }
 
-export default function Permission(){
+export default function Permission() {
   const { toast } = useToast();
   const [users, setUsers] = useState<UserPermissionItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -48,11 +48,15 @@ export default function Permission(){
   const fetchPermissions = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await axiosInstance.get('/permissions');
+      const response = await axiosInstance.get("/permissions");
       setUsers(response.data);
     } catch (error) {
       console.error("Erro ao carregar permissões:", error);
-      toast({ title: 'Erro', description: 'Falha ao carregar permissões', variant: 'destructive' });
+      toast({
+        title: "Erro",
+        description: "Falha ao carregar permissões",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -75,8 +79,12 @@ export default function Permission(){
     permissions: "Gestão de Permissões",
   };
 
-  const togglePermission = async (userId: string, permission: string, currentValue: boolean) => {
-    const updatedUsers = users.map(user => {
+  const togglePermission = async (
+    userId: string,
+    permission: string,
+    currentValue: boolean
+  ) => {
+    const updatedUsers = users.map((user) => {
       if (user.id === userId) {
         return {
           ...user,
@@ -92,364 +100,471 @@ export default function Permission(){
 
     try {
       await axiosInstance.patch(`/permissions/${userId}`, {
-        [permission]: !currentValue
+        [permission]: !currentValue,
       });
-      toast({ title: 'Sucesso', description: 'Permissão atualizada.' });
+      toast({ title: "Sucesso", description: "Permissão atualizada." });
     } catch {
       fetchPermissions();
-      toast({ title: 'Erro', description: 'Falha ao atualizar permissão', variant: 'destructive' });
+      toast({
+        title: "Erro",
+        description: "Falha ao atualizar permissão",
+        variant: "destructive",
+      });
     }
   };
 
-  const countPermissions = (permissions: Record<string, unknown> | null | undefined) => {
+  const countPermissions = (
+    permissions: Record<string, unknown> | null | undefined
+  ) => {
     if (!permissions) return 0;
-    const ignoredKeys = new Set(['id', 'userId', 'createdAt', 'updatedAt']);
-    return Object.entries(permissions).filter(([key, val]) => !ignoredKeys.has(key) && Boolean(val)).length;
+    const ignoredKeys = new Set(["id", "userId", "createdAt", "updatedAt"]);
+    return Object.entries(permissions).filter(
+      ([key, val]) => !ignoredKeys.has(key) && Boolean(val)
+    ).length;
   };
 
-  const getRoleColor = (role: string) => {
-    const colors: Record<string, string> = {
-      "SUPER_ADMIN": "bg-red-100 text-red-700",
-      "ADMIN": "bg-red-100 text-red-700",
-      "TEACHER": "bg-blue-100 text-blue-700",
-      "SECRETARY": "bg-green-100 text-green-700",
-      "STUDENT": "bg-yellow-100 text-yellow-700",
-      "PARENT": "bg-orange-100 text-orange-700",
-      "ASSOCIATION_MEMBER": "bg-purple-100 text-purple-700",
-    };
-    return colors[role] || "bg-gray-100 text-gray-700";
+  const getRoleBadge = (role: string) => {
+    switch (role) {
+      case "SUPER_ADMIN":
+      case "ADMIN":
+        return "bg-red-100 text-red-800 border border-red-300 dark:bg-[#9B2226]/30 dark:text-[#ffb4ab] dark:border-[#9B2226]/60";
+      case "TEACHER":
+        return "bg-purple-100 text-purple-800 border border-purple-300 dark:bg-[#1c1b1b] dark:text-[#DDD6FE] dark:border-[#DDD6FE]/40";
+      case "SECRETARY":
+        return "bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-[#2D6A4F]/30 dark:text-[#2D6A4F] dark:border-[#2D6A4F]/60";
+      case "STUDENT":
+        return "bg-slate-100 text-slate-800 border border-slate-300 dark:bg-[#1c1b1b] dark:text-[#C0C2C5] dark:border-[#414042]";
+      case "PARENT":
+        return "bg-amber-100 text-amber-800 border border-amber-300 dark:bg-[#1c1b1b] dark:text-[#d5c4ac] dark:border-[#414042]";
+      default:
+        return "bg-slate-100 text-slate-800 border border-slate-300 dark:bg-[#1c1b1b] dark:text-[#e5e2e1] dark:border-[#414042]";
+    }
   };
 
   const getRoleLabel = (role: string) => {
     const labels: Record<string, string> = {
-      "SUPER_ADMIN": "Super Admin",
-      "ADMIN": "Administrador",
-      "TEACHER": "Professor",
-      "SECRETARY": "Secretaria",
-      "STUDENT": "Aluno",
-      "PARENT": "Encarregado",
-      "ASSOCIATION_MEMBER": "Associação",
+      SUPER_ADMIN: "Super Admin",
+      ADMIN: "Administrador",
+      TEACHER: "Professor",
+      SECRETARY: "Secretaria",
+      STUDENT: "Aluno",
+      PARENT: "Encarregado",
+      ASSOCIATION_MEMBER: "Associação",
     };
     return labels[role] || role;
   };
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center w-full min-h-[60vh]">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="flex flex-col justify-center items-center w-full min-h-[60vh] space-y-3 font-hanken">
+        <Loader2 className="w-8 h-8 animate-spin text-[#8B5CF6]" />
+        <span className="label-caps text-[#d5c4ac]">Carregando permissões do sistema...</span>
       </div>
     );
   }
 
-  const filteredUsers = users.filter(user =>
-    user.name?.toLowerCase().includes(activeSearch) ||
-    user.email?.toLowerCase().includes(activeSearch)
+  const filteredUsers = users.filter(
+    (user) =>
+      user.name?.toLowerCase().includes(activeSearch) ||
+      user.email?.toLowerCase().includes(activeSearch)
   );
 
-  return(
-    <div className="w-full max-w-full px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-5 sm:space-y-7 overflow-x-hidden">
-
+  return (
+    <div className="w-full max-w-full space-y-6 font-hanken text-[#e5e2e1]">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#414042] pb-6">
         <div>
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Gestão de Permissões</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Controle de acesso e permissões de utilizadores</p>
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#8B5CF6] shadow-[0_0_10px_#8B5CF6]" />
+            <h1 className="headline-lg text-[#e5e2e1]">
+              Gestão de Permissões
+            </h1>
+          </div>
+          <p className="body-md text-[#d5c4ac] mt-1">
+            Controle de perfis, concessão e revogação de acessos modulares
+          </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" className="gap-1.5 rounded-xl cursor-pointer border-indigo-200 text-primary hover:bg-indigo-50 text-xs sm:text-sm">
-            <Download className="w-4 h-4" />
-            <span>Exportar</span>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <Button
+            variant="secondary"
+            className="border-[#414042] text-[#e5e2e1] hover:border-[#C0C2C5] hover:bg-[#1c1b1b] rounded h-10 px-4 text-xs sm:text-sm font-semibold cursor-pointer"
+          >
+            <Download className="w-4 h-4 mr-1.5 text-[#d5c4ac]" />
+            <span>Exportar Relatório</span>
           </Button>
-          <AddNewUserPermission />
+          <AddNewUserPermission onCreated={fetchPermissions} />
         </div>
       </div>
 
       {/* Summary Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <Card className="border border-gray-100 shadow-sm rounded-2xl">
-          <CardContent className="p-3 sm:p-5">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-indigo-100 shrink-0">
-                <Users className="w-4 h-4 text-primary" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Total</p>
-                <p className="text-2xl font-bold text-primary">{users.length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border border-gray-100 shadow-sm rounded-2xl">
-          <CardContent className="p-3 sm:p-5">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-green-100 shrink-0">
-                <UserCheck className="w-4 h-4 text-green-600" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Ativos</p>
-                <p className="text-2xl font-bold text-green-600">{users.length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border border-gray-100 shadow-sm rounded-2xl">
-          <CardContent className="p-3 sm:p-5">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-red-100 shrink-0">
-                <ShieldCheck className="w-4 h-4 text-red-600" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Admins</p>
-                <p className="text-2xl font-bold text-red-600">
-                  {users.filter(u => u.role === "ADMIN" || u.role === "SUPER_ADMIN").length}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border border-gray-100 shadow-sm rounded-2xl">
-          <CardContent className="p-3 sm:p-5">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-blue-100 shrink-0">
-                <GraduationCap className="w-4 h-4 text-primary" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Professores</p>
-                <p className="text-2xl font-bold text-primary">
-                  {users.filter(u => u.role === "TEACHER").length}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="bg-[#121212] border border-[#414042] rounded-lg p-4 flex items-center gap-3.5">
+          <div className="p-2.5 rounded bg-[#1c1b1b] border border-[#414042] shrink-0 text-[#8B5CF6]">
+            <Users className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="label-caps text-[10px] text-[#9d8f78]">Total Utilizadores</p>
+            <p className="text-2xl font-bold text-[#e5e2e1] data-mono">{users.length}</p>
+          </div>
+        </div>
+
+        <div className="bg-[#121212] border border-[#414042] rounded-lg p-4 flex items-center gap-3.5">
+          <div className="p-2.5 rounded bg-[#1c1b1b] border border-[#414042] shrink-0 text-[#2D6A4F]">
+            <UserCheck className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="label-caps text-[10px] text-[#9d8f78]">Contas Ativas</p>
+            <p className="text-2xl font-bold text-[#2D6A4F] data-mono">{users.length}</p>
+          </div>
+        </div>
+
+        <div className="bg-[#FAFBFD] dark:bg-[#121212] border border-[#CBD5E1] dark:border-[#414042] rounded-lg p-4 flex items-center gap-3.5">
+          <div className="p-2.5 rounded bg-red-50 dark:bg-[#1c1b1b] border border-red-200 dark:border-[#414042] shrink-0 text-red-600 dark:text-[#ffb4ab]">
+            <ShieldCheck className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="label-caps text-[10px] text-[#556575] dark:text-[#9d8f78]">Administradores</p>
+            <p className="text-2xl font-bold text-red-600 dark:text-[#ffb4ab] data-mono">
+              {
+                users.filter(
+                  (u) => u.role === "ADMIN" || u.role === "SUPER_ADMIN"
+                ).length
+              }
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-[#FAFBFD] dark:bg-[#121212] border border-[#CBD5E1] dark:border-[#414042] rounded-lg p-4 flex items-center gap-3.5">
+          <div className="p-2.5 rounded bg-purple-50 dark:bg-[#1c1b1b] border border-purple-200 dark:border-[#414042] shrink-0 text-[#7C3AED] dark:text-[#DDD6FE]">
+            <GraduationCap className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="label-caps text-[10px] text-[#556575] dark:text-[#9d8f78]">Professores</p>
+            <p className="text-2xl font-bold text-[#7C3AED] dark:text-[#DDD6FE] data-mono">
+              {users.filter((u) => u.role === "TEACHER").length}
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Search */}
       <div className="flex gap-2">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#556575] dark:text-[#9d8f78]" />
           <input
             type="text"
-            placeholder="Pesquisar por nome ou email..."
+            placeholder="Pesquisar por nome ou e-mail institucional..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+            className="w-full pl-10 pr-4 h-10 bg-[#FAFBFD] dark:bg-[#0D0D0D] border border-[#CBD5E1] dark:border-[#414042] rounded text-sm text-[#090D16] dark:text-[#e5e2e1] placeholder:text-[#718096] dark:placeholder:text-[#9d8f78] focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] outline-none transition-colors"
           />
         </div>
-        <Button onClick={handleSearch} size="sm" className="bg-primary text-white hover:bg-indigo-700 rounded-xl px-4 text-sm shrink-0">
+        <Button
+          onClick={handleSearch}
+          className="bg-primary hover:bg-[#A78BFA] text-white font-semibold rounded h-10 px-5 text-xs sm:text-sm shadow-xs cursor-pointer shrink-0 transition-all"
+        >
           Pesquisar
         </Button>
       </div>
 
-      {/* Users Table — desktop */}
-      <Card className="border border-gray-100 shadow-sm rounded-2xl">
-        <CardHeader className="pb-2 px-4 sm:px-6">
-          <CardTitle className="text-sm sm:text-base font-semibold text-gray-800">Utilizadores e Permissões</CardTitle>
-        </CardHeader>
-        <CardContent className="px-0 pb-0">
-          {/* Desktop table */}
-          <div className="hidden sm:block overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-100">
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700 text-xs uppercase tracking-wide">Utilizador</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700 text-xs uppercase tracking-wide">Email</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700 text-xs uppercase tracking-wide">Função</th>
-                  <th className="text-center py-3 px-4 font-semibold text-gray-700 text-xs uppercase tracking-wide">Permissões</th>
-                  <th className="text-center py-3 px-4 font-semibold text-gray-700 text-xs uppercase tracking-wide">Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredUsers.map((user) => (
-                  <tr key={user.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                    <td className="py-3 px-4 font-medium text-gray-900 whitespace-nowrap">{user.name}</td>
-                    <td className="py-3 px-4 text-gray-500 text-xs max-w-[180px] truncate">{user.email}</td>
-                    <td className="py-3 px-4">
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${getRoleColor(user.role)}`}>
-                        {getRoleLabel(user.role)}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        <span className="font-semibold text-gray-900 text-sm">
-                          {countPermissions(user.userPermission)}/10
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0 text-gray-500 hover:text-primary"
-                          onClick={() =>
-                            setShowPermissionDetails(
-                              showPermissionDetails === user.id ? null : user.id
-                            )
-                          }
-                        >
-                          {showPermissionDetails === user.id ? (
-                            <EyeOff className="w-4 h-4" />
-                          ) : (
-                            <Eye className="w-4 h-4" />
-                          )}
-                        </Button>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-500 hover:text-red-700">
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-                {filteredUsers.length === 0 && (
-                  <tr>
-                    <td colSpan={5} className="py-10 text-center text-sm text-gray-400">
-                      Nenhum utilizador encontrado.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+      {/* Users Table */}
+      <div className="bg-[#121212] border border-[#414042] rounded-lg overflow-hidden">
+        <div className="p-4 sm:p-5 border-b border-[#414042] flex items-center justify-between">
+          <h2 className="headline-sm text-[#e5e2e1]">
+            Utilizadores e Permissões Ativas
+          </h2>
+          <span className="label-caps text-[10px] text-[#DDD6FE] data-mono">
+            {filteredUsers.length} REGISTOS
+          </span>
+        </div>
 
-          {/* Mobile card list */}
-          <div className="sm:hidden divide-y divide-gray-100">
-            {filteredUsers.map((user) => (
-              <div key={user.id} className="p-4 space-y-2">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <p className="font-semibold text-sm text-gray-900 truncate">{user.name}</p>
-                    <p className="text-xs text-gray-500 truncate">{user.email}</p>
-                  </div>
-                  <span className={`shrink-0 px-2.5 py-1 rounded-full text-xs font-medium ${getRoleColor(user.role)}`}>
-                    {getRoleLabel(user.role)}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-600 font-medium">
-                    {countPermissions(user.userPermission)}/10 permissões
-                  </span>
-                  <div className="flex gap-1">
+        {/* Desktop table */}
+        <div className="hidden sm:block overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-[#1c1b1b]">
+              <tr className="border-b border-[#414042]">
+                <th className="text-left py-3 px-4 label-caps text-[#d5c4ac]">
+                  Utilizador
+                </th>
+                <th className="text-left py-3 px-4 label-caps text-[#d5c4ac]">
+                  E-mail
+                </th>
+                <th className="text-left py-3 px-4 label-caps text-[#d5c4ac]">
+                  Função
+                </th>
+                <th className="text-center py-3 px-4 label-caps text-[#d5c4ac]">
+                  Módulos
+                </th>
+                <th className="text-center py-3 px-4 label-caps text-[#d5c4ac]">
+                  Ações
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#414042]/50">
+              {filteredUsers.map((user) => (
+                <tr
+                  key={user.id}
+                  className="even:bg-[#FAFBFD] odd:bg-[#EDF0F3] dark:even:bg-[#121212] dark:odd:bg-[#151515] hover:bg-[#DDE2E7] dark:hover:bg-[#1A1A1A] transition-colors"
+                >
+                  <td className="py-3 px-4 font-semibold text-[#e5e2e1] whitespace-nowrap">
+                    {user.name}
+                  </td>
+                  <td className="py-3 px-4 text-[#d5c4ac] text-xs data-mono max-w-[200px] truncate">
+                    {user.email}
+                  </td>
+                  <td className="py-3 px-4">
+                    <span
+                      className={`px-2.5 py-1 rounded text-[11px] font-semibold data-mono ${getRoleBadge(
+                        user.role
+                      )}`}
+                    >
+                      {getRoleLabel(user.role)}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4 text-center">
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="font-bold text-[#DDD6FE] data-mono text-xs">
+                        {countPermissions(user.userPermission)}/10
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 text-slate-600 dark:text-[#d5c4ac] hover:text-[#7C3AED] dark:hover:text-[#8B5CF6] hover:bg-slate-200 dark:hover:bg-[#201f1f] rounded cursor-pointer transition-all"
+                        onClick={() =>
+                          setShowPermissionDetails(
+                            showPermissionDetails === user.id ? null : user.id
+                          )
+                        }
+                        title="Ver permissões detalhadas"
+                      >
+                        {showPermissionDetails === user.id ? (
+                          <EyeOff className="w-4 h-4 text-[#7C3AED] dark:text-[#8B5CF6]" />
+                        ) : (
+                          <Eye className="w-4 h-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </td>
+                  <td className="py-3 px-4 text-center">
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-8 w-8 p-0 text-gray-500 hover:text-primary"
-                      onClick={() =>
-                        setShowPermissionDetails(
-                          showPermissionDetails === user.id ? null : user.id
-                        )
-                      }
+                      className="h-8 w-8 p-0 text-red-600 dark:text-[#ffb4ab] bg-red-50 hover:bg-red-600 hover:text-white dark:bg-[#9B2226]/20 dark:hover:bg-[#DC2626] dark:hover:text-white border border-red-200 dark:border-[#9B2226]/50 rounded cursor-pointer transition-all shadow-2xs mx-auto flex items-center justify-center"
+                      title="Excluir Utilizador"
                     >
-                      {showPermissionDetails === user.id ? (
-                        <EyeOff className="w-4 h-4" />
-                      ) : (
-                        <Eye className="w-4 h-4" />
-                      )}
-                    </Button>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-500 hover:text-red-700">
                       <Trash2 className="w-4 h-4" />
                     </Button>
-                  </div>
+                  </td>
+                </tr>
+              ))}
+              {filteredUsers.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={5}
+                    className="py-12 text-center text-sm text-[#556575] dark:text-[#9d8f78] italic"
+                  >
+                    Nenhum utilizador encontrado para a pesquisa.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Mobile card list */}
+        <div className="sm:hidden divide-y divide-[#CBD5E1] dark:divide-[#414042]">
+          {filteredUsers.map((user) => (
+            <div key={user.id} className="p-4 space-y-2.5 bg-[#FAFBFD] dark:bg-[#121212]">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="font-semibold text-sm text-[#090D16] dark:text-[#e5e2e1] truncate">
+                    {user.name}
+                  </p>
+                  <p className="text-xs text-[#556575] dark:text-[#d5c4ac] data-mono truncate">
+                    {user.email}
+                  </p>
+                </div>
+                <span
+                  className={`shrink-0 px-2 py-0.5 rounded text-[10px] font-semibold data-mono ${getRoleBadge(
+                    user.role
+                  )}`}
+                >
+                  {getRoleLabel(user.role)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between pt-1">
+                <span className="text-xs text-[#6D28D9] dark:text-[#DDD6FE] font-bold data-mono">
+                  {countPermissions(user.userPermission)}/10 permissões
+                </span>
+                <div className="flex gap-1.5">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 text-slate-600 dark:text-[#d5c4ac] hover:text-[#7C3AED] dark:hover:text-[#8B5CF6] hover:bg-slate-200 dark:hover:bg-[#201f1f] rounded"
+                    onClick={() =>
+                      setShowPermissionDetails(
+                        showPermissionDetails === user.id ? null : user.id
+                      )
+                    }
+                  >
+                    {showPermissionDetails === user.id ? (
+                      <EyeOff className="w-4 h-4 text-[#7C3AED] dark:text-[#8B5CF6]" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 text-red-600 dark:text-[#ffb4ab] bg-red-50 hover:bg-red-600 hover:text-white dark:bg-[#9B2226]/20 dark:hover:bg-[#DC2626] dark:hover:text-white border border-red-200 dark:border-[#9B2226]/50 rounded cursor-pointer transition-all shadow-2xs flex items-center justify-center"
+                    title="Excluir Utilizador"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
                 </div>
               </div>
-            ))}
-            {filteredUsers.length === 0 && (
-              <p className="py-10 text-center text-sm text-gray-400">Nenhum utilizador encontrado.</p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Permission Details */}
-      {showPermissionDetails !== null && (
-        <Card className="border border-indigo-100 shadow-sm rounded-2xl">
-          <CardHeader className="px-4 sm:px-6 pb-2">
-            <CardTitle className="text-sm sm:text-base font-semibold text-indigo-800 flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4" />
-              Detalhes — {users.find(u => u.id === showPermissionDetails)?.name}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-4 sm:px-6 pb-5">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {Object.entries(permissionLabels).map(([key, label]) => {
-                const userPerms = users.find(u => u.id === showPermissionDetails)?.userPermission || {};
-                const value = userPerms[key] || false;
-                return (
-                  <div
-                    key={key}
-                    className="flex items-center justify-between p-3 border border-gray-100 rounded-xl hover:bg-gray-50 transition-all gap-2"
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      {value ? (
-                        <CheckCircle className="w-4 h-4 text-green-500 shrink-0" />
-                      ) : (
-                        <XCircle className="w-4 h-4 text-red-400 shrink-0" />
-                      )}
-                      <span className="text-xs sm:text-sm font-medium text-gray-800 truncate">{label}</span>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => togglePermission(showPermissionDetails, key, value)}
-                      className={`shrink-0 text-xs rounded-xl h-7 px-2 ${value ? 'border-red-200 text-red-600 hover:bg-red-50' : 'border-green-200 text-green-600 hover:bg-green-50'}`}
-                    >
-                      {value ? "Revogar" : "Conceder"}
-                    </Button>
-                  </div>
-                );
-              })}
             </div>
-          </CardContent>
-        </Card>
+          ))}
+          {filteredUsers.length === 0 && (
+            <p className="py-10 text-center text-sm text-[#556575] dark:text-[#9d8f78] italic">
+              Nenhum utilizador encontrado.
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Permission Details Panel */}
+      {showPermissionDetails !== null && (
+        <div className="bg-[#F4F6F8] dark:bg-[#121212] border border-[#7C3AED] dark:border-[#8B5CF6]/60 rounded-lg p-5 space-y-4 shadow-sm">
+          <div className="flex items-center justify-between border-b border-[#CBD5E1] dark:border-[#414042] pb-3">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-[#7C3AED] dark:text-[#8B5CF6]" />
+              <h3 className="headline-sm text-[#090D16] dark:text-[#e5e2e1]">
+                Matriz de Permissões —{" "}
+                {users.find((u) => u.id === showPermissionDetails)?.name}
+              </h3>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowPermissionDetails(null)}
+              className="text-xs text-[#334155] dark:text-[#d5c4ac] hover:bg-slate-200 dark:hover:bg-[#201f1f] rounded cursor-pointer font-semibold"
+            >
+              Fechar
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {Object.entries(permissionLabels).map(([key, label]) => {
+              const userPerms =
+                users.find((u) => u.id === showPermissionDetails)
+                  ?.userPermission || {};
+              const value = userPerms[key] || false;
+              return (
+                <div
+                  key={key}
+                  className={`flex items-center justify-between p-3 border rounded transition-all gap-2 ${
+                    value
+                      ? "bg-emerald-50/70 border-emerald-300 dark:bg-[#1c1b1b] dark:border-[#2D6A4F]/60"
+                      : "bg-[#FAFBFD] border-[#CBD5E1] dark:bg-[#161616] dark:border-[#414042]"
+                  }`}
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    {value ? (
+                      <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-[#2D6A4F] shrink-0" />
+                    ) : (
+                      <XCircle className="w-4 h-4 text-red-500 dark:text-[#ffb4ab] shrink-0" />
+                    )}
+                    <span className="text-xs sm:text-sm font-medium text-[#090D16] dark:text-[#e5e2e1] truncate">
+                      {label}
+                    </span>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      togglePermission(showPermissionDetails, key, value)
+                    }
+                    className={`shrink-0 text-xs rounded h-7 px-2.5 font-bold cursor-pointer transition-all ${
+                      value
+                        ? "border-red-500 bg-red-50 text-red-700 hover:bg-red-600 hover:text-white dark:border-[#9B2226] dark:bg-[#9B2226]/20 dark:text-[#ffb4ab] dark:hover:bg-[#DC2626] dark:hover:text-white"
+                        : "border-emerald-600 bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white dark:border-[#2D6A4F] dark:bg-[#2D6A4F]/20 dark:text-[#2D6A4F] dark:hover:bg-[#2D6A4F] dark:hover:text-white"
+                    }`}
+                  >
+                    {value ? "Revogar" : "Conceder"}
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       )}
 
       {/* Role Templates */}
-      <Card className="border border-gray-100 shadow-sm rounded-2xl">
-        <CardHeader className="px-4 sm:px-6 pb-2">
-          <CardTitle className="text-sm sm:text-base font-semibold text-gray-800">Modelos de Função (Roles)</CardTitle>
-        </CardHeader>
-        <CardContent className="px-4 sm:px-6 pb-5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            <div className="border border-gray-100 rounded-xl p-4 bg-red-50/40">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">ADMIN</span>
-              </div>
-              <p className="text-xs text-gray-500 mb-3">Acesso a gestão e relatórios</p>
-              <div className="space-y-1 text-xs text-gray-600">
-                <p>✓ Dashboard</p>
-                <p>✓ Gestão Completa</p>
-                <p>✓ Relatórios</p>
-                <p>✓ Permissões</p>
-              </div>
-            </div>
+      <div className="bg-[#F4F6F8] dark:bg-[#121212] border border-[#CBD5E1] dark:border-[#414042] rounded-lg p-5 space-y-4 shadow-2xs">
+        <div className="border-b border-[#CBD5E1] dark:border-[#414042] pb-3">
+          <h2 className="headline-sm text-[#090D16] dark:text-[#e5e2e1]">
+            Modelos de Funções do Sistema (Role Presets)
+          </h2>
+          <p className="body-md text-[#556575] dark:text-[#d5c4ac] text-xs mt-0.5">
+            Perfis padronizados de privilégios para acesso operacional e pedagógico
+          </p>
+        </div>
 
-            <div className="border border-gray-100 rounded-xl p-4 bg-blue-50/40">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">TEACHER</span>
-              </div>
-              <p className="text-xs text-gray-500 mb-3">Acesso limitado a turmas e frequência</p>
-              <div className="space-y-1 text-xs text-gray-600">
-                <p>✓ Dashboard</p>
-                <p>✓ Alunos e Turmas</p>
-                <p>✓ Frequência</p>
-                <p className="text-gray-400">✗ Financeiro</p>
-              </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+          <div className="border border-red-200 dark:border-[#9B2226]/40 rounded-lg p-4 bg-[#FAFBFD] dark:bg-[#1c1b1b] space-y-2">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="px-2.5 py-0.5 rounded text-xs font-bold bg-red-100 text-red-800 border border-red-300 dark:bg-[#9B2226]/30 dark:text-[#ffb4ab] dark:border-[#9B2226]/60 data-mono">
+                ADMIN
+              </span>
             </div>
-
-            <div className="border border-gray-100 rounded-xl p-4 bg-green-50/40 sm:col-span-2 lg:col-span-1">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">SECRETARY</span>
-              </div>
-              <p className="text-xs text-gray-500 mb-3">Acesso a gestão e pagamentos</p>
-              <div className="space-y-1 text-xs text-gray-600">
-                <p>✓ Dashboard</p>
-                <p>✓ Gestão de Alunos</p>
-                <p>✓ Pagamentos</p>
-                <p className="text-gray-400">✗ Frequência</p>
-              </div>
+            <p className="text-xs text-[#334155] dark:text-[#d5c4ac]">
+              Acesso irrestrito a configurações, finanças e auditoria
+            </p>
+            <div className="space-y-1 text-xs text-[#556575] dark:text-[#9d8f78] pt-2 border-t border-[#CBD5E1] dark:border-[#414042]">
+              <p className="text-emerald-700 dark:text-[#2D6A4F] font-medium">✓ Painel de Telemetria e Dashboard</p>
+              <p className="text-emerald-700 dark:text-[#2D6A4F] font-medium">✓ Gestão Completa de Utilizadores</p>
+              <p className="text-emerald-700 dark:text-[#2D6A4F] font-medium">✓ Relatórios Financeiros e Faturação</p>
+              <p className="text-emerald-700 dark:text-[#2D6A4F] font-medium">✓ Matriz de Permissões</p>
             </div>
           </div>
-        </CardContent>
-      </Card>
+
+          <div className="border border-purple-200 dark:border-[#DDD6FE]/30 rounded-lg p-4 bg-[#FAFBFD] dark:bg-[#1c1b1b] space-y-2">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="px-2.5 py-0.5 rounded text-xs font-bold bg-purple-100 text-purple-800 border border-purple-300 dark:bg-[#1c1b1b] dark:text-[#DDD6FE] dark:border-[#DDD6FE]/40 data-mono">
+                TEACHER
+              </span>
+            </div>
+            <p className="text-xs text-[#334155] dark:text-[#d5c4ac]">
+              Acesso pedagógico, turmas, notas e diários de turma
+            </p>
+            <div className="space-y-1 text-xs text-[#556575] dark:text-[#9d8f78] pt-2 border-t border-[#CBD5E1] dark:border-[#414042]">
+              <p className="text-emerald-700 dark:text-[#2D6A4F] font-medium">✓ Dashboard do Professor</p>
+              <p className="text-emerald-700 dark:text-[#2D6A4F] font-medium">✓ Alunos, Pautas e Turmas</p>
+              <p className="text-emerald-700 dark:text-[#2D6A4F] font-medium">✓ Lançamento de Frequência</p>
+              <p className="text-red-600 dark:text-[#ffb4ab] font-medium">✗ Módulo Financeiro Restrito</p>
+            </div>
+          </div>
+
+          <div className="border border-emerald-200 dark:border-[#2D6A4F]/40 rounded-lg p-4 bg-[#FAFBFD] dark:bg-[#1c1b1b] space-y-2 sm:col-span-2 lg:col-span-1">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="px-2.5 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-[#2D6A4F]/30 dark:text-[#2D6A4F] dark:border-[#2D6A4F]/60 data-mono">
+                SECRETARY
+              </span>
+            </div>
+            <p className="text-xs text-[#334155] dark:text-[#d5c4ac]">
+              Acesso a matrículas, atendimento e emissão de propinas
+            </p>
+            <div className="space-y-1 text-xs text-[#556575] dark:text-[#9d8f78] pt-2 border-t border-[#CBD5E1] dark:border-[#414042]">
+              <p className="text-emerald-700 dark:text-[#2D6A4F] font-medium">✓ Dashboard da Secretaria</p>
+              <p className="text-emerald-700 dark:text-[#2D6A4F] font-medium">✓ Ficha e Matrícula de Alunos</p>
+              <p className="text-emerald-700 dark:text-[#2D6A4F] font-medium">✓ Gestão e Recibos de Pagamento</p>
+              <p className="text-red-600 dark:text-[#ffb4ab] font-medium">✗ Lançamento Direto de Notas</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  )
+  );
 }

@@ -87,7 +87,7 @@ export default function NotificationsGeral() {
   return (
     <div className="p-6 space-y-6 max-w-4xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-xl shadow-sm border">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-card p-6 rounded-xl shadow-sm border">
         <div className="flex items-center gap-3">
           <div className="relative">
             <Bell className="w-8 h-8 text-primary" />
@@ -98,8 +98,8 @@ export default function NotificationsGeral() {
             )}
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Notificações</h1>
-            <p className="text-gray-600">{unreadNotificationsCount} não lidas de {notifications.length} total</p>
+            <h1 className="text-2xl font-bold text-foreground">Notificações</h1>
+            <p className="text-muted-foreground">{unreadNotificationsCount} não lidas de {notifications.length} total</p>
           </div>
         </div>
         
@@ -116,9 +116,9 @@ export default function NotificationsGeral() {
 
       {/* Notifications List */}
       {notifications.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-xl shadow-sm border">
+        <div className="text-center py-12 bg-card rounded-xl shadow-sm border">
           <Bell className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <p className="text-gray-500 text-lg">Nenhuma notificação disponível</p>
+          <p className="text-muted-foreground text-lg">Nenhuma notificação disponível</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -126,7 +126,7 @@ export default function NotificationsGeral() {
             <div
               key={notification.id}
               className={`
-                bg-white border-l-4 ${getPriorityColor(notification.priority)} 
+                bg-card border-l-4 ${getPriorityColor(notification.priority)} 
                 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 
                 transform hover:-translate-y-1 animate-fade-in
                 ${notification.isRead ? 'opacity-75' : 'border-r-2 border-r-blue-200'}
@@ -142,17 +142,17 @@ export default function NotificationsGeral() {
                   </div>
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center gap-2">
-                      <h3 className={`font-semibold ${notification.isRead ? 'text-gray-600' : 'text-gray-800'}`}>
+                      <h3 className={`font-semibold ${notification.isRead ? 'text-muted-foreground' : 'text-foreground'}`}>
                         {notification.title}
                       </h3>
                       {!notification.isRead && (
                         <span className="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
                       )}
                     </div>
-                    <p className={`text-sm ${notification.isRead ? 'text-gray-500' : 'text-gray-700'}`}>
+                    <p className={`text-sm ${notification.isRead ? 'text-muted-foreground' : 'text-foreground'}`}>
                       {notification.description}
                     </p>
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <Calendar className="w-3 h-3" />
                       {formatDate(notification.createdAt)}
                     </div>
@@ -167,7 +167,7 @@ export default function NotificationsGeral() {
                   className={`
                     transition-all duration-200 hover:scale-105
                     ${notification.isRead 
-                      ? 'text-gray-400 cursor-not-allowed' 
+                      ? 'text-muted-foreground cursor-not-allowed' 
                       : 'text-green-600 hover:bg-green-50'
                     }
                   `}

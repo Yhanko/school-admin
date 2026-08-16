@@ -203,7 +203,7 @@ export function RegulationDetailContent({
               return (
                 <div
                   key={index}
-                  className="p-4 bg-white rounded-xl border text-center"
+                  className="p-4 bg-card rounded border text-center"
                 >
                   <Icon className={`h-6 w-6 mx-auto mb-2 ${option.color}`} />
                   <p className="text-sm font-medium text-slate-900">

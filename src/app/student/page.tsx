@@ -15,13 +15,18 @@ const Student = () => {
   };
 
   return (
-    <section className="w-full space-y-4">
-      <div className="px-2 sm:px-4">
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">Estudantes</h1>
-        <p className="text-xs sm:text-sm text-gray-500 mt-1">Visualize e gerencie todos os estudantes matriculados na instituição</p>
+    <section className="w-full space-y-6 font-hanken text-[#0F172A] dark:text-[#e5e2e1]">
+      <div className="border-b border-[#E2E8F0] dark:border-[#414042] pb-6">
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#8B5CF6] shadow-[0_0_10px_#8B5CF6]" />
+          <h1 className="headline-lg text-[#0F172A] dark:text-[#e5e2e1]">Estudantes</h1>
+        </div>
+        <p className="body-md text-[#475569] dark:text-[#d5c4ac] mt-1">
+          Base de dados e gestão integral de matrículas, turmas e percurso escolar dos estudantes
+        </p>
       </div>
       
-      <div className="w-full space-y-4">
+      <div className="w-full space-y-5">
         <SearchBar 
           onNewStudentClick={() => setIsNewStudentModalOpen(true)}
           searchTerm={searchTerm}

@@ -17,8 +17,16 @@ import Link from 'next/link';
 import { AxiosError } from "axios";
 import axiosInstance from "@/service/api";
 
+// Regex simples para bloquear caracteres comuns em ataques de SQL Injection/XSS
+const safeStringRegex = /^[^<>';=]*$/;
+
 const getPasswordSchema = z.object({
-  email: z.string().email("Formato de e-mail inválido").nonempty("E-mail é obrigatório"),
+  email: z.string()
+    .trim()
+    .min(1, "E-mail é obrigatório")
+    .email("Formato de e-mail inválido")
+    .max(100, "E-mail demasiado longo")
+    .regex(safeStringRegex, "Caracteres inválidos não permitidos"),
   canal: z.enum(["E-mail", "SMS"]),
 });
 

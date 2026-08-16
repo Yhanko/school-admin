@@ -72,7 +72,7 @@ export function EnrollStudent({ classId, className, onSuccess }: EnrollStudentPr
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-primary hover:text-blue-800">
+                <Button variant="ghost" size="sm" className="bg-transparent text-secondary-foreground hover:bg-muted hover:text-primary transition-all rounded-sm h-8 w-8 p-0 flex items-center justify-center">
                     <UserPlus className="w-4 h-4" />
                 </Button>
             </DialogTrigger>
@@ -101,8 +101,8 @@ export function EnrollStudent({ classId, className, onSuccess }: EnrollStudentPr
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button variant="outline" onClick={() => setOpen(false)} disabled={loading}>Cancelar</Button>
-                    <Button onClick={handleEnroll} disabled={loading || !selectedStudent} className="bg-primary text-primary-foreground">
+                    <Button variant="outline" className="bg-transparent border border-secondary-foreground text-secondary-foreground rounded-sm hover:bg-secondary-foreground/10 transition-all font-hanken font-bold text-sm px-4 py-2 h-10" onClick={() => setOpen(false)} disabled={loading}>Cancelar</Button>
+                    <Button onClick={handleEnroll} disabled={loading || !selectedStudent} className="bg-primary text-primary-foreground border-none rounded-sm hover:bg-[#A78BFA] hover:shadow-[0_0_12px_rgba(139, 92, 246,0.4)] transition-all font-bold font-hanken text-sm px-4 py-2 h-10">
                         {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                         {loading ? "A matricular..." : "Confirmar"}
                     </Button>

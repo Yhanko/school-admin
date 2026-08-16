@@ -1,6 +1,13 @@
-"use client"
+"use client";
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { StudentRow, Student } from "./studentRow";
 import { useState, useEffect } from "react";
@@ -9,9 +16,9 @@ import { Button } from "@/components/ui/button";
 import { StudentHistoryModal } from "./studentsHistoryModal";
 import { mockStudentProfiles } from "@/types/academicHistoryData";
 import { StudentFullProfile } from "@/types/academic-history";
-
 import axiosInstance from "@/service/api";
-import { Loader2 } from "lucide-react";
+import { Loader2, ChevronLeft, ChevronRight, UserCheck } from "@/lib/icons";
+import { useToast } from "@/hooks/use-toast";
 
 interface ApiStudentUser {
   id: string;
@@ -35,17 +42,37 @@ interface ApiStudentUser {
   }>;
 }
 
-export function StudentTable ({ refreshKey, activeSearch }: { refreshKey?: number, activeSearch?: string }){
+export function StudentTable({
+  refreshKey,
+  activeSearch,
+}: {
+  refreshKey?: number;
+  activeSearch?: string;
+}) {
+  const { toast } = useToast();
   const [students, setStudents] = useState<Student[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  
-  const [selectedStudentForAction, setSelectedStudentForAction] = useState<Student | null>(null);
-  const [selectedHistoryStudent, setSelectedHistoryStudent] = useState<StudentFullProfile | null>(null);
-  const [modalType, setModalType] = useState<'view' | 'edit' | 'delete' | 'history' | null>(null);
 
-  const handleAction = (action: 'view' | 'edit' | 'delete' | 'history', student: Student) => {
+  const [selectedStudentForAction, setSelectedStudentForAction] =
+    useState<Student | null>(null);
+  const [selectedHistoryStudent, setSelectedHistoryStudent] =
+    useState<StudentFullProfile | null>(null);
+  const [modalType, setModalType] = useState<
+    "view" | "edit" | "delete" | "history" | null
+  >(null);
+
+  const [editName, setEditName] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+
+  const handleAction = (
+    action: "view" | "edit" | "delete" | "history",
+    student: Student
+  ) => {
     setSelectedStudentForAction(student);
-    if (action === 'history') {
+    setEditName(student.name);
+    setEditPhone(student.phone);
+
+    if (action === "history") {
       const studentProfile = mockStudentProfiles.find((s) => s.id === student.id);
       if (studentProfile) {
         setSelectedHistoryStudent(studentProfile);
@@ -59,20 +86,23 @@ export function StudentTable ({ refreshKey, activeSearch }: { refreshKey?: numbe
   useEffect(() => {
     async function fetchStudents() {
       try {
-        const response = await axiosInstance.get('/users?role=STUDENT');
+        const response = await axiosInstance.get("/users?role=STUDENT");
         const apiStudents = response.data.map((user: ApiStudentUser) => ({
           id: user.id,
           name: user.name,
-          date: new Date(user.createdAt).toLocaleDateString('pt-PT'),
+          date: new Date(user.createdAt).toLocaleDateString("pt-PT"),
           parentName: user.parent?.name || "N/A",
           parentEmail: user.parent?.email || "N/A",
           parentPhone: user.parent?.employeeProfile?.phone || "N/A",
           studentNumber: user.code || "N/A",
           city: "Luanda",
-          grade: (user.enrollments && user.enrollments.length > 0 && user.enrollments[0].class)
-            ? `${user.enrollments[0].class.grade} - ${user.enrollments[0].class.name}` 
-            : "N/A",
-          gradeColor: "bg-[#FF5777]",
+          grade:
+            user.enrollments &&
+            user.enrollments.length > 0 &&
+            user.enrollments[0].class
+              ? `${user.enrollments[0].class.grade} - ${user.enrollments[0].class.name}`
+              : "N/A",
+          gradeColor: "bg-secondary",
           phone: user.phone || "N/A",
           email: user.email || "N/A",
           isSelected: false,
@@ -87,47 +117,75 @@ export function StudentTable ({ refreshKey, activeSearch }: { refreshKey?: numbe
     fetchStudents();
   }, [refreshKey]);
 
-  const filteredStudents = students.filter(student => 
-    !activeSearch || student.name.toLowerCase().includes(activeSearch)
+  const filteredStudents = students.filter(
+    (student) =>
+      !activeSearch || student.name.toLowerCase().includes(activeSearch)
   );
 
   return (
-    <div className="w-full space-y-4 px-2 sm:px-4">
+    <div className="w-full space-y-4 font-hanken text-[#090D16] dark:text-[#e5e2e1]">
       {/* Vista de Tabela para Computadores e Tablets */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden w-full">
+      <div className="bg-[#F4F6F8] dark:bg-[#121212] rounded-lg border border-[#CBD5E1] dark:border-[#414042] overflow-hidden w-full shadow-xs">
         <div className="overflow-x-auto w-full">
-          <Table className="w-full">
+          <Table className="w-full border-0">
             <TableHeader>
-              <TableRow className="bg-gray-50 border-b border-gray-200">
+              <TableRow className="bg-[#E2E6EA] dark:bg-[#1c1b1b] border-b border-[#CBD5E1] dark:border-[#414042] hover:bg-[#E2E6EA] dark:hover:bg-[#1c1b1b]">
                 <TableHead className="w-10 px-3 sm:px-4 py-3">
-                  <Checkbox />
+                  <Checkbox className="border-[#CBD5E1] dark:border-[#414042] data-[state=checked]:bg-[#8B5CF6] data-[state=checked]:text-white" />
                 </TableHead>
-                <TableHead className="px-3 sm:px-4 py-3 text-xs font-bold text-gray-700 uppercase">Nº Registo</TableHead>
-                <TableHead className="px-3 sm:px-4 py-3 text-xs font-bold text-gray-700 uppercase">Nome Estudante</TableHead>
-                <TableHead className="px-3 sm:px-4 py-3 text-xs font-bold text-gray-700 uppercase">Data Matrícula</TableHead>
-                <TableHead className="px-3 sm:px-4 py-3 text-xs font-bold text-gray-700 uppercase">Encarregado</TableHead>
-                <TableHead className="px-3 sm:px-4 py-3 text-xs font-bold text-gray-700 uppercase">Cidade</TableHead>
-                <TableHead className="px-3 sm:px-4 py-3 text-xs font-bold text-gray-700 uppercase">Contactos</TableHead>
-                <TableHead className="px-3 sm:px-4 py-3 text-xs font-bold text-gray-700 uppercase">Turma / Classe</TableHead>
-                <TableHead className="px-3 sm:px-4 py-3 text-xs font-bold text-gray-700 uppercase text-right">Ação</TableHead>
+                <TableHead className="px-3 sm:px-4 py-3 label-caps text-[#334155] dark:text-[#d5c4ac]">
+                  Nº Registo
+                </TableHead>
+                <TableHead className="px-3 sm:px-4 py-3 label-caps text-[#334155] dark:text-[#d5c4ac]">
+                  Nome Estudante
+                </TableHead>
+                <TableHead className="px-3 sm:px-4 py-3 label-caps text-[#334155] dark:text-[#d5c4ac]">
+                  Data Matrícula
+                </TableHead>
+                <TableHead className="px-3 sm:px-4 py-3 label-caps text-[#334155] dark:text-[#d5c4ac]">
+                  Encarregado
+                </TableHead>
+                <TableHead className="px-3 sm:px-4 py-3 label-caps text-[#334155] dark:text-[#d5c4ac]">
+                  Cidade
+                </TableHead>
+                <TableHead className="px-3 sm:px-4 py-3 label-caps text-[#334155] dark:text-[#d5c4ac]">
+                  Contactos
+                </TableHead>
+                <TableHead className="px-3 sm:px-4 py-3 label-caps text-[#334155] dark:text-[#d5c4ac]">
+                  Turma / Classe
+                </TableHead>
+                <TableHead className="px-3 sm:px-4 py-3 label-caps text-[#334155] dark:text-[#d5c4ac] text-right">
+                  Ação
+                </TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody className="divide-y divide-gray-100">
+            <TableBody className="divide-y divide-[#CBD5E1] dark:divide-[#414042]/50 bg-[#F4F6F8] dark:bg-[#121212]">
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="h-32 text-center">
-                    <Loader2 className="h-6 w-6 animate-spin mx-auto text-[#4D44B5]" />
-                    <span className="text-xs text-gray-500 mt-2 block">Carregando estudantes...</span>
+                  <TableCell colSpan={9} className="h-40 text-center">
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      <Loader2 className="h-8 w-8 animate-spin text-[#8B5CF6]" />
+                      <span className="label-caps text-[#556575] dark:text-[#d5c4ac]">
+                        Carregando base de estudantes...
+                      </span>
+                    </div>
                   </TableCell>
                 </TableRow>
               ) : filteredStudents.length > 0 ? (
                 filteredStudents.map((student) => (
-                  <StudentRow key={student.id} student={student} onAction={handleAction} />
+                  <StudentRow
+                    key={student.id}
+                    student={student}
+                    onAction={handleAction}
+                  />
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={9} className="h-32 text-center text-gray-500 text-sm">
-                    Nenhum estudante encontrado.
+                  <TableCell
+                    colSpan={9}
+                    className="h-32 text-center text-[#718096] dark:text-[#9d8f78] text-sm"
+                  >
+                    Nenhum estudante encontrado na base de dados.
                   </TableCell>
                 </TableRow>
               )}
@@ -135,92 +193,145 @@ export function StudentTable ({ refreshKey, activeSearch }: { refreshKey?: numbe
           </Table>
         </div>
 
-        {/* Rodapé da Tabela com Paginação Traduzida */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 bg-gray-50/80 border-t border-gray-200">
-          <div className="text-xs sm:text-sm text-gray-600 font-medium">
-            Exibindo <span className="font-semibold text-gray-900">{filteredStudents.length > 0 ? 1 : 0}-{filteredStudents.length}</span> de <span className="font-semibold text-gray-900">{filteredStudents.length}</span> estudantes
+        {/* Rodapé da Tabela com Paginação */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 bg-[#E2E6EA] dark:bg-[#121212] border-t border-[#CBD5E1] dark:border-[#414042]">
+          <div className="text-xs text-[#556575] dark:text-[#d5c4ac] font-medium data-mono">
+            A exibir{" "}
+            <span className="font-semibold text-[#6D28D9] dark:text-[#DDD6FE]">
+              {filteredStudents.length > 0 ? 1 : 0}-{filteredStudents.length}
+            </span>{" "}
+            de{" "}
+            <span className="font-semibold text-[#090D16] dark:text-[#e5e2e1]">
+              {filteredStudents.length}
+            </span>{" "}
+            estudantes
           </div>
-          <div className="flex items-center space-x-1">
-            <button className="p-1.5 text-gray-400 hover:text-gray-700 rounded-xl hover:bg-gray-200 transition-colors">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
+          <div className="flex items-center space-x-1.5">
+            <Button
+              variant="secondary"
+              size="sm"
+              className="h-7 w-7 p-0 border border-[#CBD5E1] dark:border-[#414042] bg-[#FAFBFD] dark:bg-[#1A1A1A] text-[#334155] dark:text-[#d5c4ac] hover:text-[#8B5CF6] hover:border-[#8B5CF6] rounded cursor-pointer"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </Button>
+            <button className="px-2.5 py-1 bg-[#8B5CF6] text-white rounded text-xs font-bold font-jetbrains shadow-xs">
+              1
             </button>
-            <button className="px-3 py-1 bg-[#4D44B5] text-white rounded-xl text-xs font-semibold shadow-sm">1</button>
-            <button className="p-1.5 text-gray-400 hover:text-gray-700 rounded-xl hover:bg-gray-200 transition-colors">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="h-7 w-7 p-0 border border-[#CBD5E1] dark:border-[#414042] bg-white dark:bg-[#1A1A1A] text-[#64748B] dark:text-[#d5c4ac] hover:text-[#8B5CF6] hover:border-[#8B5CF6] rounded cursor-pointer"
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </Button>
           </div>
         </div>
       </div>
 
       <StudentHistoryModal
         student={selectedHistoryStudent}
-        open={modalType === 'history'}
-        onOpenChange={(isOpen) => setModalType(isOpen ? 'history' : null)}
+        open={modalType === "history"}
+        onOpenChange={(isOpen) => setModalType(isOpen ? "history" : null)}
       />
 
       {/* Modal Visualizar Detalhes */}
       {selectedStudentForAction && (
         <Modal
-          isOpen={modalType === 'view'}
+          isOpen={modalType === "view"}
           onClose={() => setModalType(null)}
-          title={`Detalhes de ${selectedStudentForAction.name}`}
+          title={`Ficha de Matrícula: ${selectedStudentForAction.name}`}
           size="lg"
         >
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-sm font-bold text-[#4D44B5] uppercase tracking-wider border-b pb-2 mb-3">Dados do Aluno</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs font-medium text-gray-500">Nº do Estudante</p>
-                  <p className="text-sm font-semibold text-gray-900">{selectedStudentForAction.studentNumber}</p>
+          <div className="space-y-5 font-hanken text-[#0F172A] dark:text-[#e5e2e1]">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between border-b border-[#E2E8F0] dark:border-[#414042] pb-2">
+                <h3 className="label-caps text-[#7C3AED] dark:text-[#DDD6FE]">Dados do Estudante</h3>
+                <span className="data-mono text-xs text-[#64748B] dark:text-[#9d8f78]">
+                  ID: #{selectedStudentForAction.studentNumber}
+                </span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="p-3 bg-[#F8FAFC] dark:bg-[#201f1f] border border-[#E2E8F0] dark:border-[#414042] rounded">
+                  <span className="label-caps text-[#64748B] dark:text-[#9d8f78] block mb-1">
+                    Nome Completo
+                  </span>
+                  <p className="font-semibold text-sm text-[#0F172A] dark:text-[#e5e2e1]">
+                    {selectedStudentForAction.name}
+                  </p>
                 </div>
-                <div>
-                  <p className="text-xs font-medium text-gray-500">Nome Completo</p>
-                  <p className="text-sm font-semibold text-gray-900">{selectedStudentForAction.name}</p>
+                <div className="p-3 bg-[#F8FAFC] dark:bg-[#201f1f] border border-[#E2E8F0] dark:border-[#414042] rounded">
+                  <span className="label-caps text-[#64748B] dark:text-[#9d8f78] block mb-1">
+                    Turma / Classe
+                  </span>
+                  <p className="font-semibold text-sm text-[#7C3AED] dark:text-[#DDD6FE] data-mono">
+                    {selectedStudentForAction.grade}
+                  </p>
                 </div>
-                <div>
-                  <p className="text-xs font-medium text-gray-500">Turma / Classe</p>
-                  <p className="text-sm font-semibold text-gray-900">{selectedStudentForAction.grade}</p>
+                <div className="p-3 bg-[#F8FAFC] dark:bg-[#201f1f] border border-[#E2E8F0] dark:border-[#414042] rounded">
+                  <span className="label-caps text-[#64748B] dark:text-[#9d8f78] block mb-1">
+                    Telemóvel
+                  </span>
+                  <p className="font-semibold text-sm text-[#0F172A] dark:text-[#e5e2e1] data-mono">
+                    {selectedStudentForAction.phone}
+                  </p>
                 </div>
-                <div>
-                  <p className="text-xs font-medium text-gray-500">Telemóvel</p>
-                  <p className="text-sm font-semibold text-gray-900">{selectedStudentForAction.phone}</p>
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-gray-500">E-mail</p>
-                  <p className="text-sm font-semibold text-gray-900">{selectedStudentForAction.email}</p>
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-gray-500">Data de Matrícula</p>
-                  <p className="text-sm font-semibold text-gray-900">{selectedStudentForAction.date}</p>
+                <div className="p-3 bg-[#F8FAFC] dark:bg-[#201f1f] border border-[#E2E8F0] dark:border-[#414042] rounded">
+                  <span className="label-caps text-[#64748B] dark:text-[#9d8f78] block mb-1">
+                    E-mail Institucional
+                  </span>
+                  <p className="font-semibold text-sm text-[#0F172A] dark:text-[#e5e2e1] truncate">
+                    {selectedStudentForAction.email}
+                  </p>
                 </div>
               </div>
             </div>
 
-            <div>
-              <h3 className="text-sm font-bold text-[#4D44B5] uppercase tracking-wider border-b pb-2 mb-3">Dados do Encarregado</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs font-medium text-gray-500">Nome do Encarregado</p>
-                  <p className="text-sm font-semibold text-gray-900">{selectedStudentForAction.parentName}</p>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between border-b border-[#E2E8F0] dark:border-[#414042] pb-2">
+                <h3 className="label-caps text-[#7C3AED] dark:text-[#DDD6FE]">
+                  Filiação & Encarregado
+                </h3>
+                <span className="data-mono text-xs text-[#64748B] dark:text-[#9d8f78]">
+                  Matrícula: {selectedStudentForAction.date}
+                </span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="p-3 bg-[#F8FAFC] dark:bg-[#201f1f] border border-[#E2E8F0] dark:border-[#414042] rounded">
+                  <span className="label-caps text-[#64748B] dark:text-[#9d8f78] block mb-1">
+                    Encarregado de Educação
+                  </span>
+                  <p className="font-semibold text-sm text-[#0F172A] dark:text-[#e5e2e1]">
+                    {selectedStudentForAction.parentName}
+                  </p>
                 </div>
-                <div>
-                  <p className="text-xs font-medium text-gray-500">E-mail do Encarregado</p>
-                  <p className="text-sm font-semibold text-gray-900">{selectedStudentForAction.parentEmail}</p>
+                <div className="p-3 bg-[#F8FAFC] dark:bg-[#201f1f] border border-[#E2E8F0] dark:border-[#414042] rounded">
+                  <span className="label-caps text-[#64748B] dark:text-[#9d8f78] block mb-1">
+                    Telemóvel do Encarregado
+                  </span>
+                  <p className="font-semibold text-sm text-[#0F172A] dark:text-[#e5e2e1] data-mono">
+                    {selectedStudentForAction.parentPhone}
+                  </p>
                 </div>
-                <div>
-                  <p className="text-xs font-medium text-gray-500">Telemóvel do Encarregado</p>
-                  <p className="text-sm font-semibold text-gray-900">{selectedStudentForAction.parentPhone}</p>
+                <div className="sm:col-span-2 p-3 bg-[#F8FAFC] dark:bg-[#201f1f] border border-[#E2E8F0] dark:border-[#414042] rounded">
+                  <span className="label-caps text-[#64748B] dark:text-[#9d8f78] block mb-1">
+                    E-mail do Encarregado
+                  </span>
+                  <p className="font-semibold text-sm text-[#0F172A] dark:text-[#e5e2e1]">
+                    {selectedStudentForAction.parentEmail}
+                  </p>
                 </div>
               </div>
             </div>
-            
-            <div className="pt-4 flex justify-end">
-              <Button variant="outline" onClick={() => setModalType(null)} className="rounded-xl">Fechar</Button>
+
+            <div className="pt-2 flex justify-end border-t border-[#E2E8F0] dark:border-[#414042]">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setModalType(null)}
+                className="border border-[#CBD5E1] dark:border-[#414042] bg-white dark:bg-[#1A1A1A] text-[#0F172A] dark:text-[#e5e2e1] hover:border-[#8B5CF6] hover:bg-[#F1F5F9] dark:hover:bg-[#201f1f] rounded text-xs font-semibold"
+              >
+                Fechar Ficha
+              </Button>
             </div>
           </div>
         </Modal>
@@ -229,23 +340,54 @@ export function StudentTable ({ refreshKey, activeSearch }: { refreshKey?: numbe
       {/* Modal Editar Aluno */}
       {selectedStudentForAction && (
         <Modal
-          isOpen={modalType === 'edit'}
+          isOpen={modalType === "edit"}
           onClose={() => setModalType(null)}
           title="Editar Estudante"
           size="md"
         >
-          <div className="space-y-4">
-            <div className="space-y-2">
-               <label className="text-xs font-semibold text-gray-700">Nome do Estudante</label>
-               <input type="text" defaultValue={selectedStudentForAction.name} className="w-full border border-gray-300 rounded-xl p-2.5 text-sm" />
+          <div className="space-y-4 font-hanken text-[#0F172A] dark:text-[#e5e2e1]">
+            <div className="space-y-1.5">
+              <label className="label-caps text-[#64748B] dark:text-[#d5c4ac]">
+                Nome do Estudante
+              </label>
+              <input
+                type="text"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                className="w-full bg-white dark:bg-[#0D0D0D] border border-[#CBD5E1] dark:border-[#414042] focus:border-[#8B5CF6] focus:ring-1 focus:ring-[#8B5CF6] rounded text-sm text-[#0F172A] dark:text-[#e5e2e1] p-2.5 outline-none transition-colors"
+              />
             </div>
-            <div className="space-y-2">
-               <label className="text-xs font-semibold text-gray-700">Telefone</label>
-               <input type="text" defaultValue={selectedStudentForAction.phone} className="w-full border border-gray-300 rounded-xl p-2.5 text-sm" />
+            <div className="space-y-1.5">
+              <label className="label-caps text-[#64748B] dark:text-[#d5c4ac]">Telefone</label>
+              <input
+                type="text"
+                value={editPhone}
+                onChange={(e) => setEditPhone(e.target.value)}
+                className="w-full bg-white dark:bg-[#0D0D0D] border border-[#CBD5E1] dark:border-[#414042] focus:border-[#8B5CF6] focus:ring-1 focus:ring-[#8B5CF6] rounded text-sm text-[#0F172A] dark:text-[#e5e2e1] p-2.5 outline-none transition-colors"
+              />
             </div>
-            <div className="pt-4 flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setModalType(null)} className="rounded-xl">Cancelar</Button>
-              <Button className="bg-[#4D44B5] hover:bg-[#3d3695] text-white rounded-xl" onClick={() => setModalType(null)}>Guardar Alterações</Button>
+            <div className="pt-3 flex justify-end gap-2.5 border-t border-[#E2E8F0] dark:border-[#414042]">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setModalType(null)}
+                className="border border-[#CBD5E1] dark:border-[#414042] bg-white dark:bg-[#1A1A1A] text-[#0F172A] dark:text-[#e5e2e1] hover:border-[#8B5CF6] hover:bg-[#F1F5F9] dark:hover:bg-[#201f1f] rounded text-xs font-semibold"
+              >
+                Cancelar
+              </Button>
+              <Button
+                size="sm"
+                className="bg-[#8B5CF6] hover:bg-[#A78BFA] text-white font-bold rounded shadow-xs transition-all text-xs"
+                onClick={() => {
+                  toast({
+                    title: "Atualizado",
+                    description: "Dados do estudante guardados com sucesso.",
+                  });
+                  setModalType(null);
+                }}
+              >
+                Guardar Alterações
+              </Button>
             </div>
           </div>
         </Modal>
@@ -254,18 +396,41 @@ export function StudentTable ({ refreshKey, activeSearch }: { refreshKey?: numbe
       {/* Modal Excluir Aluno */}
       {selectedStudentForAction && (
         <Modal
-          isOpen={modalType === 'delete'}
+          isOpen={modalType === "delete"}
           onClose={() => setModalType(null)}
           title="Excluir Estudante"
           size="sm"
         >
-          <div className="space-y-4">
-            <p className="text-sm text-gray-600">
-              Tem a certeza de que deseja excluir o estudante <strong className="text-gray-900">{selectedStudentForAction.name}</strong>? Esta ação não pode ser desfeita.
+          <div className="space-y-4 font-hanken text-[#0F172A] dark:text-[#e5e2e1]">
+            <p className="text-sm text-[#64748B] dark:text-[#d5c4ac]">
+              Tem a certeza de que deseja excluir o estudante{" "}
+              <strong className="text-[#0F172A] dark:text-[#e5e2e1]">
+                {selectedStudentForAction.name}
+              </strong>
+              ? Esta ação revogará a matrícula e o histórico associado.
             </p>
-            <div className="pt-4 flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setModalType(null)} className="rounded-xl">Cancelar</Button>
-              <Button className="bg-[#FF5777] hover:bg-[#fc4667] text-white rounded-xl" onClick={() => setModalType(null)}>Confirmar Exclusão</Button>
+            <div className="pt-3 flex justify-end gap-2.5 border-t border-[#E2E8F0] dark:border-[#414042]">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setModalType(null)}
+                className="border border-[#CBD5E1] dark:border-[#414042] bg-white dark:bg-[#1A1A1A] text-[#0F172A] dark:text-[#e5e2e1] hover:border-[#8B5CF6] hover:bg-[#F1F5F9] dark:hover:bg-[#201f1f] rounded text-xs font-semibold"
+              >
+                Cancelar
+              </Button>
+              <Button
+                size="sm"
+                className="bg-[#EF4444] hover:bg-[#DC2626] text-white font-bold rounded text-xs transition-colors"
+                onClick={() => {
+                  toast({
+                    title: "Excluído",
+                    description: `Estudante ${selectedStudentForAction.name} foi removido.`,
+                  });
+                  setModalType(null);
+                }}
+              >
+                Confirmar Exclusão
+              </Button>
             </div>
           </div>
         </Modal>

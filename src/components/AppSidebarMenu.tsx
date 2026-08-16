@@ -28,29 +28,42 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className="h-screen border-none">
-      <SidebarContent className="bg-[#4D44B5] h-full overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-black/20 [&::-webkit-scrollbar-thumb]:rounded-full">
+    <Sidebar className="h-screen border-r border-[#414042] bg-[#131313]">
+      <SidebarContent className="bg-[#131313] h-full overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#414042] [&::-webkit-scrollbar-thumb]:rounded-full">
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="py-2 space-y-1">
               {routes.map((item) => {
                 const isActive = pathname === item.url;
 
                 return (
-                  <SidebarMenuItem key={item.id} className="w-[14rem]">
-                    <SidebarMenuButton asChild className="h-10 hover:text-[#4D44B5] cursor-pointer space-x-3 rounded-l-4xl overflow-hidden text-ellipsis whitespace-nowrap">
+                  <SidebarMenuItem key={item.id} className="w-full px-2">
+                    <SidebarMenuButton
+                      asChild
+                      className={`h-11 cursor-pointer rounded transition-all duration-200 relative overflow-hidden ${
+                        isActive
+                          ? "bg-[#201f1f] text-[#e5e2e1] font-semibold border-l-[3px] border-[#8B5CF6] pl-4"
+                          : "text-[#d5c4ac] hover:bg-[#1A1A1A] hover:text-[#e5e2e1] pl-4"
+                      }`}
+                    >
                       <Link
                         href={item.url}
                         onClick={handleNavClick}
-                        className={`flex hover:bg-[#F1F5F7] cursor-pointer h-10 hover:text-[#4D44B5] hover:font-semibold pl-5 transition-colors ${
-                          isActive 
-                            ? "bg-white text-[#4D44B5] border-white" 
-                            : "text-white"
-                        }`}
+                        className="flex items-center gap-3 w-full"
                         aria-current={isActive ? "page" : undefined}
                       >
-                        <item.icon size={24} />
-                        <span className="text-[0.9rem]">{item.title}</span>
+                        <div
+                          className={`shrink-0 transition-all ${
+                            isActive
+                              ? "text-[#8B5CF6] drop-shadow-[0_0_8px_rgba(139, 92, 246,0.5)]"
+                              : "text-[#d5c4ac]"
+                          }`}
+                        >
+                          <item.icon size={20} />
+                        </div>
+                        <span className="text-sm tracking-tight truncate">
+                          {item.title}
+                        </span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -61,15 +74,15 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="bg-[#4D44B5] pb-8 pt-4">
+      <SidebarFooter className="bg-[#131313] border-t border-[#414042] pb-6 pt-3 px-2">
         <SidebarMenu>
-          <SidebarMenuItem className="w-[14rem]">
+          <SidebarMenuItem className="w-full">
             <LogOutModal>
               <button 
                 onClick={handleNavClick}
-                className="flex w-full items-center gap-3 rounded-l-4xl px-5 h-10 text-[0.9rem] text-white hover:bg-[#F1F5F7] hover:text-[#4D44B5] transition-colors cursor-pointer"
+                className="flex w-full items-center gap-3 rounded px-4 h-10 text-sm text-[#d5c4ac] hover:bg-[#9B2226]/20 hover:text-[#ffb4ab] hover:border hover:border-[#9B2226]/40 transition-all duration-200 cursor-pointer"
               >
-                <LogOut size={24} />
+                <LogOut size={20} className="text-[#9d8f78]" />
                 <span>Terminar Sessão</span>
               </button>
             </LogOutModal>

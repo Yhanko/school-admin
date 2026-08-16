@@ -162,30 +162,29 @@ export function RelatoriosPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {reports.map((report) => (
-            <Card key={report.id} className="hover:shadow-lg transition-shadow">
+            <Card key={report.id} className="hover:shadow-md transition-shadow rounded border border-border">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-4">
-                    <div className="p-3 bg-blue-100 rounded-xl">
-                      <FileText className="h-6 w-6 text-[#5856eb]" />
+                    <div className="p-3 bg-primary/10 text-primary rounded">
+                      <FileText className="h-6 w-6 text-primary" />
                     </div>
                     <div>
                       <CardTitle className="text-lg mb-1">{report.title}</CardTitle>
-                      <p className="text-sm text-slate-500">{report.description}</p>
+                      <p className="text-sm text-muted-foreground">{report.description}</p>
                     </div>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm text-slate-500">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Calendar className="h-4 w-4" />
                     <span>{report.date}</span>
                   </div>
                   <Button 
                     size="sm" 
-                    variant="outline" 
-                    className="gap-2 rounded-full hover:cursor-pointer bg-[#4D44B5] text-white hover:bg-[#3d368a] hover:text-white"
+                    className="gap-2 rounded hover:cursor-pointer bg-primary text-white hover:bg-[#A78BFA] transition-all font-semibold"
                     onClick={() => handleDownload(report.id)}
                     disabled={loadingReport === report.id}
                   >
@@ -202,27 +201,27 @@ export function RelatoriosPage() {
           ))}
         </div>
 
-        <Card className="mt-8">
+        <Card className="mt-8 rounded border border-border">
           <CardHeader>
             <CardTitle>Tipos de Relatórios Disponíveis (PDF)</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 border rounded-xl hover:bg-slate-50 cursor-pointer transition-colors">
-                <h3 className="font-medium text-slate-900 mb-2">Acadêmico</h3>
-                <p className="text-sm text-slate-500">
+              <div className="p-4 border rounded hover:bg-muted/50 cursor-pointer transition-colors">
+                <h3 className="font-medium text-foreground mb-2">Acadêmico</h3>
+                <p className="text-sm text-muted-foreground">
                   Notas médias da instituição, taxa de frequência e alunos por turma.
                 </p>
               </div>
-              <div className="p-4 border rounded-xl hover:bg-slate-50 cursor-pointer transition-colors">
-                <h3 className="font-medium text-slate-900 mb-2">Financeiro</h3>
-                <p className="text-sm text-slate-500">
+              <div className="p-4 border rounded hover:bg-muted/50 cursor-pointer transition-colors">
+                <h3 className="font-medium text-foreground mb-2">Financeiro</h3>
+                <p className="text-sm text-muted-foreground">
                   Receitas totais, status de pagamentos pendentes, confirmados e cancelados.
                 </p>
               </div>
-              <div className="p-4 border rounded-xl hover:bg-slate-50 cursor-pointer transition-colors">
-                <h3 className="font-medium text-slate-900 mb-2">Administrativo</h3>
-                <p className="text-sm text-slate-500">
+              <div className="p-4 border rounded hover:bg-muted/50 cursor-pointer transition-colors">
+                <h3 className="font-medium text-foreground mb-2">Administrativo</h3>
+                <p className="text-sm text-muted-foreground">
                   Métricas de recursos humanos, como número de professores, administradores e espaços físicos.
                 </p>
               </div>

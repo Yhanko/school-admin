@@ -36,7 +36,7 @@ export function ClassDetails({ classId }: ClassDetailsProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-primary hover:text-blue-800" title="Ver detalhes">
+        <Button variant="ghost" size="sm" className="bg-transparent text-secondary-foreground hover:bg-muted hover:text-primary transition-all rounded-sm h-8 w-8 p-0 flex items-center justify-center" title="Ver detalhes">
           <Eye className="w-4 h-4" />
         </Button>
       </DialogTrigger>
@@ -127,16 +127,16 @@ export function ClassDetails({ classId }: ClassDetailsProps) {
                   {turma.classSubjects && turma.classSubjects.length > 0 ? (
                     <ul className="space-y-2">
                       {turma.classSubjects.map((cs) => (
-                        <li key={cs.id} className="p-3 border rounded-xl flex justify-between items-center bg-gray-50/50">
+                        <li key={cs.id} className="p-3 border rounded-xl flex justify-between items-center bg-muted/50">
                           <span className="font-medium text-sm">{cs.subject?.name || 'Disciplina Desconhecida'}</span>
-                          <span className="text-xs text-muted-foreground bg-white px-2 py-1 rounded-xl border">
+                          <span className="text-xs text-muted-foreground bg-card px-2 py-1 rounded-xl border">
                             {cs.teacher?.name || 'Sem Professor'}
                           </span>
                         </li>
                       ))}
                     </ul>
                   ) : (
-                    <p className="text-sm text-muted-foreground p-3 border rounded-xl bg-gray-50/50 text-center">Nenhuma disciplina associada.</p>
+                    <p className="text-sm text-muted-foreground p-3 border rounded-xl bg-muted/50 text-center">Nenhuma disciplina associada.</p>
                   )}
                 </div>
 
@@ -147,7 +147,7 @@ export function ClassDetails({ classId }: ClassDetailsProps) {
                   {turma.students && turma.students.length > 0 ? (
                     <ul className="space-y-2">
                       {turma.students.map((student) => (
-                        <li key={student.id} className="p-3 border rounded-xl flex justify-between items-center bg-gray-50/50">
+                        <li key={student.id} className="p-3 border rounded-xl flex justify-between items-center bg-muted/50">
                           <span className="font-medium text-sm">{student.name}</span>
                           <span className="text-xs text-muted-foreground">
                             {student.profile?.studentNumber ? `Nº ${student.profile.studentNumber}` : ''}
@@ -156,7 +156,7 @@ export function ClassDetails({ classId }: ClassDetailsProps) {
                       ))}
                     </ul>
                   ) : (
-                    <p className="text-sm text-muted-foreground p-3 border rounded-xl bg-gray-50/50 text-center">Nenhum aluno matriculado.</p>
+                    <p className="text-sm text-muted-foreground p-3 border rounded-xl bg-muted/50 text-center">Nenhum aluno matriculado.</p>
                   )}
                 </div>
               </div>

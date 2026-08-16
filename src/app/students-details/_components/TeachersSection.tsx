@@ -11,7 +11,7 @@ export default function TeachersSection({ student }: TeachersSectionProps) {
     <Card className="p-6 mb-6">
       <div className="flex items-center gap-2 mb-6">
         <Users className="w-5 h-5 text-primary" />
-        <h2 className="text-2xl font-bold text-gray-900">Professores</h2>
+        <h2 className="text-2xl font-bold text-foreground">Professores</h2>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -26,16 +26,16 @@ export default function TeachersSection({ student }: TeachersSectionProps) {
                   {teacher.split(' ').map(n => n[0]).join('')}
                 </span>
               </div>
-              <p className="text-gray-900 font-medium">{teacher}</p>
+              <p className="text-foreground font-medium">{teacher}</p>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="mt-6 p-4 bg-gray-50 rounded-xl">
+      <div className="mt-6 p-4 bg-muted rounded-xl">
         <div className="flex justify-between items-center">
-          <span className="text-gray-700 font-medium">Total de Professores:</span>
-          <span className="text-xl font-bold text-gray-900">{student.teachers.length}</span>
+          <span className="text-foreground font-medium">Total de Professores:</span>
+          <span className="text-xl font-bold text-foreground">{student.teachers.length}</span>
         </div>
       </div>
     </Card>

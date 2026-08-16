@@ -1,10 +1,16 @@
-"use client"
+"use client";
+
+import React from "react";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "@/lib/icons";
 
 export interface Student {
@@ -25,93 +31,126 @@ export interface Student {
 
 interface StudentRowProps {
   student: Student;
-  onAction: (action: 'view' | 'edit' | 'delete' | 'history', student: Student) => void;
+  onAction: (
+    action: "view" | "edit" | "delete" | "history",
+    student: Student
+  ) => void;
 }
 
-export function StudentRow ({ student, onAction }: StudentRowProps) {
+export function StudentRow({ student, onAction }: StudentRowProps) {
   const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .substring(0, 2);
   };
 
   return (
-    <TableRow className="hover:bg-muted/50 border-b border-border transition-colors">
+    <TableRow className="even:bg-[#FAFBFD] odd:bg-[#EDF0F3] dark:even:bg-[#121212] dark:odd:bg-[#151515] hover:!bg-[#DDE2E7] dark:hover:!bg-[#1A1A1A] border-b border-[#CBD5E1] dark:border-[#414042]/50 transition-colors group">
       <TableCell className="px-3 sm:px-4 py-3">
-        <Checkbox checked={student.isSelected} />
+        <Checkbox
+          className="border-[#CBD5E1] dark:border-[#414042] data-[state=checked]:bg-[#8B5CF6] data-[state=checked]:text-white"
+          checked={student.isSelected}
+        />
       </TableCell>
-      
+
       <TableCell className="px-3 sm:px-4 py-3 whitespace-nowrap">
-        <span className="font-mono text-xs sm:text-sm font-semibold text-primary">#{student.studentNumber}</span>
+        <span className="data-mono text-xs font-semibold text-[#7C3AED] dark:text-[#DDD6FE]">
+          #{student.studentNumber || "N/A"}
+        </span>
       </TableCell>
 
       <TableCell className="px-3 sm:px-4 py-3">
         <div className="flex items-center space-x-3 min-w-[140px]">
-          <Avatar className="h-9 w-9 shrink-0">
-            <AvatarFallback className="bg-purple-100 text-purple-700 text-xs font-bold">
+          <Avatar className="h-8 w-8 shrink-0 border border-[#CBD5E1] dark:border-[#414042] bg-[#F1F5F9] dark:bg-[#201f1f]">
+            <AvatarFallback className="bg-[#F1F5F9] dark:bg-[#201f1f] text-[#7C3AED] dark:text-[#DDD6FE] data-mono text-xs font-bold">
               {getInitials(student.name)}
             </AvatarFallback>
           </Avatar>
-          <span className="font-semibold text-xs sm:text-sm text-gray-900 truncate max-w-[150px] sm:max-w-[200px]" title={student.name}>
+          <span
+            className="font-hanken font-bold text-sm text-[#0F172A] dark:text-[#e5e2e1] truncate max-w-[150px] sm:max-w-[200px]"
+            title={student.name}
+          >
             {student.name}
           </span>
         </div>
       </TableCell>
 
       <TableCell className="px-3 sm:px-4 py-3 whitespace-nowrap">
-        <span className="text-xs sm:text-sm text-gray-500">{student.date}</span>
+        <span className="data-mono text-xs text-[#64748B] dark:text-[#d5c4ac]">{student.date}</span>
       </TableCell>
 
       <TableCell className="px-3 sm:px-4 py-3">
-        <span className="text-xs sm:text-sm text-gray-800 font-medium truncate max-w-[140px] block" title={student.parentName}>
+        <span
+          className="text-xs sm:text-sm font-hanken text-[#0F172A] dark:text-[#e5e2e1] font-medium truncate max-w-[140px] block"
+          title={student.parentName}
+        >
           {student.parentName}
         </span>
       </TableCell>
 
       <TableCell className="px-3 sm:px-4 py-3 whitespace-nowrap">
-        <span className="text-xs sm:text-sm text-gray-600">{student.city}</span>
+        <span className="text-xs font-hanken text-[#64748B] dark:text-[#d5c4ac]">{student.city}</span>
       </TableCell>
 
       <TableCell className="px-3 sm:px-4 py-3">
         <div className="flex flex-col space-y-0.5 min-w-[130px]">
-          <span className="text-xs font-semibold text-gray-900">{student.phone}</span>
-          <span className="text-[11px] text-gray-400 truncate max-w-[140px]" title={student.email}>{student.email}</span>
+          <span className="data-mono text-xs font-medium text-[#0F172A] dark:text-[#e5e2e1]">
+            {student.phone}
+          </span>
+          <span
+            className="data-mono text-[11px] text-[#94A3B8] dark:text-[#9d8f78] truncate max-w-[140px]"
+            title={student.email}
+          >
+            {student.email}
+          </span>
         </div>
       </TableCell>
 
       <TableCell className="px-3 sm:px-4 py-3 whitespace-nowrap">
-        <Badge className={`${student.gradeColor} text-white px-2.5 py-0.5 text-[11px] font-semibold rounded-full shadow-none`}>
+        <span className="inline-block bg-[#F1F5F9] dark:bg-[#201f1f] text-[#7C3AED] dark:text-[#DDD6FE] border border-[#E2E8F0] dark:border-[#414042] px-2.5 py-0.5 data-mono text-[11px] font-bold rounded">
           {student.grade}
-        </Badge>
+        </span>
       </TableCell>
 
       <TableCell className="px-3 sm:px-4 py-3 whitespace-nowrap text-right">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-gray-600 cursor-pointer">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-[#64748B] dark:text-[#9d8f78] hover:text-[#8B5CF6] hover:bg-[#F1F5F9] dark:hover:bg-[#201f1f] rounded cursor-pointer transition-colors"
+            >
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-white border-border shadow-lg rounded-xl">
-            <DropdownMenuItem 
-              className="hover:bg-gray-100 cursor-pointer text-xs font-medium"
-              onClick={() => onAction('view', student)}
+          <DropdownMenuContent
+            align="end"
+            className="bg-white dark:bg-[#1A1A1A] border border-[#E2E8F0] dark:border-[#C0C2C5] text-[#0F172A] dark:text-[#e5e2e1] shadow-lg rounded p-1 z-50 font-hanken"
+          >
+            <DropdownMenuItem
+              className="hover:bg-[#F1F5F9] dark:hover:bg-[#201f1f] focus:bg-[#F1F5F9] dark:focus:bg-[#201f1f] cursor-pointer text-xs font-semibold text-[#0F172A] dark:text-[#e5e2e1]"
+              onClick={() => onAction("view", student)}
             >
               Visualizar Detalhes
             </DropdownMenuItem>
-            <DropdownMenuItem 
-              className="hover:bg-gray-100 cursor-pointer text-xs font-medium"
-              onClick={() => onAction('history', student)}
+            <DropdownMenuItem
+              className="hover:bg-[#F1F5F9] dark:hover:bg-[#201f1f] focus:bg-[#F1F5F9] dark:focus:bg-[#201f1f] cursor-pointer text-xs font-semibold text-[#7C3AED] dark:text-[#DDD6FE]"
+              onClick={() => onAction("history", student)}
             >
               Histórico Académico
             </DropdownMenuItem>
-            <DropdownMenuItem 
-              className="hover:bg-gray-100 cursor-pointer text-xs font-medium"
-              onClick={() => onAction('edit', student)}
+            <DropdownMenuItem
+              className="hover:bg-[#F1F5F9] dark:hover:bg-[#201f1f] focus:bg-[#F1F5F9] dark:focus:bg-[#201f1f] cursor-pointer text-xs font-semibold text-[#0F172A] dark:text-[#e5e2e1]"
+              onClick={() => onAction("edit", student)}
             >
               Editar Estudante
             </DropdownMenuItem>
-            <DropdownMenuItem 
-              className="hover:bg-red-50 text-red-600 cursor-pointer text-xs font-medium"
-              onClick={() => onAction('delete', student)}
+            <DropdownMenuItem
+              className="hover:bg-[#FEE2E2] dark:hover:bg-[#9B2226]/20 focus:bg-[#FEE2E2] dark:focus:bg-[#9B2226]/20 text-[#DC2626] dark:text-[#ffb4ab] cursor-pointer text-xs font-semibold"
+              onClick={() => onAction("delete", student)}
             >
               Excluir Estudante
             </DropdownMenuItem>

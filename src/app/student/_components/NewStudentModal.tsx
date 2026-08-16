@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Modal } from "./modal";
 import {
@@ -60,6 +61,60 @@ interface StudentFormData {
   previousClass: string; // for transfer
 }
 
+
+const safeStringRegex = /^[^<>\';=]*$/;
+const baseString = z.string().trim().regex(safeStringRegex, "Caracteres inválidos").min(1, "Obrigatório").max(100, "Muito longo");
+const emailString = z.string().trim().email("E-mail inválido").max(100).regex(safeStringRegex, "Caracteres inválidos").or(z.literal(""));
+
+const studentSchema = z.object({
+  firstName: baseString,
+  lastName: baseString,
+  dateOfBirth: baseString,
+  gender: baseString.or(z.literal("")),
+  email: emailString,
+  phone: baseString.or(z.literal("")),
+  password: z.string().min(6, "No mínimo 6 caracteres").max(100).regex(safeStringRegex, "Caracteres inválidos").or(z.literal("")),
+  confirmPassword: z.string().or(z.literal("")),
+  class: baseString,
+  classe: baseString,
+}).superRefine((data, ctx) => {
+  if (data.password && data.password !== data.confirmPassword) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Senhas não conferem", path: ["confirmPassword"] });
+  }
+});
+
+const parentSchema = z.object({
+  parentFirstName: baseString,
+  parentLastName: baseString,
+  parentEmail: emailString,
+  parentPhone: baseString,
+  parentPassword: z.string().min(6, "No mínimo 6 caracteres").max(100).regex(safeStringRegex, "Caracteres inválidos").or(z.literal("")),
+  parentConfirmPassword: z.string().or(z.literal("")),
+}).superRefine((data, ctx) => {
+  if (data.parentPassword && data.parentPassword !== data.parentConfirmPassword) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Senhas não conferem", path: ["parentConfirmPassword"] });
+  }
+});
+
+const guardianSchema = z.object({
+  guardianFirstName: baseString,
+  guardianLastName: baseString,
+  guardianRelationship: baseString,
+  guardianEmail: emailString,
+  guardianPhone: baseString,
+  guardianPassword: z.string().min(6, "No mínimo 6 caracteres").max(100).regex(safeStringRegex, "Caracteres inválidos").or(z.literal("")),
+  guardianConfirmPassword: z.string().or(z.literal("")),
+}).superRefine((data, ctx) => {
+  if (data.guardianPassword && data.guardianPassword !== data.guardianConfirmPassword) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Senhas não conferem", path: ["guardianConfirmPassword"] });
+  }
+});
+
+const transferSchema = z.object({
+  previousSchool: baseString,
+  previousClass: baseString,
+});
+
 export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean, onClose: () => void, onAdded?: () => void }) {
   const { toast } = useToast();
   const [selectedLevel, setSelectedLevel] = useState<AcademicLevel>(null);
@@ -68,6 +123,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [availableClasses, setAvailableClasses] = useState<{ id: string; name: string; academicLevel?: string; grade?: string; roomName?: string }[]>([]);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState<StudentFormData>({
     studentNumber: "",
     firstName: "",
@@ -174,6 +230,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
     onClose();
     setSelectedLevel(null);
     setCurrentStep(1);
+    setErrors({});
     setShowPassword(false);
     setShowConfirmPassword(false);
     setFormData({
@@ -259,7 +316,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
               setSelectedLevel(option.level);
               setCurrentStep(2);
             }}
-            className="p-6 border-2 border-border rounded-xl hover:border-primary hover:bg-muted transition-all duration-200 text-left"
+            className="p-6 border border-border rounded-sm hover:border-primary hover:bg-popover hover:shadow-[0_0_12px_rgba(139, 92, 246,0.1)] transition-all duration-200 text-left"
           >
             <div className="text-3xl mb-2">{option.icon}</div>
             <h3 className="font-semibold text-foreground text-lg">
@@ -288,11 +345,11 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
               type="text"
               value={formData.studentNumber}
               readOnly
-              className="flex-1 border border-border rounded-xl p-2 bg-muted"
+              className="flex-1 bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2 bg-muted"
             />
             <Button
               onClick={generateStudentNumber}
-              className="bg-[#5856eb] text-white hover:bg-[#5856eb] hover:text-white"
+              className="bg-primary text-primary-foreground border-none rounded-sm hover:bg-[#A78BFA] hover:shadow-[0_0_12px_rgba(139, 92, 246,0.4)] text-white hover:bg-primary text-primary-foreground border-none rounded-sm hover:bg-[#A78BFA] hover:shadow-[0_0_12px_rgba(139, 92, 246,0.4)] hover:text-white"
             >
               Gerar
             </Button>
@@ -308,9 +365,10 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="firstName"
             value={formData.firstName}
             onChange={handleInputChange}
-            className="border border-border rounded-xl p-2"
+            className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
             placeholder="João"
           />
+            {errors.firstName && <p className="text-red-500 text-xs mt-1 pl-1">{errors.firstName}</p>}
         </div>
 
         <div className="flex flex-col space-y-2">
@@ -322,9 +380,10 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="lastName"
             value={formData.lastName}
             onChange={handleInputChange}
-            className="border border-border rounded-xl p-2"
+            className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
             placeholder="Silva"
           />
+            {errors.lastName && <p className="text-red-500 text-xs mt-1 pl-1">{errors.lastName}</p>}
         </div>
 
         <div className="flex flex-col space-y-2">
@@ -336,8 +395,9 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="dateOfBirth"
             value={formData.dateOfBirth}
             onChange={handleInputChange}
-            className="border border-border rounded-xl p-2"
+            className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
           />
+            {errors.dateOfBirth && <p className="text-red-500 text-xs mt-1 pl-1">{errors.dateOfBirth}</p>}
         </div>
 
         <div className="flex flex-col space-y-2">
@@ -346,12 +406,13 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="gender"
             value={formData.gender}
             onChange={handleInputChange}
-            className="border border-border rounded-xl p-2"
+            className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
           >
             <option value="">Selecione</option>
             <option value="M">Masculino</option>
             <option value="F">Feminino</option>
           </select>
+          {errors.gender && <p className="text-red-500 text-xs mt-1 pl-1">{errors.gender}</p>}
         </div>
 
         <div className="flex flex-col space-y-2">
@@ -361,9 +422,10 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="email"
             value={formData.email}
             onChange={handleInputChange}
-            className="border border-border rounded-xl p-2"
+            className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
             placeholder="joao@example.com"
           />
+            {errors.email && <p className="text-red-500 text-xs mt-1 pl-1">{errors.email}</p>}
         </div>
 
         <div className="flex flex-col space-y-2">
@@ -375,9 +437,10 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="phone"
             value={formData.phone}
             onChange={handleInputChange}
-            className="border border-border rounded-xl p-2"
+            className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
             placeholder="+244 923 456 789"
           />
+            {errors.phone && <p className="text-red-500 text-xs mt-1 pl-1">{errors.phone}</p>}
         </div>
 
 
@@ -388,13 +451,14 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
               name="cycle"
               value={formData.cycle}
               onChange={handleInputChange}
-              className="border border-border rounded-xl p-2"
+              className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
             >
               <option value="">Selecione o Ciclo</option>
               <option value="1-6">Ensino Primário (1-6)</option>
               <option value="7-9">Ensino Secundário I (7-9)</option>
               <option value="10-13">Ensino Secundário II (10-13)</option>
             </select>
+          {errors.cycle && <p className="text-red-500 text-xs mt-1 pl-1">{errors.cycle}</p>}
           </div>
         )}
 
@@ -406,9 +470,10 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
               name="course"
               value={formData.course}
               onChange={handleInputChange}
-              className="border border-border rounded-xl p-2"
+              className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
               placeholder="Curso/Especialidade"
             />
+            {errors.course && <p className="text-red-500 text-xs mt-1 pl-1">{errors.course}</p>}
           </div>
         )}
 
@@ -418,7 +483,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="classe"
             value={formData.classe || ""}
             onChange={handleInputChange}
-            className="border border-border rounded-xl p-2"
+            className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
           >
             <option value="">Selecione uma classe</option>
             {(() => {
@@ -455,6 +520,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
               return null;
             })()}
           </select>
+          {errors.classe && <p className="text-red-500 text-xs mt-1 pl-1">{errors.classe}</p>}
         </div>
 
         <div className="flex flex-col space-y-2">
@@ -463,7 +529,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="class"
             value={formData.class}
             onChange={handleInputChange}
-            className="border border-border rounded-xl p-2"
+            className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
           >
             <option value="">Selecione uma turma</option>
             {availableClasses.filter(c => {
@@ -478,6 +544,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
               </option>
             ))}
           </select>
+          {errors.class && <p className="text-red-500 text-xs mt-1 pl-1">{errors.class}</p>}
         </div>
         <div className="flex flex-col space-y-2">
           <label className="text-sm font-medium text-foreground">Senha *</label>
@@ -487,16 +554,17 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
               name="password"
               value={formData.password}
               onChange={handleInputChange}
-              className="w-full border border-border rounded-xl p-2 pr-10"
+              className="w-full bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2 pr-10"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground"
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
+          {errors.password && <p className="text-red-500 text-xs mt-1 pl-1">{errors.password}</p>}
         </div>
 
         <div className="flex flex-col space-y-2">
@@ -507,16 +575,17 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleInputChange}
-              className="w-full border border-border rounded-xl p-2 pr-10"
+              className="w-full bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2 pr-10"
             />
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground"
             >
               {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
+          {errors.confirmPassword && <p className="text-red-500 text-xs mt-1 pl-1">{errors.confirmPassword}</p>}
         </div>
       </div>
 
@@ -539,9 +608,10 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="parentFirstName"
             value={formData.parentFirstName}
             onChange={handleInputChange}
-            className="border border-border rounded-xl p-2"
+            className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
             placeholder="Maria"
           />
+            {errors.parentFirstName && <p className="text-red-500 text-xs mt-1 pl-1">{errors.parentFirstName}</p>}
         </div>
 
         <div className="flex flex-col space-y-2">
@@ -553,9 +623,10 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="parentLastName"
             value={formData.parentLastName}
             onChange={handleInputChange}
-            className="border border-border rounded-xl p-2"
+            className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
             placeholder="Silva"
           />
+            {errors.parentLastName && <p className="text-red-500 text-xs mt-1 pl-1">{errors.parentLastName}</p>}
         </div>
 
         <div className="flex flex-col space-y-2">
@@ -565,9 +636,10 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="parentEmail"
             value={formData.parentEmail}
             onChange={handleInputChange}
-            className="border border-border rounded-xl p-2"
+            className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
             placeholder="maria@example.com"
           />
+            {errors.parentEmail && <p className="text-red-500 text-xs mt-1 pl-1">{errors.parentEmail}</p>}
         </div>
 
         <div className="flex flex-col space-y-2">
@@ -579,9 +651,10 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="parentPhone"
             value={formData.parentPhone}
             onChange={handleInputChange}
-            className="border border-border rounded-xl p-2"
+            className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
             placeholder="+244 923 456 789"
           />
+            {errors.parentPhone && <p className="text-red-500 text-xs mt-1 pl-1">{errors.parentPhone}</p>}
         </div>
 
         <div className="flex flex-col space-y-2">
@@ -592,16 +665,17 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
               name="parentPassword"
               value={formData.parentPassword}
               onChange={handleInputChange}
-              className="w-full border border-border rounded-xl p-2 pr-10"
+              className="w-full bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2 pr-10"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground"
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
+          {errors.parentPassword && <p className="text-red-500 text-xs mt-1 pl-1">{errors.parentPassword}</p>}
         </div>
 
         <div className="flex flex-col space-y-2">
@@ -612,16 +686,17 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
               name="parentConfirmPassword"
               value={formData.parentConfirmPassword}
               onChange={handleInputChange}
-              className="w-full border border-border rounded-xl p-2 pr-10"
+              className="w-full bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2 pr-10"
             />
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground"
             >
               {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
+          {errors.parentConfirmPassword && <p className="text-red-500 text-xs mt-1 pl-1">{errors.parentConfirmPassword}</p>}
         </div>
       </div>
     </div>
@@ -643,8 +718,9 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="guardianFirstName"
             value={formData.guardianFirstName}
             onChange={handleInputChange}
-            className="border border-border rounded-xl p-2"
+            className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
           />
+            {errors.guardianFirstName && <p className="text-red-500 text-xs mt-1 pl-1">{errors.guardianFirstName}</p>}
         </div>
 
         <div className="flex flex-col space-y-2">
@@ -656,8 +732,9 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="guardianLastName"
             value={formData.guardianLastName}
             onChange={handleInputChange}
-            className="border border-border rounded-xl p-2"
+            className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
           />
+            {errors.guardianLastName && <p className="text-red-500 text-xs mt-1 pl-1">{errors.guardianLastName}</p>}
         </div>
 
         <div className="flex flex-col space-y-2">
@@ -668,7 +745,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="guardianRelationship"
             value={formData.guardianRelationship}
             onChange={handleInputChange}
-            className="border border-border rounded-xl p-2"
+            className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
           >
             <option value="">Selecione</option>
             <option value="Pai">Pai</option>
@@ -679,6 +756,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             <option value="Tia">Tia</option>
             <option value="Outro">Outro</option>
           </select>
+          {errors.guardianRelationship && <p className="text-red-500 text-xs mt-1 pl-1">{errors.guardianRelationship}</p>}
         </div>
 
         <div className="flex flex-col space-y-2">
@@ -688,8 +766,9 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="guardianEmail"
             value={formData.guardianEmail}
             onChange={handleInputChange}
-            className="border border-border rounded-xl p-2"
+            className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
           />
+            {errors.guardianEmail && <p className="text-red-500 text-xs mt-1 pl-1">{errors.guardianEmail}</p>}
         </div>
 
         <div className="flex flex-col space-y-2">
@@ -701,8 +780,9 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="guardianPhone"
             value={formData.guardianPhone}
             onChange={handleInputChange}
-            className="border border-border rounded-xl p-2"
+            className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
           />
+            {errors.guardianPhone && <p className="text-red-500 text-xs mt-1 pl-1">{errors.guardianPhone}</p>}
         </div>
 
         <div className="flex flex-col space-y-2">
@@ -713,16 +793,17 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
               name="guardianPassword"
               value={formData.guardianPassword}
               onChange={handleInputChange}
-              className="w-full border border-border rounded-xl p-2 pr-10"
+              className="w-full bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2 pr-10"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground"
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
+          {errors.guardianPassword && <p className="text-red-500 text-xs mt-1 pl-1">{errors.guardianPassword}</p>}
         </div>
 
         <div className="flex flex-col space-y-2">
@@ -733,16 +814,17 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
               name="guardianConfirmPassword"
               value={formData.guardianConfirmPassword}
               onChange={handleInputChange}
-              className="w-full border border-border rounded-xl p-2 pr-10"
+              className="w-full bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2 pr-10"
             />
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground"
             >
               {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
+          {errors.guardianConfirmPassword && <p className="text-red-500 text-xs mt-1 pl-1">{errors.guardianConfirmPassword}</p>}
         </div>
       </div>
     </div>
@@ -771,6 +853,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             onChange={handleFileChange}
             className="hidden"
           />
+            {errors.previousCertificate && <p className="text-red-500 text-xs mt-1 pl-1">{errors.previousCertificate}</p>}
         </label>
       </div>
     </div>
@@ -792,9 +875,10 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="previousSchool"
             value={formData.previousSchool}
             onChange={handleInputChange}
-            className="border border-border rounded-xl p-2"
+            className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
             placeholder="Nome da escola anterior"
           />
+            {errors.previousSchool && <p className="text-red-500 text-xs mt-1 pl-1">{errors.previousSchool}</p>}
         </div>
 
         <div className="flex flex-col space-y-2">
@@ -806,9 +890,10 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             name="previousClass"
             value={formData.previousClass}
             onChange={handleInputChange}
-            className="border border-border rounded-xl p-2"
+            className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
             placeholder="Ex: 9ª Classe"
           />
+            {errors.previousClass && <p className="text-red-500 text-xs mt-1 pl-1">{errors.previousClass}</p>}
         </div>
       </div>
 
@@ -830,6 +915,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
               onChange={handleFileChange}
               className="hidden"
             />
+            {errors.transferRequest && <p className="text-red-500 text-xs mt-1 pl-1">{errors.transferRequest}</p>}
           </label>
         </div>
 
@@ -850,6 +936,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
               onChange={handleFileChange}
               className="hidden"
             />
+            {errors.grade9Certificate && <p className="text-red-500 text-xs mt-1 pl-1">{errors.grade9Certificate}</p>}
           </label>
         </div>
       </div>
@@ -875,7 +962,33 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
     return null;
   };
 
+  
+  const validateStep = (step: number) => {
+    try {
+      if (step === 2) {
+        studentSchema.parse(formData);
+      } else if (step === 3) {
+        if (selectedLevel === "1-6") parentSchema.parse(formData);
+        if (selectedLevel === "10-13" || selectedLevel === "transfer") guardianSchema.parse(formData);
+      } else if (step === 4 && selectedLevel === "transfer") {
+        transferSchema.parse(formData);
+      }
+      setErrors({});
+      return true;
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        const fieldErrors: Record<string, string> = {};
+        err.errors.forEach(e => {
+          if (e.path[0]) fieldErrors[e.path[0] as string] = e.message;
+        });
+        setErrors(fieldErrors);
+      }
+      return false;
+    }
+  };
+
   const handleNext = () => {
+    if (!validateStep(currentStep)) return;
     if (currentStep < getTotalSteps()) {
       setCurrentStep(currentStep + 1);
     }
@@ -902,60 +1015,63 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
     >
       <div className="space-y-6">
         {/* Progress Bar */}
-          {selectedLevel !== null && (
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm text-muted-foreground">
-                <span>Progresso</span>
-                <span>
-                  {currentStep} de {getTotalSteps()}
-                </span>
-              </div>
-              <div className="w-full bg-muted rounded-full h-2">
-                <div
-                  className="bg-[#5856eb] h-2 rounded-full transition-all duration-300"
-                  style={{
-                    width: `${(currentStep / getTotalSteps()) * 100}%`,
-                  }}
-                />
-              </div>
+        {selectedLevel !== null && (
+          <div className="space-y-2">
+            <div className="flex justify-between text-xs text-[#d5c4ac] label-caps">
+              <span>Progresso</span>
+              <span className="data-mono">
+                {currentStep} de {getTotalSteps()}
+              </span>
             </div>
-          )}
-
-          {/* Form Content */}
-          <div>{renderFormStep()}</div>
-
-          {/* Buttons */}
-          <div className="flex justify-between gap-4 pt-4 border-t border-border">
-            <Button
-              variant="outline"
-              onClick={handlePrevious}
-              disabled={currentStep === 1}
-              className="bg-primary text-white rounded-full hover:bg-primary hover:text-white hover:cursor-pointer"
-            >
-              Anterior
-            </Button>
-
-            {currentStep === getTotalSteps() ? (
-              <Button
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-                className="bg-green-600 hover:bg-green-700 gap-2 hover:cursor-pointer rounded-full"
-              >
-                {isSubmitting ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Check className="w-4 h-4" />
-                )}
-                Registrar Aluno
-              </Button>
-            ) : selectedLevel !== null ? (
-              <Button onClick={handleNext} className="gap-2 bg-green-600 hover:bg-green-700 hover:cursor-pointer rounded-full">
-                Próximo
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            ) : null}
+            <div className="w-full bg-[#1c1b1b] border border-[#414042] rounded h-2 overflow-hidden">
+              <div
+                className="bg-[#8B5CF6] h-2 transition-all duration-300 shadow-[0_0_8px_#8B5CF6]"
+                style={{
+                  width: `${(currentStep / getTotalSteps()) * 100}%`,
+                }}
+              />
+            </div>
           </div>
+        )}
+
+        {/* Form Content */}
+        <div>{renderFormStep()}</div>
+
+        {/* Buttons */}
+        <div className="flex justify-between gap-4 pt-4 border-t border-[#414042]">
+          <Button
+            variant="secondary"
+            onClick={handlePrevious}
+            disabled={currentStep === 1}
+            className="border-[#414042] text-[#e5e2e1] hover:border-[#C0C2C5] hover:bg-[#1c1b1b] rounded text-xs font-semibold h-10 px-4 cursor-pointer"
+          >
+            Anterior
+          </Button>
+
+          {currentStep === getTotalSteps() ? (
+            <Button
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className="bg-[#8B5CF6] hover:bg-[#A78BFA] text-black font-bold rounded shadow-[0_0_10px_rgba(139, 92, 246,0.35)] hover:shadow-[0_0_14px_rgba(139, 92, 246,0.55)] gap-2 h-10 px-5 text-xs sm:text-sm cursor-pointer"
+            >
+              {isSubmitting ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Check className="w-4 h-4" />
+              )}
+              Registrar Aluno
+            </Button>
+          ) : selectedLevel !== null ? (
+            <Button
+              onClick={handleNext}
+              className="bg-[#8B5CF6] hover:bg-[#A78BFA] text-black font-bold rounded shadow-[0_0_10px_rgba(139, 92, 246,0.35)] hover:shadow-[0_0_14px_rgba(139, 92, 246,0.55)] gap-2 h-10 px-5 text-xs sm:text-sm cursor-pointer"
+            >
+              Próximo
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          ) : null}
         </div>
-      </Modal>
+      </div>
+    </Modal>
   );
 }

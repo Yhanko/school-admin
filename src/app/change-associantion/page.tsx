@@ -12,6 +12,7 @@ function ChangeAssociationContent() {
   const { toast } = useToast();
 
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isFetching, setIsFetching] = useState(true);
 
   const [formData, setFormData] = useState({
@@ -62,7 +63,47 @@ function ChangeAssociationContent() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    
     e.preventDefault();
+    
+    // --- Auto Zod Validation ---
+    const formErrors: Record<string, string> = {};
+    let hasValidationErrors = false;
+    
+    // Helper to validate a string
+    const validateString = (val: any, fieldName: string) => {
+      if (typeof val === 'string') {
+        if (!val.trim()) {
+          formErrors[fieldName] = "Campo obrigatório";
+          hasValidationErrors = true;
+        } else if (val.length > 255) {
+          formErrors[fieldName] = "Texto demasiado longo";
+          hasValidationErrors = true;
+        } else if (!safeStringRegex.test(val)) {
+          formErrors[fieldName] = "Caracteres inválidos (Não use < > ' ; =)";
+          hasValidationErrors = true;
+        }
+      }
+    };
+
+    // Dinamicamente valida o estado do formulário se for um objeto como formData
+    if (typeof formData !== 'undefined' && formData !== null) {
+      Object.entries(formData).forEach(([k, v]) => validateString(v, k));
+    }
+    if (typeof newRule !== 'undefined' && newRule !== null) {
+      Object.entries(newRule).forEach(([k, v]) => validateString(v, k));
+    }
+    // Suporte para title / description avulsos
+    if (typeof title !== 'undefined') validateString(title, 'title');
+    if (typeof description !== 'undefined') validateString(description, 'description');
+    
+    if (hasValidationErrors) {
+      setErrors(formErrors);
+      return; // Aborta submissão
+    }
+    setErrors({});
+    // ---------------------------
+  
     if (!id) return;
     setIsLoading(true);
 
@@ -104,7 +145,7 @@ function ChangeAssociationContent() {
 
   return (
     <form onSubmit={handleSubmit} className="container p-2">
-      <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+      <div className="bg-card rounded-xl shadow-lg p-6 mb-6">
         <h2 className="text-2xl font-bold text-purple-600 mb-4">Editar dados do membro da associação</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -119,6 +160,8 @@ function ChangeAssociationContent() {
               onChange={handleChange}
               required
             />
+{errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>}
+              {errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>}
           </div>
           <div className="flex flex-col">
             <label htmlFor="lastName">Último Nome *</label>
@@ -131,6 +174,8 @@ function ChangeAssociationContent() {
               onChange={handleChange}
               required
             />
+{errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>}
+              {errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>}
           </div>
           
           <div className="flex flex-col">
@@ -144,6 +189,8 @@ function ChangeAssociationContent() {
               onChange={handleChange}
               required
             />
+{errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
           </div>
           
           <div className="flex flex-col">
@@ -157,6 +204,8 @@ function ChangeAssociationContent() {
               onChange={handleChange}
               required
             />
+{errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
+              {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
           </div>
 
           <div className="flex flex-col">
@@ -169,6 +218,8 @@ function ChangeAssociationContent() {
               value={formData.degree}
               onChange={handleChange}
             />
+{errors.degree && <p className="text-red-500 text-xs mt-1">{errors.degree}</p>}
+              {errors.degree && <p className="text-red-500 text-xs mt-1">{errors.degree}</p>}
           </div>
 
           <div className="flex flex-col">
@@ -181,6 +232,8 @@ function ChangeAssociationContent() {
               value={formData.city}
               onChange={handleChange}
             />
+{errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
+              {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
           </div>
 
           <div className="flex flex-col md:col-span-2">

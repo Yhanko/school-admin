@@ -56,7 +56,7 @@ export function EditClass() {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-green-700 hover:cursor-pointer hover:text-green-900">
+        <Button variant="ghost" size="sm" className="bg-transparent text-secondary-foreground hover:bg-muted hover:text-primary transition-all rounded-sm h-8 w-8 p-0 flex items-center justify-center">
             <Edit className="w-4 h-4" />
         </Button>
       </SheetTrigger>
@@ -69,7 +69,7 @@ export function EditClass() {
         </SheetHeader>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-bold font-hanken text-secondary-foreground mb-2">
                 Nome da Turma
               </label>
               <input
@@ -77,13 +77,13 @@ export function EditClass() {
                 required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Ex: Turma A"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-bold font-hanken text-secondary-foreground mb-2">
                 Classe 
               </label>
               <input
@@ -91,20 +91,20 @@ export function EditClass() {
                 required
                 value={formData.room}
                 onChange={(e) => setFormData({ ...formData, room: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Ex: Sala 101"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-bold font-hanken text-secondary-foreground mb-2">
                 Período
               </label>
               <select
                 required
                 value={formData.period}
                 onChange={(e) => setFormData({ ...formData, period: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 {PERIODS.map((period) => (
                   <option key={period} value={period}>
@@ -115,14 +115,14 @@ export function EditClass() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-bold font-hanken text-secondary-foreground mb-2">
                 Nível Acadêmico *
               </label>
               <select
                 required
                 value={formData.academic_level}
                 onChange={(e) => setFormData({ ...formData, academic_level: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 {ACADEMIC_LEVELS.map((level) => (
                   <option key={level} value={level}>
@@ -133,7 +133,7 @@ export function EditClass() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-bold font-hanken text-secondary-foreground mb-2">
                 Sala
               </label>
               <input
@@ -142,31 +142,31 @@ export function EditClass() {
                 onChange={(e) =>
                   setFormData({ ...formData, student_count: parseInt(e.target.value) || 0 })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-bold font-hanken text-secondary-foreground mb-2">
               Professores
             </label>
-            <div className="border border-gray-300 rounded-xl p-4 max-h-48 overflow-y-auto">
+            <div className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-4 max-h-48 overflow-y-auto">
               <div className="space-y-2">
                 <label
-                    className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded"
+                    className="flex items-center gap-2 cursor-pointer hover:bg-muted p-2 rounded"
                 >
                     <input
                         type="checkbox"
                         className="w-4 h-4 text-primary rounded focus:ring-2 focus:ring-blue-500"
                     />
-                    <span className="text-sm text-gray-700">Osvaldo Pedro</span>
+                    <span className="text-sm text-foreground">Osvaldo Pedro</span>
                 </label>
               </div>
             </div>
           </div>
         <SheetFooter>
-          <Button type="submit" className="bg-[#5856eb] rounded-full text-white hover:cursor-pointer hover:text-white hover:bg-[#3c3ad6]">Save changes</Button>
+          <Button type="submit" className="bg-primary text-primary-foreground border-none rounded-sm hover:bg-[#A78BFA] hover:shadow-[0_0_12px_rgba(139, 92, 246,0.4)] transition-all font-bold font-hanken text-sm px-4 py-2 h-10">Save changes</Button>
         </SheetFooter>
       </SheetContent>
     </Sheet>

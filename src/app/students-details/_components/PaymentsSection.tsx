@@ -29,7 +29,7 @@ export default function PaymentsSection({ student }: PaymentsSectionProps) {
       case 'atrasado':
         return 'bg-red-50 border-red-200';
       default:
-        return 'bg-gray-50 border-gray-200';
+        return 'bg-muted border-border';
     }
   };
 
@@ -58,22 +58,22 @@ export default function PaymentsSection({ student }: PaymentsSectionProps) {
     <Card className="p-6 mb-6">
       <div className="flex items-center gap-2 mb-6">
         <CreditCard className="w-5 h-5 text-primary" />
-        <h2 className="text-2xl font-bold text-gray-900">Pagamentos</h2>
+        <h2 className="text-2xl font-bold text-foreground">Pagamentos</h2>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div className="bg-green-50 p-4 rounded-xl border border-green-200">
-          <p className="text-sm text-gray-600 font-medium mb-1">Total Pago</p>
+          <p className="text-sm text-muted-foreground font-medium mb-1">Total Pago</p>
           <p className="text-2xl font-bold text-green-700">{totalPaid.toFixed(2)} €</p>
         </div>
 
         <div className="bg-yellow-50 p-4 rounded-xl border border-yellow-200">
-          <p className="text-sm text-gray-600 font-medium mb-1">Pendente</p>
+          <p className="text-sm text-muted-foreground font-medium mb-1">Pendente</p>
           <p className="text-2xl font-bold text-yellow-700">{totalPending.toFixed(2)} €</p>
         </div>
 
         <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
-          <p className="text-sm text-gray-600 font-medium mb-1">Total de Transações</p>
+          <p className="text-sm text-muted-foreground font-medium mb-1">Total de Transações</p>
           <p className="text-2xl font-bold text-blue-700">{student.payments.length}</p>
         </div>
       </div>
@@ -87,15 +87,15 @@ export default function PaymentsSection({ student }: PaymentsSectionProps) {
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-1">
                 {getPaymentStatusIcon(payment.status)}
-                <p className="font-semibold text-gray-900">{payment.description}</p>
+                <p className="font-semibold text-foreground">{payment.description}</p>
               </div>
-              <p className="text-sm text-gray-600 ml-8">
+              <p className="text-sm text-muted-foreground ml-8">
                 {new Date(payment.date).toLocaleDateString('pt-PT')}
               </p>
             </div>
             <div className="text-right">
-              <p className="text-lg font-bold text-gray-900">{payment.amount.toFixed(2)} €</p>
-              <p className="text-xs font-medium text-gray-600 mt-1">
+              <p className="text-lg font-bold text-foreground">{payment.amount.toFixed(2)} €</p>
+              <p className="text-xs font-medium text-muted-foreground mt-1">
                 {getPaymentStatusLabel(payment.status)}
               </p>
             </div>

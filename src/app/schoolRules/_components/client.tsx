@@ -32,6 +32,13 @@ import axiosInstance from '@/service/api';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import jsPDF from 'jspdf';
+import { z } from 'zod';
+
+const ruleSchema = z.object({
+  title: z.string().trim().min(1, "O título é obrigatório").max(255, "Título muito longo").regex(/^[^<>';=]*$/, "Caracteres inválidos (Não use < > ' ; =)"),
+  description: z.string().trim().max(500, "Descrição muito longa").regex(/^[^<>';=]*$/, "Caracteres inválidos (Não use < > ' ; =)").optional().or(z.literal('')),
+  content: z.string().trim().max(10000, "Conteúdo muito longo").regex(/^[^<>';=]*$/, "Caracteres inválidos (Não use < > ' ; =)").optional().or(z.literal(''))
+});
 
 interface Regulation {
   id: string;
@@ -45,6 +52,7 @@ interface Regulation {
 
 export function RegulationsClient() {
   const [regulations, setRegulations] = useState<Regulation[]>([]);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [shareDialog, setShareDialog] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
@@ -107,6 +115,27 @@ export function RegulationsClient() {
 
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    try {
+      ruleSchema.parse({
+        title: newRule.title,
+        description: newRule.description,
+        content: newRule.content,
+      });
+      setErrors({});
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        const fieldErrors: Record<string, string> = {};
+        err.errors.forEach((error) => {
+          if (error.path[0]) {
+            fieldErrors[error.path[0] as string] = error.message;
+          }
+        });
+        setErrors(fieldErrors);
+      }
+      return;
+    }
+  
     setIsSubmitting(true);
     try {
       const payload: Record<string, unknown> = {
@@ -247,7 +276,7 @@ export function RegulationsClient() {
           />
           <Button 
             size="sm"
-            className="gap-1.5 bg-primary rounded-xl hover:bg-indigo-700 cursor-pointer text-xs sm:text-sm"
+            className="gap-1.5 bg-primary rounded hover:bg-[#A78BFA] text-white cursor-pointer text-xs sm:text-sm font-semibold transition-all shadow-xs"
             onClick={handleImportClick}
             disabled={isUploading}
           >
@@ -257,12 +286,12 @@ export function RegulationsClient() {
           
           <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
             <DialogTrigger asChild>
-              <Button size="sm" className="gap-1.5 bg-primary rounded-xl hover:bg-indigo-700 cursor-pointer text-xs sm:text-sm">
+              <Button size="sm" className="gap-1.5 bg-primary rounded hover:bg-[#A78BFA] text-white cursor-pointer text-xs sm:text-sm font-semibold transition-all shadow-xs">
                 <Plus className="h-4 w-4" />
                 Criar regulamento
               </Button>
             </DialogTrigger>
-            <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto rounded border border-border">
               <DialogHeader>
                 <DialogTitle>Criar Novo Regulamento</DialogTitle>
               </DialogHeader>
@@ -273,9 +302,11 @@ export function RegulationsClient() {
                     id="title" 
                     placeholder="Ex: Regulamento de Avaliação Escolar" 
                     value={newRule.title}
-                    onChange={(e) => setNewRule({...newRule, title: e.target.value})}
+                    onChange={(e) => { setNewRule({...newRule, title: e.target.value}); if(errors.title) setErrors(prev => ({...prev, title: ''})); }}
+                    className={`rounded ${errors.title ? 'border-red-500 bg-red-50 dark:bg-red-950/20 text-red-900 dark:text-red-200' : ''}`}
                     required
                   />
+                  {errors.title && <p className="text-red-500 text-xs">{errors.title}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="description">Descrição Breve</Label>
@@ -283,16 +314,18 @@ export function RegulationsClient() {
                     id="description" 
                     placeholder="Ex: Normas e critérios para as avaliações trimestrais." 
                     value={newRule.description}
-                    onChange={(e) => setNewRule({...newRule, description: e.target.value})}
+                    onChange={(e) => { setNewRule({...newRule, description: e.target.value}); if(errors.description) setErrors(prev => ({...prev, description: ''})); }}
+                    className={`rounded ${errors.description ? 'border-red-500 bg-red-50 dark:bg-red-950/20 text-red-900 dark:text-red-200' : ''}`}
                   />
+                  {errors.description && <p className="text-red-500 text-xs">{errors.description}</p>}
                 </div>
 
                 {newRule.fileUrl && (
-                  <div className="p-3 bg-blue-50 text-blue-700 rounded-xl border border-blue-200 flex items-center justify-between">
+                  <div className="p-3 bg-primary/10 text-primary rounded border border-primary/20 flex items-center justify-between">
                     <span className="text-sm font-medium flex items-center gap-2">
                       <FileText className="h-4 w-4" /> PDF Anexado
                     </span>
-                    <Button type="button" variant="ghost" size="sm" onClick={() => setNewRule({...newRule, fileUrl: ''})}>Remover</Button>
+                    <Button type="button" variant="ghost" size="sm" className="rounded" onClick={() => setNewRule({...newRule, fileUrl: ''})}>Remover</Button>
                   </div>
                 )}
 
@@ -301,10 +334,11 @@ export function RegulationsClient() {
                   <Textarea 
                     id="content" 
                     placeholder="Digite o texto completo do regulamento aqui..." 
-                    className="min-h-[200px]"
+                    className={`min-h-[200px] rounded ${errors.content ? 'border-red-500 bg-red-50 dark:bg-red-950/20 text-red-900 dark:text-red-200' : ''}`}
                     value={newRule.content}
-                    onChange={(e) => setNewRule({...newRule, content: e.target.value})}
+                    onChange={(e) => { setNewRule({...newRule, content: e.target.value}); if(errors.content) setErrors(prev => ({...prev, content: ''})); }}
                   />
+                  {errors.content && <p className="text-red-500 text-xs">{errors.content}</p>}
                 </div>
                 
                 <div className="space-y-3 pt-4 border-t">

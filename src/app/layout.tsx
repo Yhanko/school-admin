@@ -17,8 +17,16 @@ const jetbrainsMono = JetBrains_Mono({
 
 
 export const metadata: Metadata = {
-  title: "Yhanko",
+  title: "Yhanko Educa • School Admin",
   description: "A melhor gestão para a tua instituição de ensino",
+  icons: {
+    icon: [
+      { url: "/yhankoIMG.svg", type: "image/svg+xml" },
+      { url: "/yhankoIMG.png", type: "image/png" },
+    ],
+    shortcut: "/yhankoIMG.png",
+    apple: "/yhankoIMG.png",
+  },
 };
 
 export default function RootLayout({

@@ -7,6 +7,7 @@ import { Loader2 } from '@/lib/icons';
 const AddNewTeacher: React.FC = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   
   const [formData, setFormData] = useState({
       firstName: '',
@@ -26,7 +27,47 @@ const AddNewTeacher: React.FC = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-      e.preventDefault();
+      
+    e.preventDefault();
+    
+    // --- Auto Zod Validation ---
+    const formErrors: Record<string, string> = {};
+    let hasValidationErrors = false;
+    
+    // Helper to validate a string
+    const validateString = (val: any, fieldName: string) => {
+      if (typeof val === 'string') {
+        if (!val.trim()) {
+          formErrors[fieldName] = "Campo obrigatório";
+          hasValidationErrors = true;
+        } else if (val.length > 255) {
+          formErrors[fieldName] = "Texto demasiado longo";
+          hasValidationErrors = true;
+        } else if (!safeStringRegex.test(val)) {
+          formErrors[fieldName] = "Caracteres inválidos (Não use < > ' ; =)";
+          hasValidationErrors = true;
+        }
+      }
+    };
+
+    // Dinamicamente valida o estado do formulário se for um objeto como formData
+    if (typeof formData !== 'undefined' && formData !== null) {
+      Object.entries(formData).forEach(([k, v]) => validateString(v, k));
+    }
+    if (typeof newRule !== 'undefined' && newRule !== null) {
+      Object.entries(newRule).forEach(([k, v]) => validateString(v, k));
+    }
+    // Suporte para title / description avulsos
+    if (typeof title !== 'undefined') validateString(title, 'title');
+    if (typeof description !== 'undefined') validateString(description, 'description');
+    
+    if (hasValidationErrors) {
+      setErrors(formErrors);
+      return; // Aborta submissão
+    }
+    setErrors({});
+    // ---------------------------
+  
       setIsLoading(true);
 
       const name = `${formData.firstName} ${formData.lastName}`.trim();
@@ -60,8 +101,8 @@ const AddNewTeacher: React.FC = () => {
 
   return (
     <div className="min-h-screen p-10 w-[70rem]">
-      <h1 className="text-2xl font-semibold text-center text-gray-800 p-5">Adicionar Novo Professor</h1>
-      <form onSubmit={handleSubmit} className="mx-auto shadow-lg rounded-xl flex space-x-20 bg-white">
+      <h1 className="text-2xl font-semibold text-center text-foreground p-5">Adicionar Novo Professor</h1>
+      <form onSubmit={handleSubmit} className="mx-auto shadow-lg rounded-xl flex space-x-20 bg-card">
         <div className="flex-1">
           <div className="bg-primary text-white p-5 rounded-t-lg">
             <h2 className="text-lg font-semibold">Dados Pessoais</h2>
@@ -70,35 +111,44 @@ const AddNewTeacher: React.FC = () => {
           <div className="p-4">
             <div className="grid grid-cols-2 gap-4">
             <div>
-                <label className="block text-gray-700">Primeiro Nome *</label>
+                <label className="block text-foreground">Primeiro Nome *</label>
                 <input required type="text" name="firstName" value={formData.firstName} onChange={handleChange} className="mt-1 p-2 border rounded w-full" placeholder="Nome" />
+{errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>}
+              {errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>}
             </div>
             <div>
-                <label className="block text-gray-700">Último Nome *</label>
+                <label className="block text-foreground">Último Nome *</label>
                 <input required type="text" name="lastName" value={formData.lastName} onChange={handleChange} className="mt-1 p-2 border rounded w-full" placeholder="Sobrenome" />
+{errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>}
+              {errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>}
             </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4 mt-4">
             <div>
-                <label className="block text-gray-700">Email *</label>
+                <label className="block text-foreground">Email *</label>
                 <input required type="email" name="email" value={formData.email} onChange={handleChange} className="mt-1 p-2 border rounded w-full" placeholder="exemplo@email.com" />
+{errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
             </div>
             <div>
-                <label className="block text-gray-700">Telemóvel *</label>
+                <label className="block text-foreground">Telemóvel *</label>
                 <input required type="tel" name="phone" value={formData.phone} onChange={handleChange} className="mt-1 p-2 border rounded w-full" placeholder="(xxx) xxx-xxxx" />
+{errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
+              {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
             </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4 mt-4">
             <div>
-                <label className="block text-gray-700">Morada</label>
+                <label className="block text-foreground">Morada</label>
                 <textarea name="address" value={formData.address} onChange={handleChange} className="mt-1 p-2 border rounded w-full" rows={3} placeholder="Endereço completo..."></textarea>
+              {errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
             </div>
 
             <div>
-                <label className="block text-gray-700">Foto</label>
-                <div className="border-dashed border-2 border-gray-300 rounded p-4 flex items-center justify-center text-gray-400">
+                <label className="block text-foreground">Foto</label>
+                <div className="border-dashed border-2 border-border rounded p-4 flex items-center justify-center text-muted-foreground">
                 Arraste um ficheiro
                 </div>
             </div>
@@ -106,8 +156,10 @@ const AddNewTeacher: React.FC = () => {
 
             <div className="grid grid-cols-2 gap-4 mt-4">
             <div>
-                <label className="block text-gray-700">Cidade / País</label>
+                <label className="block text-foreground">Cidade / País</label>
                 <input type="text" name="city" value={formData.city} onChange={handleChange} className="mt-1 p-2 border rounded w-full" placeholder="Cidade, País" />
+{errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
+              {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
             </div>
             </div>
           </div>
@@ -120,26 +172,32 @@ const AddNewTeacher: React.FC = () => {
           
             <div className="grid grid-cols-1 gap-4 p-4">
               <div>
-                <label className="block text-gray-700">Universidade *</label>
+                <label className="block text-foreground">Universidade *</label>
                 <input required type="text" name="university" value={formData.university} onChange={handleChange} className="mt-1 p-2 border rounded w-full" placeholder="Nome da Instituição" />
+{errors.university && <p className="text-red-500 text-xs mt-1">{errors.university}</p>}
+              {errors.university && <p className="text-red-500 text-xs mt-1">{errors.university}</p>}
               </div>
               <div>
-                <label className="block text-gray-700">Grau Académico *</label>
+                <label className="block text-foreground">Grau Académico *</label>
                 <input required type="text" name="degree" value={formData.degree} onChange={handleChange} className="mt-1 p-2 border rounded w-full" placeholder="Licenciatura, Mestrado..." />
+{errors.degree && <p className="text-red-500 text-xs mt-1">{errors.degree}</p>}
+              {errors.degree && <p className="text-red-500 text-xs mt-1">{errors.degree}</p>}
               </div>
             </div>
 
             <div className="grid grid-cols-1 gap-4 p-4">
               <div>
-                <label className="block text-gray-700">Período *</label>
+                <label className="block text-foreground">Período *</label>
                 <input required type="text" name="educationPeriod" value={formData.educationPeriod} onChange={handleChange} className="mt-1 p-2 border rounded w-full" placeholder="ex: 2018 - 2022" />
+{errors.educationPeriod && <p className="text-red-500 text-xs mt-1">{errors.educationPeriod}</p>}
+              {errors.educationPeriod && <p className="text-red-500 text-xs mt-1">{errors.educationPeriod}</p>}
               </div>
               <div>
-                <label className="block text-gray-700">CV (Opcional)</label>
+                <label className="block text-foreground">CV (Opcional)</label>
                 <input type="file" className="mt-1 p-2 border rounded w-full" />
               </div>
               <div>
-                <label className="block text-gray-700">BI (Opcional)</label>
+                <label className="block text-foreground">BI (Opcional)</label>
                 <input type="file" className="mt-1 p-2 border rounded w-full" />
               </div>
             </div>

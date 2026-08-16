@@ -105,7 +105,7 @@ export function ClassSubjects({ classId, className }: { classId: string, classNa
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="h-8 border-primary text-primary hover:bg-primary/10">
+        <Button variant="outline" size="sm" className="bg-transparent text-secondary-foreground hover:bg-muted hover:text-primary transition-all rounded-sm h-8 w-8 p-0 flex items-center justify-center w-auto px-2 h-8">
           <BookOpen className="w-4 h-4 mr-2" />
           Disciplinas
         </Button>
@@ -146,7 +146,7 @@ export function ClassSubjects({ classId, className }: { classId: string, classNa
                   </SelectContent>
                 </Select>
               </div>
-              <Button onClick={handleAssignSubject} disabled={isSaving || !selectedSubjectId} className="w-full md:col-span-2">
+              <Button onClick={handleAssignSubject} disabled={isSaving || !selectedSubjectId} className="w-full md:col-span-2 bg-primary text-primary-foreground border-none rounded-sm hover:bg-[#A78BFA] hover:shadow-[0_0_12px_rgba(139, 92, 246,0.4)] transition-all font-bold font-hanken text-sm px-4 py-2 h-10">
                 {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
                 Associar Disciplina
               </Button>
@@ -175,7 +175,7 @@ export function ClassSubjects({ classId, className }: { classId: string, classNa
                         <td className="py-3 px-4">{s.subject?.name}</td>
                         <td className="py-3 px-4">{s.teacher?.name || <span className="text-muted-foreground italic">Não atribuído</span>}</td>
                         <td className="py-3 px-4 text-center">
-                          <Button variant="ghost" size="sm" onClick={() => handleRemoveSubject(s.subjectId)} className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50">
+                          <Button variant="ghost" size="sm" onClick={() => handleRemoveSubject(s.subjectId)} className="bg-transparent text-red-500 hover:text-red-700 hover:bg-red-50 transition-all rounded-sm h-8 w-8 p-0 flex items-center justify-center">
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </td>

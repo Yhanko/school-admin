@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { z } from "zod";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +24,12 @@ interface ParentDashboardProps {
 export function ParentDashboard  ({ parentId, student }: ParentDashboardProps) {
   const [newMessage, setNewMessage] = useState("");
   const [selectedTeacher, setSelectedTeacher] = useState<string>("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const messageSchema = z.object({
+    selectedTeacher: z.string().min(1, "Selecione um professor"),
+    newMessage: z.string().trim().min(1, "A mensagem não pode estar vazia").max(2000, "Mensagem demasiado longa").regex(/^[^<>';=]*$/, "Caracteres inválidos (Não use < > ' ; =)")
+  });
 
   // Mock data para demonstração
   const [chatMessages] = useState<ChatMessage[]>([
@@ -110,10 +117,24 @@ export function ParentDashboard  ({ parentId, student }: ParentDashboardProps) {
   ];
 
   const handleSendMessage = () => {
-    if (newMessage.trim() && selectedTeacher) {
-      console.log("Enviando mensagem:", newMessage, "para:", selectedTeacher);
-      setNewMessage("");
+    try {
+      messageSchema.parse({ selectedTeacher, newMessage });
+      setErrors({});
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        const fieldErrors: Record<string, string> = {};
+        err.errors.forEach((error) => {
+          if (error.path[0]) {
+            fieldErrors[error.path[0] as string] = error.message;
+          }
+        });
+        setErrors(fieldErrors);
+      }
+      return;
     }
+
+    console.log("Enviando mensagem:", newMessage, "para:", selectedTeacher);
+    setNewMessage("");
   };
 
   const getScoreColor = (percentage: number) => {
@@ -129,18 +150,18 @@ export function ParentDashboard  ({ parentId, student }: ParentDashboardProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-muted p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
+        <div className="bg-card rounded shadow-xs p-6 border border-border">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Painel do Encarregado</h1>
-              <p className="text-gray-600 mt-1">
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Painel do Encarregado</h1>
+              <p className="text-muted-foreground mt-1 text-sm">
                 Acompanhamento do aluno: {student.name} - {student.class}
               </p>
             </div>
-            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+            <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 rounded">
               Encarregado de Educação
             </Badge>
           </div>
@@ -148,7 +169,7 @@ export function ParentDashboard  ({ parentId, student }: ParentDashboardProps) {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
+          <Card className="rounded border border-border">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Média Geral</CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
@@ -163,7 +184,7 @@ export function ParentDashboard  ({ parentId, student }: ParentDashboardProps) {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="rounded border border-border">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Mensagens</CardTitle>
               <MessageCircle className="h-4 w-4 text-muted-foreground" />
@@ -178,7 +199,7 @@ export function ParentDashboard  ({ parentId, student }: ParentDashboardProps) {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="rounded border border-border">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Última Avaliação</CardTitle>
               <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -196,18 +217,18 @@ export function ParentDashboard  ({ parentId, student }: ParentDashboardProps) {
 
         {/* Main Content */}
         <Tabs defaultValue="chat" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="chat">Comunicação com Professores</TabsTrigger>
-            <TabsTrigger value="assessments">Avaliações do Aluno</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 rounded border border-border">
+            <TabsTrigger value="chat" className="rounded">Comunicação com Professores</TabsTrigger>
+            <TabsTrigger value="assessments" className="rounded">Avaliações do Aluno</TabsTrigger>
           </TabsList>
 
           {/* Chat Tab */}
           <TabsContent value="chat" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Chat Messages */}
-              <Card className="h-[600px] flex flex-col">
+              <Card className="h-[600px] flex flex-col rounded border border-border">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-base">
                     <MessageCircle className="h-5 w-5" />
                     Mensagens Recentes
                   </CardTitle>
@@ -218,10 +239,10 @@ export function ParentDashboard  ({ parentId, student }: ParentDashboardProps) {
                       key={message.id}
                       className={`flex ${message.senderId === parentId ? 'justify-end' : 'justify-start'}`}
                     >
-                      <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-xl ${
+                      <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded ${
                         message.senderId === parentId
                           ? 'bg-primary text-white'
-                          : 'bg-gray-100 text-gray-900'
+                          : 'bg-muted text-foreground'
                       }`}>
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-xs font-medium">
@@ -233,7 +254,7 @@ export function ParentDashboard  ({ parentId, student }: ParentDashboardProps) {
                         </div>
                         <p className="text-sm">{message.message}</p>
                         <p className={`text-xs mt-1 ${
-                          message.senderId === parentId ? 'text-blue-100' : 'text-gray-500'
+                          message.senderId === parentId ? 'text-purple-100' : 'text-muted-foreground'
                         }`}>
                           {message.timestamp.toLocaleString()}
                         </p>
@@ -244,17 +265,17 @@ export function ParentDashboard  ({ parentId, student }: ParentDashboardProps) {
               </Card>
 
               {/* New Message */}
-              <Card className="h-[600px] flex flex-col">
+              <Card className="h-[600px] flex flex-col rounded border border-border">
                 <CardHeader>
-                  <CardTitle>Nova Mensagem</CardTitle>
+                  <CardTitle className="text-base">Nova Mensagem</CardTitle>
                 </CardHeader>
                 <CardContent className="flex-1 flex flex-col space-y-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Professor:</label>
                     <select
                       value={selectedTeacher}
-                      onChange={(e) => setSelectedTeacher(e.target.value)}
-                      className="w-full p-2 border rounded-xl"
+                      onChange={(e) => { setSelectedTeacher(e.target.value); if(errors.selectedTeacher) setErrors(prev => ({...prev, selectedTeacher: ""})); }}
+                      className={`w-full p-2 border rounded text-sm bg-card ${errors.selectedTeacher ? 'border-red-500 bg-red-50 dark:bg-red-950/20 text-red-900 dark:text-red-200' : 'border-border'}`}
                     >
                       <option value="">Selecionar professor...</option>
                       {teachers.map((teacher) => (
@@ -263,16 +284,18 @@ export function ParentDashboard  ({ parentId, student }: ParentDashboardProps) {
                         </option>
                       ))}
                     </select>
+                    {errors.selectedTeacher && <p className="text-red-500 text-xs">{errors.selectedTeacher}</p>}
                   </div>
                   
                   <div className="flex-1 space-y-2">
                     <label className="text-sm font-medium">Mensagem:</label>
                     <Textarea
                       value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
+                      onChange={(e) => { setNewMessage(e.target.value); if(errors.newMessage) setErrors(prev => ({...prev, newMessage: ""})); }}
                       placeholder="Digite sua mensagem..."
-                      className="h-32 resize-none"
+                      className={`h-32 resize-none ${errors.newMessage ? 'border-red-500 bg-red-50 dark:bg-red-950/20 text-red-900 dark:text-red-200' : ''}`}
                     />
+                    {errors.newMessage && <p className="text-red-500 text-xs">{errors.newMessage}</p>}
                   </div>
                   
                   <Button 
@@ -300,7 +323,7 @@ export function ParentDashboard  ({ parentId, student }: ParentDashboardProps) {
               <CardContent>
                 <div className="space-y-4">
                   {assessments.map((assessment) => (
-                    <div key={assessment.id} className="border rounded-xl p-4 space-y-3">
+                    <div key={assessment.id} className="border rounded p-4 space-y-3">
                       <div className="flex items-start justify-between">
                         <div className="space-y-1">
                           <h3 className="font-semibold text-lg">{assessment.title}</h3>
@@ -308,7 +331,7 @@ export function ParentDashboard  ({ parentId, student }: ParentDashboardProps) {
                             <Badge variant="outline">{assessment.subject}</Badge>
                             <Badge variant="secondary">{assessment.type}</Badge>
                           </div>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-muted-foreground">
                             Professor: {assessment.teacherName}
                           </p>
                         </div>
@@ -319,21 +342,21 @@ export function ParentDashboard  ({ parentId, student }: ParentDashboardProps) {
                               {assessment.percentage}%
                             </Badge>
                           </div>
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm text-muted-foreground">
                             {assessment.score}/{assessment.maxScore}
                           </p>
                         </div>
                       </div>
                       
-                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Clock className="h-4 w-4" />
                         {assessment.date.toLocaleDateString()}
                       </div>
                       
                       {assessment.comments && (
-                        <div className="bg-gray-50 rounded p-3">
+                        <div className="bg-muted rounded p-3">
                           <p className="text-sm font-medium mb-1">Comentários do Professor:</p>
-                          <p className="text-sm text-gray-700">{assessment.comments}</p>
+                          <p className="text-sm text-foreground">{assessment.comments}</p>
                         </div>
                       )}
                     </div>
@@ -343,7 +366,7 @@ export function ParentDashboard  ({ parentId, student }: ParentDashboardProps) {
             </Card>
 
             {/* Performance Summary */}
-            <Card>
+            <Card className="rounded border border-border">
               <CardHeader>
                 <CardTitle>Resumo de Desempenho por Disciplina</CardTitle>
               </CardHeader>
@@ -356,12 +379,12 @@ export function ParentDashboard  ({ parentId, student }: ParentDashboardProps) {
                       : 0;
                     
                     return (
-                      <div key={subject} className="text-center p-4 border rounded-xl">
+                      <div key={subject} className="text-center p-4 border rounded">
                         <h4 className="font-medium">{subject}</h4>
                         <div className={`text-2xl font-bold ${getScoreColor(average)}`}>
                           {average.toFixed(1)}%
                         </div>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-muted-foreground">
                           {subjectAssessments.length} avaliações
                         </p>
                       </div>

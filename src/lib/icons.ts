@@ -74,7 +74,17 @@ import {
   Shield,
   CreditCard,
   IdCard,
-  BookMarked
+  BookMarked,
+  Copy,
+  Hash,
+  Percent,
+  ShieldCheck,
+  FileSpreadsheet,
+  RefreshCw,
+  ShieldAlert,
+  UserCheck,
+  ArrowRight,
+  Camera
 } from "lucide-react";
 import { IoIosAlert } from "react-icons/io";
 import { TbFileText, TbPigOff, TbFileArrowRight } from "react-icons/tb";
@@ -208,4 +218,14 @@ export {
   Edit,
   Lock,
   Unlock,
+  Copy,
+  Hash,
+  Percent,
+  ShieldCheck,
+  FileSpreadsheet,
+  RefreshCw,
+  ShieldAlert,
+  UserCheck,
+  ArrowRight,
+  Camera,
 }

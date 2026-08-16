@@ -7,6 +7,16 @@ export interface User {
   email: string;
   role: string;
   institutionId?: string;
+  photoUrl?: string;
+  avatar?: string;
+  profile?: {
+    photoUrl?: string;
+    phone?: string;
+  };
+  employeeProfile?: {
+    photoUrl?: string;
+    phone?: string;
+  };
 }
 
 interface AuthState {
@@ -14,6 +24,7 @@ interface AuthState {
   token: string | null;
   isAuthenticated: boolean;
   setAuth: (user: User, token: string) => void;
+  updateUser: (updatedFields: Partial<User>) => void;
   logout: () => void;
 }
 
@@ -23,7 +34,7 @@ const USER_KEY = 'yhanko_school_admin_user';
 const getInitialState = () => {
   const token = Cookies.get(TOKEN_KEY) || null;
   const userStr = Cookies.get(USER_KEY);
-  let user = null;
+  let user: User | null = null;
 
   if (userStr) {
     try {
@@ -36,13 +47,33 @@ const getInitialState = () => {
   return { token, user, isAuthenticated: !!token };
 };
 
-export const useAuth = create<AuthState>((set) => ({
+export const useAuth = create<AuthState>((set, get) => ({
   ...getInitialState(),
 
   setAuth: (user, token) => {
     Cookies.set(TOKEN_KEY, token, { expires: 7, path: '/' });
     Cookies.set(USER_KEY, JSON.stringify(user), { expires: 7, path: '/' });
     set({ user, token, isAuthenticated: true });
+  },
+
+  updateUser: (updatedFields) => {
+    const currentUser = get().user;
+    if (currentUser) {
+      const newUser = {
+        ...currentUser,
+        ...updatedFields,
+        profile: {
+          ...currentUser.profile,
+          ...updatedFields.profile,
+        },
+        employeeProfile: {
+          ...currentUser.employeeProfile,
+          ...updatedFields.employeeProfile,
+        },
+      };
+      Cookies.set(USER_KEY, JSON.stringify(newUser), { expires: 7, path: '/' });
+      set({ user: newUser });
+    }
   },
 
   logout: () => {

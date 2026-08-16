@@ -1,58 +1,49 @@
-"use client"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+"use client";
+
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { Loader2, RefreshCw, DollarSign, ShieldAlert } from "@/lib/icons";
 import { Button } from "@/components/ui/button";
-import {
-  CheckCircle,
-  AlertCircle,
-  Clock,
-  Download,
-  Search,
-  MoreVertical,
-  Loader2
-} from "@/lib/icons";
-import { useState, useEffect, useCallback } from "react";
 import axiosInstance from "@/service/api";
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-interface PaymentData {
-  id?: string;
-  student?: { name?: string };
-  type?: string;
-  amount?: number;
-  status?: string;
-  paymentDate?: string;
-  createdAt?: string;
-}
+import { PaymentStats } from "./_components/PaymentStats";
+import { PaymentSummary } from "./_components/PaymentSummary";
+import { PaymentTable } from "./_components/PaymentTable";
+import { LatePaymentsAlert } from "./_components/LatePaymentsAlert";
+import { PaymentRecord } from "./_components/PaymentDetailModal";
 
 export default function Payments() {
   const { toast } = useToast();
-  const [payments, setPayments] = useState<PaymentData[]>([]);
+  const [payments, setPayments] = useState<PaymentRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [activeSearch, setActiveSearch] = useState("");
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const handleSearch = () => {
-    setActiveSearch(searchTerm.toLowerCase());
-  };
+  const fetchPayments = useCallback(async (isManualRefresh = false) => {
+    if (isManualRefresh) setIsRefreshing(true);
+    else setIsLoading(true);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      handleSearch();
-    }
-  };
-
-  const fetchPayments = useCallback(async () => {
     try {
-      const response = await axiosInstance.get('/finance/payments');
+      const response = await axiosInstance.get("/finance/payments");
       setPayments(response.data.data || response.data || []);
+      if (isManualRefresh) {
+        toast({
+          title: "Telemetria Atualizada",
+          description: "Dados financeiros sincronizados com o servidor.",
+        });
+      }
     } catch (error) {
       console.error("Erro ao carregar pagamentos:", error);
-      toast({ title: 'Erro', description: 'Falha ao carregar pagamentos', variant: 'destructive' });
+      toast({
+        title: "Falha na Conexão",
+        description: "Não foi possível carregar os registros de pagamentos.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
   }, [toast]);
 
@@ -60,346 +51,277 @@ export default function Payments() {
     fetchPayments();
   }, [fetchPayments]);
 
-  const getStatusBadge = (status: string) => {
-    // A API usa: 'confirmed', 'pending', 'cancelled'
-    const statusConfig: Record<string, { bg: string; text: string; icon: React.ElementType, label: string }> = {
-      "confirmed": {
-        bg: "bg-green-100 dark:bg-green-900",
-        text: "text-green-800 dark:text-green-100",
-        icon: CheckCircle,
-        label: "Pago",
-      },
-      "pending": {
-        bg: "bg-yellow-100 dark:bg-yellow-900",
-        text: "text-yellow-800 dark:text-yellow-100",
-        icon: Clock,
-        label: "Pendente",
-      },
-      "cancelled": {
-        bg: "bg-red-100 dark:bg-red-900",
-        text: "text-red-800 dark:text-red-100",
-        icon: AlertCircle,
-        label: "Cancelado",
-      },
+  // Dynamic calculations
+  const stats = useMemo(() => {
+    const total = payments.reduce((acc, curr) => acc + (curr.amount || 0), 0);
+    const paid = payments
+      .filter((p) => p.status === "confirmed")
+      .reduce((acc, curr) => acc + (curr.amount || 0), 0);
+    const pending = payments
+      .filter((p) => p.status === "pending")
+      .reduce((acc, curr) => acc + (curr.amount || 0), 0);
+    const cancelled = payments
+      .filter((p) => p.status === "cancelled")
+      .reduce((acc, curr) => acc + (curr.amount || 0), 0);
+
+    const paidRate = total > 0 ? (paid / total) * 100 : 0;
+    const pendingRate = total > 0 ? (pending / total) * 100 : 0;
+    const cancelledRate = total > 0 ? (cancelled / total) * 100 : 0;
+
+    return {
+      total,
+      paid,
+      pending,
+      cancelled,
+      paidRate,
+      pendingRate,
+      cancelledRate,
+      totalCount: payments.length,
+      cancelledCount: payments.filter((p) => p.status === "cancelled").length,
     };
+  }, [payments]);
 
-    const config = statusConfig[status] || statusConfig["pending"];
-    const Icon = config.icon;
-
-    return (
-      <div className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text} w-fit`}>
-        <Icon className="w-3 h-3" />
-        {config.label}
-      </div>
-    );
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  // Calculate stats dynamically
-  const totalAmount = payments.reduce((acc, curr) => acc + (curr.amount || 0), 0);
-  const paidAmount = payments.filter(p => p.status === 'confirmed').reduce((acc, curr) => acc + (curr.amount || 0), 0);
-  const pendingAmount = payments.filter(p => p.status === 'pending').reduce((acc, curr) => acc + (curr.amount || 0), 0);
-  const cancelledAmount = payments.filter(p => p.status === 'cancelled').reduce((acc, curr) => acc + (curr.amount || 0), 0);
-  
-  const paidRate = totalAmount ? (paidAmount / totalAmount) * 100 : 0;
-  const pendingRate = totalAmount ? (pendingAmount / totalAmount) * 100 : 0;
-  const cancelledRate = totalAmount ? (cancelledAmount / totalAmount) * 100 : 0;
-
+  // Export to PDF with yhankoEduca branded styling
   const exportToPDF = () => {
     setIsExporting(true);
     try {
       const doc = new jsPDF();
-      
-      // Título
-      doc.setFontSize(20);
-      doc.setTextColor(40, 40, 40);
-      doc.text("Relatório Geral de Pagamentos", 14, 22);
-      
-      // Subtítulo e data
-      doc.setFontSize(10);
-      doc.setTextColor(100, 100, 100);
-      doc.text(`Data de Emissão: ${new Date().toLocaleDateString()}`, 14, 30);
-      doc.text(`Yhanko Educa`, 14, 35);
-      
-      // Resumo Estatístico
-      doc.setFontSize(12);
-      doc.setTextColor(40, 40, 40);
-      doc.text("Resumo Financeiro", 14, 45);
-      
-      doc.setFontSize(10);
-      doc.text(`Total Esperado: ${totalAmount.toLocaleString()} Kz`, 14, 52);
-      doc.text(`Total Recebido (Pago): ${paidAmount.toLocaleString()} Kz`, 14, 58);
-      doc.text(`Total Pendente: ${pendingAmount.toLocaleString()} Kz`, 14, 64);
-      doc.text(`Total Cancelado/Atrasado: ${cancelledAmount.toLocaleString()} Kz`, 14, 70);
-      
-      let currentY = 80;
 
-      // Helper para desenhar tabelas
-      const drawTable = (title: string, data: PaymentData[], startY: number) => {
-        doc.setFontSize(12);
+      // Mission Control Dark Header Band
+      doc.setFillColor(19, 19, 19);
+      doc.rect(0, 0, 210, 35, "F");
+
+      // Title & Subtitle in Header
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.setTextColor(253, 185, 19); // Gold #8B5CF6
+      doc.text("Yhanko Educa • Relatório Financeiro", 14, 16);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(229, 226, 225); // Light Silver
+      doc.text(
+        `Emitido em: ${new Date().toLocaleString("pt-PT")} | Autenticação: SEC-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
+        14,
+        24
+      );
+
+      // Section: Summary Cards in PDF
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.setTextColor(30, 30, 30);
+      doc.text("Resumo de Desempenho & Arrecadação", 14, 46);
+
+      // Draw Summary Box
+      doc.setFillColor(245, 245, 245);
+      doc.roundedRect(14, 50, 182, 26, 2, 2, "F");
+
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(80, 80, 80);
+      doc.text("TOTAL ESPERADO", 20, 58);
+      doc.text("TOTAL RECEBIDO", 70, 58);
+      doc.text("TOTAL PENDENTE", 120, 58);
+      doc.text("TAXA EFICÁCIA", 165, 58);
+
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(20, 20, 20);
+      doc.text(`${stats.total.toLocaleString()} Kz`, 20, 68);
+
+      doc.setTextColor(45, 106, 79); // Green
+      doc.text(`${stats.paid.toLocaleString()} Kz`, 70, 68);
+
+      doc.setTextColor(180, 120, 0); // Gold/Amber
+      doc.text(`${stats.pending.toLocaleString()} Kz`, 120, 68);
+
+      doc.setTextColor(20, 20, 20);
+      doc.text(`${stats.paidRate.toFixed(1)}%`, 165, 68);
+
+      let currentY = 88;
+
+      // Table helper
+      const drawTable = (
+        title: string,
+        data: PaymentRecord[],
+        startY: number,
+        headerColor: [number, number, number]
+      ) => {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(11);
+        doc.setTextColor(headerColor[0], headerColor[1], headerColor[2]);
         doc.text(title, 14, startY);
-        
-        const tableData = data.map(payment => [
-          payment.student?.name || 'Desconhecido',
-          payment.type || '',
+
+        const tableData = data.map((payment, idx) => [
+          payment.id?.substring(0, 8) || `TX-${idx + 1}`,
+          payment.student?.name || "Desconhecido",
+          payment.type || "Mensalidade",
           `${(payment.amount || 0).toLocaleString()} Kz`,
-          payment.status === 'confirmed' ? 'Pago' : payment.status === 'pending' ? 'Pendente' : 'Cancelado',
-          payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString() : "-"
+          payment.status === "confirmed"
+            ? "Pago"
+            : payment.status === "pending"
+            ? "Pendente"
+            : "Cancelado",
+          payment.paymentDate
+            ? new Date(payment.paymentDate).toLocaleDateString("pt-PT")
+            : "-",
         ]);
 
         autoTable(doc, {
-          startY: startY + 5,
-          head: [['Aluno', 'Tipo', 'Valor', 'Status', 'Data Pagamento']],
+          startY: startY + 4,
+          head: [["ID / Ref", "Aluno", "Tipo", "Valor", "Status", "Data Liquidação"]],
           body: tableData,
-          theme: 'striped',
-          headStyles: { fillColor: [74, 71, 245] },
+          theme: "grid",
+          headStyles: {
+            fillColor: headerColor,
+            textColor: [255, 255, 255],
+            fontSize: 8,
+            fontStyle: "bold",
+          },
+          styles: {
+            fontSize: 8,
+            cellPadding: 2.5,
+          },
+          alternateRowStyles: {
+            fillColor: [248, 248, 248],
+          },
         });
-        
-        return (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 15;
+
+        return (
+          (doc as unknown as { lastAutoTable: { finalY: number } })
+            .lastAutoTable.finalY + 12
+        );
       };
 
-      const confirmedList = payments.filter(p => p.status === 'confirmed');
-      const pendingList = payments.filter(p => p.status === 'pending');
-      const cancelledList = payments.filter(p => p.status === 'cancelled');
+      const confirmedList = payments.filter((p) => p.status === "confirmed");
+      const pendingList = payments.filter((p) => p.status === "pending");
+      const cancelledList = payments.filter((p) => p.status === "cancelled");
 
       if (confirmedList.length > 0) {
-        currentY = drawTable("1. Pagamentos Confirmados", confirmedList, currentY);
+        currentY = drawTable(
+          "1. Pagamentos Confirmados (Liquidados)",
+          confirmedList,
+          currentY,
+          [45, 106, 79]
+        );
       }
       if (pendingList.length > 0) {
-        currentY = drawTable("2. Pagamentos Pendentes", pendingList, currentY);
+        currentY = drawTable(
+          "2. Pagamentos Pendentes (Em Aberto)",
+          pendingList,
+          currentY,
+          [160, 110, 0]
+        );
       }
       if (cancelledList.length > 0) {
-        drawTable("3. Pagamentos em Atraso / Cancelados", cancelledList, currentY);
+        drawTable(
+          "3. Pagamentos em Atraso / Cancelados",
+          cancelledList,
+          currentY,
+          [155, 34, 38]
+        );
       }
 
-      doc.save("Relatorio_Pagamentos.pdf");
-      toast({ title: 'Sucesso', description: 'Relatório exportado com sucesso!' });
+      doc.save("YhankoEduca_Relatorio_Pagamentos.pdf");
+      toast({
+        title: "Relatório Gerado",
+        description: "O documento PDF foi exportado com sucesso.",
+      });
     } catch (error) {
       console.error("Erro ao exportar PDF:", error);
-      toast({ title: 'Erro', description: 'Falha ao gerar o relatório PDF', variant: 'destructive' });
+      toast({
+        title: "Erro ao Gerar PDF",
+        description: "Ocorreu um erro durante a compilação do relatório.",
+        variant: "destructive",
+      });
     } finally {
       setIsExporting(false);
     }
   };
 
-  const paymentStats = [
-    {
-      title: "Pagamentos Recebidos",
-      value: `${paidAmount.toLocaleString()} Kz`,
-      percentage: `${paidRate.toFixed(1)}%`,
-      icon: CheckCircle,
-      color: "text-green-600",
-      bgColor: "bg-green-100 dark:bg-green-900",
-    },
-    {
-      title: "Pagamentos Pendentes",
-      value: `${pendingAmount.toLocaleString()} Kz`,
-      percentage: `${pendingRate.toFixed(1)}%`,
-      icon: Clock,
-      color: "text-orange-600",
-      bgColor: "bg-orange-100 dark:bg-orange-900",
-    },
-    {
-      title: "Pagamentos Cancelados/Atrasados",
-      value: `${cancelledAmount.toLocaleString()} Kz`,
-      percentage: `${cancelledRate.toFixed(1)}%`,
-      icon: AlertCircle,
-      color: "text-red-600",
-      bgColor: "bg-red-100 dark:bg-red-900",
-    },
-  ];
+  if (isLoading) {
+    return (
+      <div className="flex flex-col justify-center items-center w-full min-h-[70vh] bg-[#131313] text-[#e5e2e1] space-y-4">
+        <div className="relative">
+          <Loader2 className="w-10 h-10 animate-spin text-[#8B5CF6]" />
+          <div className="absolute inset-0 rounded-full blur-md bg-[#8B5CF6]/30 animate-pulse" />
+        </div>
+        <div className="text-center space-y-1">
+          <p className="headline-sm text-[#e5e2e1]">Carregando Telemetria</p>
+          <p className="label-caps text-[#d5c4ac]">
+            A conectar com o módulo financeiro yhankoEduca...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-      <section className="w-full max-w-full px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-5 sm:space-y-8 overflow-x-hidden">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
-          <div>
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">Relatório de Pagamentos</h1>
-            <p className="text-sm text-muted-foreground mt-1">Status de pagamentos mensais dos alunos</p>
+    <section className="w-full max-w-full bg-[#131313] text-[#e5e2e1] px-4 sm:px-6 lg:px-8 py-6 space-y-6 overflow-x-hidden min-h-screen font-hanken">
+      {/* Top Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#414042] pb-6">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#8B5CF6] shadow-[0_0_10px_#8B5CF6]" />
+            <h1 className="headline-lg text-[#e5e2e1]">
+              Relatório de Pagamentos
+            </h1>
           </div>
+          <p className="body-md text-[#d5c4ac] mt-1">
+            Auditoria, conciliação e telemetria de pagamentos mensais e receitas
+          </p>
         </div>
 
-        {/* Payment Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6">
-          {paymentStats.map((stat, index) => {
-            const Icon = stat.icon;
-            return (
-              <Card key={index}>
-                <CardContent className="pt-6">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">{stat.title}</p>
-                      <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-                      <p className={`text-sm font-semibold mt-2 ${stat.color}`}>{stat.percentage}</p>
-                    </div>
-                    <div className={`${stat.bgColor} p-3 rounded-xl`}>
-                      <Icon className={`w-6 h-6 ${stat.color}`} />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-
-        {/* Payment Summary */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Resumo de Pagamentos - Geral</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">Total Esperado</p>
-                <p className="text-2xl font-bold text-foreground">{totalAmount.toLocaleString()} Kz</p>
-              </div>
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">Total Recebido</p>
-                <p className="text-2xl font-bold text-green-600">{paidAmount.toLocaleString()} Kz</p>
-              </div>
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">Taxa de Recebimento</p>
-                <p className="text-2xl font-bold text-primary">{paidRate.toFixed(1)}%</p>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Progresso de Arrecadação</span>
-                <span className="font-semibold text-foreground">{paidRate.toFixed(1)}%</span>
-              </div>
-              <div className="w-full bg-muted rounded-full h-3">
-                <div className="bg-green-500 h-3 rounded-full" style={{ width: `${paidRate}%` }}></div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Search and Filter */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1 flex gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Pesquisar por aluno..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyDown={handleKeyDown}
-                className="w-full pl-10 pr-4 py-2.5 bg-card border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
-            <Button onClick={handleSearch} size="sm" className="bg-primary text-white hover:bg-primary/90 rounded-xl shrink-0">
-              Pesquisar
-            </Button>
-          </div>
-          <Button 
-            onClick={exportToPDF}
-            disabled={isExporting}
+        {/* Header Actions */}
+        <div className="flex items-center gap-2.5">
+          <Button
+            variant="secondary"
             size="sm"
-            className="gap-2 rounded-xl cursor-pointer bg-primary text-white hover:bg-indigo-700 shrink-0">
-            {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-            {isExporting ? "A Exportar..." : "Exportar PDF"}
+            onClick={() => fetchPayments(true)}
+            disabled={isRefreshing}
+            className="border-[#414042] text-[#e5e2e1] hover:bg-[#1A1A1A] hover:border-[#C0C2C5] rounded h-9 px-3.5 text-xs sm:text-sm font-semibold gap-2 transition-all cursor-pointer"
+          >
+            <RefreshCw
+              className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin text-[#8B5CF6]" : "text-[#d5c4ac]"}`}
+            />
+            <span>{isRefreshing ? "A Atualizar..." : "Sincronizar"}</span>
           </Button>
         </div>
+      </div>
 
-        {/* Payments Table */}
-        <Card className="border border-gray-100 shadow-sm rounded-2xl">
-          <CardHeader className="flex flex-row items-center justify-between px-4 sm:px-6 pb-2">
-            <CardTitle className="text-sm sm:text-base font-semibold">Pagamentos por Aluno</CardTitle>
-            <Button variant="ghost" size="sm">
-              <MoreVertical className="w-4 h-4" />
-            </Button>
-          </CardHeader>
-          <CardContent className="px-0 pb-0">
-            {/* Desktop table */}
-            <div className="hidden sm:block overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="bg-gray-50 border-b border-gray-100">
-                    <th className="text-left py-3 px-4 font-semibold text-gray-600 text-xs uppercase tracking-wide">Aluno</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-600 text-xs uppercase tracking-wide">Tipo</th>
-                    <th className="text-right py-3 px-4 font-semibold text-gray-600 text-xs uppercase tracking-wide">Valor</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-600 text-xs uppercase tracking-wide">Status</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-600 text-xs uppercase tracking-wide">Data Pagamento</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {payments.filter(payment =>
-                    payment.student?.name?.toLowerCase().includes(activeSearch)
-                  ).map((payment) => (
-                    <tr key={payment.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                      <td className="py-3 px-4 font-medium text-foreground whitespace-nowrap">{payment.student?.name || 'Desconhecido'}</td>
-                      <td className="py-3 px-4 text-muted-foreground text-sm">{payment.type}</td>
-                      <td className="py-3 px-4 text-right font-semibold text-foreground whitespace-nowrap">
-                        {(payment.amount || 0).toLocaleString()} Kz
-                      </td>
-                      <td className="py-3 px-4">{getStatusBadge(payment.status || "")}</td>
-                      <td className="py-3 px-4 text-muted-foreground whitespace-nowrap text-sm">
-                        {payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString() : "-"}
-                      </td>
-                    </tr>
-                  ))}
-                  {payments.length === 0 && (
-                    <tr>
-                      <td colSpan={5} className="py-8 text-center text-sm text-gray-400">
-                        Nenhum pagamento encontrado
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+      {/* KPI Stats Cards */}
+      <PaymentStats
+        totalAmount={stats.total}
+        paidAmount={stats.paid}
+        pendingAmount={stats.pending}
+        cancelledAmount={stats.cancelled}
+        totalCount={stats.totalCount}
+        paidRate={stats.paidRate}
+        pendingRate={stats.pendingRate}
+        cancelledRate={stats.cancelledRate}
+      />
 
-            {/* Mobile card list */}
-            <div className="sm:hidden divide-y divide-gray-100">
-              {payments.filter(payment =>
-                payment.student?.name?.toLowerCase().includes(activeSearch)
-              ).map((payment) => (
-                <div key={payment.id} className="p-4 space-y-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <p className="font-semibold text-sm text-gray-900 truncate">{payment.student?.name || 'Desconhecido'}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">{payment.type}</p>
-                    </div>
-                    {getStatusBadge(payment.status || "")}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-sm text-gray-900">{(payment.amount || 0).toLocaleString()} Kz</span>
-                    <span className="text-xs text-gray-400">{payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString() : "-"}</span>
-                  </div>
-                </div>
-              ))}
-              {payments.length === 0 && (
-                <p className="py-8 text-center text-sm text-gray-400">Nenhum pagamento encontrado</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+      {/* Financial Summary & Gauge */}
+      <PaymentSummary
+        totalAmount={stats.total}
+        paidAmount={stats.paid}
+        pendingAmount={stats.pending}
+        cancelledAmount={stats.cancelled}
+        paidRate={stats.paidRate}
+      />
 
-        {/* Late Payments Alert */}
-        {cancelledAmount > 0 && (
-          <Card className="border-red-200 dark:border-red-800">
-            <CardHeader>
-              <CardTitle className="text-red-600 dark:text-red-400">Atenção: Pagamentos Atrasados/Cancelados</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
-                Existem {payments.filter(p => p.status === 'cancelled').length} pagamentos não recebidos. Recomenda-se entrar em contato com os responsáveis.
-              </p>
-              <Button variant="outline" className="text-red-600 hover:text-red-600 hover:cursor-pointer border-red-600 hover:bg-red-50 dark:hover:bg-red-950 rounded-full">
-                Enviar Notificações
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-      </section>
+      {/* Late Payments Alert Notice */}
+      <LatePaymentsAlert
+        cancelledCount={stats.cancelledCount}
+        cancelledAmount={stats.cancelled}
+      />
+
+      {/* Payments Table & Subsystem */}
+      <PaymentTable
+        payments={payments}
+        onExportPDF={exportToPDF}
+        isExporting={isExporting}
+      />
+    </section>
   );
 }

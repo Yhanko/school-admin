@@ -33,6 +33,7 @@ function StudentParentFormContent() {
   const { toast } = useToast();
 
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isFetching, setIsFetching] = useState(true);
 
   const [studentData, setStudentData] = useState<StudentData>({
@@ -103,7 +104,47 @@ function StudentParentFormContent() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    
     e.preventDefault();
+    
+    // --- Auto Zod Validation ---
+    const formErrors: Record<string, string> = {};
+    let hasValidationErrors = false;
+    
+    // Helper to validate a string
+    const validateString = (val: any, fieldName: string) => {
+      if (typeof val === 'string') {
+        if (!val.trim()) {
+          formErrors[fieldName] = "Campo obrigatório";
+          hasValidationErrors = true;
+        } else if (val.length > 255) {
+          formErrors[fieldName] = "Texto demasiado longo";
+          hasValidationErrors = true;
+        } else if (!safeStringRegex.test(val)) {
+          formErrors[fieldName] = "Caracteres inválidos (Não use < > ' ; =)";
+          hasValidationErrors = true;
+        }
+      }
+    };
+
+    // Dinamicamente valida o estado do formulário se for um objeto como formData
+    if (typeof formData !== 'undefined' && formData !== null) {
+      Object.entries(formData).forEach(([k, v]) => validateString(v, k));
+    }
+    if (typeof newRule !== 'undefined' && newRule !== null) {
+      Object.entries(newRule).forEach(([k, v]) => validateString(v, k));
+    }
+    // Suporte para title / description avulsos
+    if (typeof title !== 'undefined') validateString(title, 'title');
+    if (typeof description !== 'undefined') validateString(description, 'description');
+    
+    if (hasValidationErrors) {
+      setErrors(formErrors);
+      return; // Aborta submissão
+    }
+    setErrors({});
+    // ---------------------------
+  
     if (!id) return;
     setIsLoading(true);
 
@@ -151,13 +192,13 @@ function StudentParentFormContent() {
   return (
     <form onSubmit={handleSubmit} className="container p-2">
       {/* Student Details */}
-      <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+      <div className="bg-card rounded-xl shadow-lg p-6 mb-6">
         <h2 className="text-2xl font-bold text-purple-600">Editar Dados do Aluno</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           <div className="flex flex-col">
             <label>Foto *</label>
-            <div className="border-dashed border-2 border-gray-300 h-32 flex items-center justify-center text-gray-500">
+            <div className="border-dashed border-2 border-border h-32 flex items-center justify-center text-muted-foreground">
               {studentData.photo ? 'Foto Carregada' : 'Arraste e solte ou clique para selecionar o ficheiro'}
             </div>
           </div>
@@ -172,6 +213,8 @@ function StudentParentFormContent() {
               onChange={handleStudentChange}
               required
             />
+{errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>}
+              {errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>}
           </div>
           <div className="flex flex-col">
             <label htmlFor="lastName">Último Nome *</label>
@@ -184,6 +227,8 @@ function StudentParentFormContent() {
               onChange={handleStudentChange}
               required
             />
+{errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>}
+              {errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>}
           </div>
           <div className="flex flex-col">
             <label htmlFor="birthDate">Data de Nascimento *</label>
@@ -195,6 +240,8 @@ function StudentParentFormContent() {
               value={studentData.birthDate}
               onChange={handleStudentChange}
             />
+{errors.birthDate && <p className="text-red-500 text-xs mt-1">{errors.birthDate}</p>}
+              {errors.birthDate && <p className="text-red-500 text-xs mt-1">{errors.birthDate}</p>}
             <label htmlFor="birthCity" className="mt-2">Local de Nascimento (Cidade) *</label>
             <input
               id="birthCity"
@@ -205,6 +252,8 @@ function StudentParentFormContent() {
               value={studentData.birthCity}
               onChange={handleStudentChange}
             />
+{errors.birthCity && <p className="text-red-500 text-xs mt-1">{errors.birthCity}</p>}
+              {errors.birthCity && <p className="text-red-500 text-xs mt-1">{errors.birthCity}</p>}
           </div>
           <div className="flex flex-col">
             <label htmlFor="parentName">Nome do Encarregado de Educação *</label>
@@ -216,6 +265,8 @@ function StudentParentFormContent() {
               value={studentData.parentName}
               onChange={handleStudentChange}
             />
+{errors.parentName && <p className="text-red-500 text-xs mt-1">{errors.parentName}</p>}
+              {errors.parentName && <p className="text-red-500 text-xs mt-1">{errors.parentName}</p>}
           </div>
           <div className="flex flex-col">
             <label htmlFor="phone">Telefone *</label>
@@ -227,6 +278,8 @@ function StudentParentFormContent() {
               value={studentData.phone}
               onChange={handleStudentChange}
             />
+{errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
+              {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
           </div>
           <div className="flex flex-col">
             <label htmlFor="email">Email *</label>
@@ -239,6 +292,8 @@ function StudentParentFormContent() {
               onChange={handleStudentChange}
               required
             />
+{errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
           </div>
           <div className="flex flex-col">
             <label htmlFor="address">Morada *</label>
@@ -256,7 +311,7 @@ function StudentParentFormContent() {
       </div>
 
       {/* Parent Details */}
-      <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+      <div className="bg-card rounded-xl shadow-lg p-6 mb-6">
         <h2 className="text-2xl font-bold text-purple-600">Detalhes do Encarregado de Educação</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -270,6 +325,8 @@ function StudentParentFormContent() {
               value={parentData.firstName}
               onChange={handleParentChange}
             />
+{errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>}
+              {errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>}
           </div>
           <div className="flex flex-col">
             <label htmlFor="parentLastName">Último Nome *</label>
@@ -281,6 +338,8 @@ function StudentParentFormContent() {
               value={parentData.lastName}
               onChange={handleParentChange}
             />
+{errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>}
+              {errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>}
           </div>
           <div className="flex flex-col">
             <label htmlFor="parentEmail">Email *</label>
@@ -292,6 +351,8 @@ function StudentParentFormContent() {
               value={parentData.email}
               onChange={handleParentChange}
             />
+{errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
           </div>
           <div className="flex flex-col">
             <label htmlFor="parentPhone">Telefone *</label>
@@ -303,6 +364,8 @@ function StudentParentFormContent() {
               value={parentData.phone}
               onChange={handleParentChange}
             />
+{errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
+              {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
           </div>
           <div className="flex flex-col">
             <label htmlFor="parentAddress">Morada *</label>
@@ -313,6 +376,8 @@ function StudentParentFormContent() {
               value={parentData.address}
               onChange={handleParentChange}
             />
+{errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
+              {errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
           </div>
           <div className="flex flex-col">
             <label>Método de Pagamento *</label>

@@ -14,6 +14,7 @@ interface SupportTicket {
 
 export default function SupportPage() {
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -34,7 +35,47 @@ export default function SupportPage() {
   };
 
   const createTicket = async (e: React.FormEvent) => {
+    
     e.preventDefault();
+    
+    // --- Auto Zod Validation ---
+    const formErrors: Record<string, string> = {};
+    let hasValidationErrors = false;
+    
+    // Helper to validate a string
+    const validateString = (val: any, fieldName: string) => {
+      if (typeof val === 'string') {
+        if (!val.trim()) {
+          formErrors[fieldName] = "Campo obrigatório";
+          hasValidationErrors = true;
+        } else if (val.length > 255) {
+          formErrors[fieldName] = "Texto demasiado longo";
+          hasValidationErrors = true;
+        } else if (!safeStringRegex.test(val)) {
+          formErrors[fieldName] = "Caracteres inválidos (Não use < > ' ; =)";
+          hasValidationErrors = true;
+        }
+      }
+    };
+
+    // Dinamicamente valida o estado do formulário se for um objeto como formData
+    if (typeof formData !== 'undefined' && formData !== null) {
+      Object.entries(formData).forEach(([k, v]) => validateString(v, k));
+    }
+    if (typeof newRule !== 'undefined' && newRule !== null) {
+      Object.entries(newRule).forEach(([k, v]) => validateString(v, k));
+    }
+    // Suporte para title / description avulsos
+    if (typeof title !== 'undefined') validateString(title, 'title');
+    if (typeof description !== 'undefined') validateString(description, 'description');
+    
+    if (hasValidationErrors) {
+      setErrors(formErrors);
+      return; // Aborta submissão
+    }
+    setErrors({});
+    // ---------------------------
+  
     try {
       await axiosInstance.post('/support/tickets', { title, description, priority: 'MEDIUM' });
       setTitle('');
@@ -53,7 +94,7 @@ export default function SupportPage() {
       <h1 className="text-3xl font-bold mb-8">Centro de Suporte YhankoEduca</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="md:col-span-1 bg-white p-6 rounded-xl border shadow-sm h-fit">
+        <div className="md:col-span-1 bg-card p-6 rounded-xl border shadow-sm h-fit">
           <h2 className="text-xl font-bold mb-4">Abrir Novo Ticket</h2>
           <form onSubmit={createTicket} className="space-y-4">
             <div>
@@ -74,7 +115,7 @@ export default function SupportPage() {
           </form>
         </div>
 
-        <div className="md:col-span-2 bg-white rounded-xl border shadow-sm overflow-hidden">
+        <div className="md:col-span-2 bg-card rounded-xl border shadow-sm overflow-hidden">
           <div className="p-4 border-b bg-slate-50"><h2 className="text-xl font-bold">Meus Tickets Abertos</h2></div>
           <table className="w-full text-left">
             <thead className="border-b">

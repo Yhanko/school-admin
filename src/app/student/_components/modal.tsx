@@ -33,23 +33,23 @@ export function Modal({
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
       />
 
       {/* Modal Content */}
       <div
-        className={`relative bg-card rounded-xl shadow-2xl w-full mx-4 ${sizeClasses[size]} max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-300`}
+        className={`relative bg-popover border border-secondary-foreground rounded-sm shadow-[0_0_16px_rgba(139, 92, 246,0.15)] w-full mx-4 ${sizeClasses[size]} max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-300`}
       >
         {/* Header */}
-        <div className="sticky top-0 bg-card border-b border-border px-6 py-4 flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-foreground">{title}</h2>
+        <div className="sticky top-0 bg-popover border-b border-border px-6 py-4 flex items-center justify-between">
+          <h2 className="text-xl font-hanken font-bold text-foreground">{title}</h2>
           {showCloseButton && (
             <Button
               variant="ghost"
               size="sm"
               onClick={onClose}
-              className="h-8 w-8 p-0 hover:cursor-pointer"
+              className="h-8 w-8 p-0 text-secondary-foreground hover:text-primary hover:bg-transparent cursor-pointer transition-colors"
             >
               <X className="w-5 h-5" />
             </Button>

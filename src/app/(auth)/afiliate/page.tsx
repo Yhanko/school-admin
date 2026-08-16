@@ -22,9 +22,20 @@ import RequestError from "../../../assets/ErroDeResposta.svg";
 import RoundedIcon from "../../../assets/ErroDeResposta.svg";
 import YhankoIMG from "../../../assets/yhankoIMG.svg";
 
+// Regex simples para bloquear caracteres comuns em ataques de SQL Injection/XSS
+const safeStringRegex = /^[^<>';=]*$/;
+
 const loginSchema = z.object({
-  user_name: z.string().nonempty("E-mail é obrigatório"),
-  user_pass: z.string().nonempty("Senha é obrigatória"),
+  user_name: z.string()
+    .trim()
+    .min(1, "E-mail/Utilizador é obrigatório")
+    .max(100, "Demasiado longo")
+    .regex(safeStringRegex, "Caracteres inválidos não permitidos"),
+  user_pass: z.string()
+    .trim()
+    .min(1, "Senha é obrigatória")
+    .max(100, "Demasiado longa")
+    .regex(safeStringRegex, "Caracteres inválidos não permitidos"),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;

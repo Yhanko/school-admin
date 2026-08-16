@@ -17,6 +17,7 @@ function ChangeEventContent() {
   const id = searchParams.get('id');
 
   const [isLoading, setIsLoading] = useState(true);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -75,7 +76,47 @@ function ChangeEventContent() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    
     e.preventDefault();
+    
+    // --- Auto Zod Validation ---
+    const formErrors: Record<string, string> = {};
+    let hasValidationErrors = false;
+    
+    // Helper to validate a string
+    const validateString = (val: any, fieldName: string) => {
+      if (typeof val === 'string') {
+        if (!val.trim()) {
+          formErrors[fieldName] = "Campo obrigatório";
+          hasValidationErrors = true;
+        } else if (val.length > 255) {
+          formErrors[fieldName] = "Texto demasiado longo";
+          hasValidationErrors = true;
+        } else if (!safeStringRegex.test(val)) {
+          formErrors[fieldName] = "Caracteres inválidos (Não use < > ' ; =)";
+          hasValidationErrors = true;
+        }
+      }
+    };
+
+    // Dinamicamente valida o estado do formulário se for um objeto como formData
+    if (typeof formData !== 'undefined' && formData !== null) {
+      Object.entries(formData).forEach(([k, v]) => validateString(v, k));
+    }
+    if (typeof newRule !== 'undefined' && newRule !== null) {
+      Object.entries(newRule).forEach(([k, v]) => validateString(v, k));
+    }
+    // Suporte para title / description avulsos
+    if (typeof title !== 'undefined') validateString(title, 'title');
+    if (typeof description !== 'undefined') validateString(description, 'description');
+    
+    if (hasValidationErrors) {
+      setErrors(formErrors);
+      return; // Aborta submissão
+    }
+    setErrors({});
+    // ---------------------------
+  
     if (!id) return;
     
     setIsSaving(true);

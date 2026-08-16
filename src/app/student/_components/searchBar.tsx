@@ -1,6 +1,7 @@
-"use client"
-import { Plus, Search as SearchIcon } from "lucide-react";
-import { Input } from "@/components/ui/input";
+"use client";
+
+import React from "react";
+import { Plus, Search as SearchIcon } from "@/lib/icons";
 import { Button } from "@/components/ui/button";
 
 interface SearchBarProps {
@@ -10,34 +11,39 @@ interface SearchBarProps {
   handleSearch: () => void;
 }
 
-export function SearchBar({ onNewStudentClick, searchTerm, setSearchTerm, handleSearch }: SearchBarProps) {
+export function SearchBar({
+  onNewStudentClick,
+  searchTerm,
+  setSearchTerm,
+  handleSearch,
+}: SearchBarProps) {
   return (
-    <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 my-4 w-full px-2 sm:px-4">
+    <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 w-full font-hanken">
       {/* Input de Pesquisa */}
-      <div className="flex items-center gap-2 flex-1 max-w-full sm:max-w-md">
+      <div className="flex items-center gap-2.5 flex-1 max-w-full sm:max-w-md">
         <div className="relative flex-1">
-          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <Input
+          <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8] dark:text-[#9d8f78]" />
+          <input
             type="text"
             placeholder="Pesquisar por nome do estudante..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            className="bg-white border-2 border-[#E2E5F1] rounded-xl pl-9 pr-3 h-11 text-xs sm:text-sm text-gray-800 placeholder:text-gray-400 focus:border-[#4D44B5] focus-visible:ring-0 w-full transition-all"
+            className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-[#0D0D0D] border border-[#CBD5E1] dark:border-[#414042] rounded text-sm text-[#0F172A] dark:text-[#e5e2e1] placeholder:text-[#94A3B8] dark:placeholder:text-[#9d8f78] focus:outline-none focus:border-[#8B5CF6] focus:ring-1 focus:ring-[#8B5CF6] transition-all font-hanken shadow-2xs"
           />
         </div>
-        <Button 
-          onClick={handleSearch} 
-          className="bg-[#4D44B5] hover:bg-[#3d3695] text-white h-11 px-4 text-xs sm:text-sm font-semibold rounded-xl transition-all shrink-0 cursor-pointer"
+        <Button
+          onClick={handleSearch}
+          className="bg-[#8B5CF6] hover:bg-[#A78BFA] text-white h-10 px-5 text-sm font-hanken font-bold rounded shadow-xs transition-all shrink-0 cursor-pointer"
         >
           Pesquisar
         </Button>
       </div>
 
       {/* Botão Novo Estudante */}
-      <Button 
-        onClick={onNewStudentClick} 
-        className="bg-[#FF5777] hover:bg-[#fc4667] text-white rounded-xl px-5 h-11 text-xs sm:text-sm font-semibold cursor-pointer shrink-0 shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2"
+      <Button
+        onClick={onNewStudentClick}
+        className="bg-[#8B5CF6] hover:bg-[#A78BFA] text-white font-bold rounded h-10 px-5 text-sm font-hanken shadow-xs cursor-pointer shrink-0 transition-all flex items-center justify-center gap-2"
       >
         <Plus className="h-4 w-4" />
         <span>Novo Estudante</span>

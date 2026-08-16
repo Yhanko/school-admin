@@ -63,47 +63,44 @@ function StudentDetailsContent() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex justify-center items-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="min-h-[60vh] flex flex-col justify-center items-center space-y-3 font-hanken">
+        <Loader2 className="w-8 h-8 animate-spin text-[#8B5CF6]" />
+        <span className="label-caps text-[#d5c4ac]">Carregando ficha do estudante...</span>
       </div>
     );
   }
 
   if (!student) {
     return (
-      <div className="min-h-screen bg-gray-100 flex justify-center items-center">
-        <p>Aluno não encontrado.</p>
+      <div className="min-h-[60vh] flex justify-center items-center text-[#d5c4ac] font-hanken">
+        <p>Aluno não encontrado na base de dados.</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="lg:col-span-2 pl-4 pr-4">
-        <Card className="bg-white w-[67rem] mx-auto mt-4">
-          <CardHeader className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-purple-800 rounded-t-lg overflow-hidden">
-              <div className="absolute top-4 right-8 w-24 h-24 bg-orange-400 rounded-full opacity-80"></div>
-              <div className="absolute top-8 right-24 w-16 h-16 bg-yellow-400 rounded-full opacity-60"></div>
-              <div className="absolute top-12 right-4 w-12 h-12 bg-red-400 rounded-full opacity-70"></div>
-            </div>
-            
-            <div className="relative z-10 flex items-center gap-6 pt-8 pb-6">
-              <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center overflow-hidden">
-                  <span className="text-3xl font-bold text-primary">
-                    {student.fullName[0]}
-                  </span>
-              </div>
-              <div className="text-white">
-                <h1 className="text-3xl font-bold mb-2">{student.fullName}</h1>
-                <p className="text-purple-100">Aluno</p>
-              </div>
-            </div>
-          </CardHeader>
-        </Card>
+    <div className="w-full space-y-6 font-hanken text-[#e5e2e1]">
+      <div className="bg-[#121212] border border-[#414042] rounded-lg overflow-hidden relative">
+        <div className="h-24 bg-gradient-to-r from-[#1A1A1A] via-[#201f1f] to-[#121212] border-b border-[#414042] relative">
+          <div className="absolute top-3 right-4 label-caps text-[10px] text-[#DDD6FE] bg-[#1c1b1b] border border-[#414042] px-2.5 py-1 rounded">
+            MATRÍCULA ATIVA • 2024/2025
+          </div>
+        </div>
+        
+        <div className="px-6 pb-6 pt-0 flex flex-col sm:flex-row items-start sm:items-end gap-4 -mt-12">
+          <div className="w-20 h-20 bg-[#201f1f] border-2 border-[#414042] rounded-full flex items-center justify-center shadow-lg shrink-0">
+            <span className="text-2xl font-bold font-jetbrains text-[#DDD6FE]">
+              {student.fullName ? student.fullName[0] : "A"}
+            </span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <h1 className="headline-md text-[#e5e2e1] truncate">{student.fullName}</h1>
+            <p className="label-caps text-[#d5c4ac] text-xs mt-0.5">Estudante • Nº #{student.studentNumber}</p>
+          </div>
+        </div>
       </div>
       
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="space-y-6">
         <StudentHeader student={student} />
         <AcademicInfo student={student} />
         <SubjectsSection student={student} />

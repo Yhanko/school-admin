@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Plan, PriceCalculation, plans, calculatePrices } from '@/lib/plans';
+import { z } from "zod";
 import { CreditCard, Lock, CheckCircle, AlertCircle, Eye, EyeOff } from '@/lib/icons';
 
 // Interfaces TypeScript
@@ -103,6 +104,15 @@ const Button: React.FC<{
   </button>
 );
 
+const paymentSchema = z.object({
+  cardNumber: z.string().transform(v => v.replace(/\s/g, '')).pipe(z.string().length(16, "Número do cartão deve ter 16 dígitos")),
+  cardName: z.string().trim().min(2, "Nome do titular é obrigatório").max(100, "Nome muito longo").regex(/^[^<>';=]*$/, "Caracteres inválidos"),
+  expiryDate: z.string().trim().min(5, "Data de expiração inválida").max(5, "Data de expiração inválida").regex(/^[^<>';=]*$/, "Caracteres inválidos"),
+  cvv: z.string().trim().min(3, "CVV deve ter 3 ou 4 dígitos").max(4, "CVV deve ter 3 ou 4 dígitos"),
+  email: z.string().trim().email("Email inválido"),
+  plan: z.string().optional()
+});
+
 const PaymentForm: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
     cardNumber: '',
@@ -160,34 +170,6 @@ const PaymentForm: React.FC = () => {
     return v;
   };
 
-  // Validação do formulário
-  const validateForm = (): boolean => {
-    const newErrors: FormErrors = {};
-
-    if (!formData.cardNumber || formData.cardNumber.replace(/\s/g, '').length < 16) {
-      newErrors.cardNumber = 'Número do cartão deve ter 16 dígitos';
-    }
-
-    if (!formData.cardName || formData.cardName.length < 2) {
-      newErrors.cardName = 'Nome do titular é obrigatório';
-    }
-
-    if (!formData.expiryDate || formData.expiryDate.length < 5) {
-      newErrors.expiryDate = 'Data de expiração inválida';
-    }
-
-    if (!formData.cvv || formData.cvv.length < 3) {
-      newErrors.cvv = 'CVV deve ter 3 ou 4 dígitos';
-    }
-
-    if (!formData.email || !/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email inválido';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   // Handler para mudanças nos inputs
   const handleInputChange = (field: keyof FormData, value: string) => {
     let formattedValue = value;
@@ -212,7 +194,21 @@ const PaymentForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validateForm()) return;
+    try {
+      paymentSchema.parse(formData);
+      setErrors({});
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        const fieldErrors: FormErrors = {};
+        err.errors.forEach((error) => {
+          if (error.path[0]) {
+            fieldErrors[error.path[0] as keyof FormErrors] = error.message;
+          }
+        });
+        setErrors(fieldErrors);
+      }
+      return;
+    }
 
     setIsLoading(true);
     
@@ -235,10 +231,10 @@ const PaymentForm: React.FC = () => {
   if (isSuccess) {
     return (
       <div className="min-h-screen bg-[#1B191F] flex items-center justify-center p-4">
-        <Card className="w-full max-w-md bg-white/5 backdrop-blur-md border border-white/10 animate-fade-in-up">
+        <Card className="w-full max-w-md bg-card/5 backdrop-blur-md border border-white/10 animate-fade-in-up">
           <CardContent className="p-8 text-center">
             <div className="mb-6">
-              <CheckCircle className="w-16 h-16 text-[#FF5777] mx-auto animate-bounce" />
+              <CheckCircle className="w-16 h-16 text-secondary-foreground mx-auto animate-bounce" />
             </div>
             <h2 className="text-2xl font-bold text-white mb-4">Pagamento Realizado!</h2>
             <p className="text-gray-300 mb-6">
@@ -246,7 +242,7 @@ const PaymentForm: React.FC = () => {
             </p>
             <Button 
               onClick={() => setIsSuccess(false)}
-              className="w-full bg-[#FF5777] hover:bg-[#E04B6B] text-white font-semibold transition-all duration-300 transform hover:scale-105"
+              className="w-full bg-secondary hover:bg-[#E04B6B] text-white font-semibold transition-all duration-300 transform hover:scale-105"
             >
               Fazer Novo Pagamento
             </Button>
@@ -260,18 +256,18 @@ const PaymentForm: React.FC = () => {
     <div className="min-h-screen bg-[#1B191F] flex items-center justify-center p-4">
       {/* Efeitos de fundo */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-[#FF5777]/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-[#FF5777]/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-secondary/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-secondary/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
       </div>
 
-      <Card className="w-full max-w-md bg-white/5 backdrop-blur-md border border-white/10 shadow-2xl animate-fade-in-up relative z-10">
+      <Card className="w-full max-w-md bg-card/5 backdrop-blur-md border border-white/10 shadow-2xl animate-fade-in-up relative z-10">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center mb-4">
-            <div className="p-3 bg-[#FF5777]/20 rounded-full">
-              <CreditCard className="w-8 h-8 text-[#FF5777]" />
+            <div className="p-3 bg-secondary/20 rounded-full">
+              <CreditCard className="w-8 h-8 text-secondary-foreground" />
             </div>
           </div>
-          <CardTitle className="text-[#FF5777] text-3xl font-bold">
+          <CardTitle className="text-secondary-foreground text-3xl font-bold">
             Finalizar Pagamento
           </CardTitle>
           <CardDescription className="text-gray-300 text-base">
@@ -282,21 +278,21 @@ const PaymentForm: React.FC = () => {
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-6">
             {/* Plano Selecionado */}
-            <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+            <div className="bg-card/5 rounded-xl p-4 border border-white/10">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-white font-semibold">
                     {selectedPlan ? selectedPlan.name : 'Plano Básico'}
                   </h3>
-                  <p className="text-gray-400 text-sm">
+                  <p className="text-muted-foreground text-sm">
                     {selectedPlan ? selectedPlan.description : 'Plano selecionado para assinatura'}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[#FF5777] font-bold text-lg">
+                  <p className="text-secondary-foreground font-bold text-lg">
                     {selectedPlan ? selectedPlan.prices.finalTotal.toFixed(2) : '29,90'} KZ
                   </p>
-                  <p className="text-gray-400 text-sm">
+                  <p className="text-muted-foreground text-sm">
                     {selectedPlan && selectedPlan.period > 1 
                       ? `por ${selectedPlan.period} meses`
                       : 'por mês'}
@@ -316,7 +312,7 @@ const PaymentForm: React.FC = () => {
                 placeholder="seu@email.com"
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
-                className={`bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-[#FF5777] focus:ring-[#FF5777] transition-all duration-300 ${
+                className={`bg-card/10 border-white/20 text-white placeholder:text-muted-foreground focus:border-[#FF5777] focus:ring-[#FF5777] transition-all duration-300 ${
                   errors.email ? 'border-red-500' : ''
                 }`}
               />
@@ -340,12 +336,12 @@ const PaymentForm: React.FC = () => {
                   value={formData.cardNumber}
                   onChange={(e) => handleInputChange('cardNumber', e.target.value)}
                   maxLength={19}
-                  className={`bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-[#FF5777] focus:ring-[#FF5777] transition-all duration-300 pr-16 ${
+                  className={`bg-card/10 border-white/20 text-white placeholder:text-muted-foreground focus:border-[#FF5777] focus:ring-[#FF5777] transition-all duration-300 pr-16 ${
                     errors.cardNumber ? 'border-red-500' : ''
                   }`}
                 />
                 <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                  <span className="text-xs text-gray-400 bg-white/10 px-2 py-1 rounded">
+                  <span className="text-xs text-muted-foreground bg-card/10 px-2 py-1 rounded">
                     {getCardType(formData.cardNumber)}
                   </span>
                 </div>
@@ -368,7 +364,7 @@ const PaymentForm: React.FC = () => {
                 placeholder="João Silva"
                 value={formData.cardName}
                 onChange={(e) => handleInputChange('cardName', e.target.value.toUpperCase())}
-                className={`bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-[#FF5777] focus:ring-[#FF5777] transition-all duration-300 ${
+                className={`bg-card/10 border-white/20 text-white placeholder:text-muted-foreground focus:border-[#FF5777] focus:ring-[#FF5777] transition-all duration-300 ${
                   errors.cardName ? 'border-red-500' : ''
                 }`}
               />
@@ -392,7 +388,7 @@ const PaymentForm: React.FC = () => {
                   value={formData.expiryDate}
                   onChange={(e) => handleInputChange('expiryDate', e.target.value)}
                   maxLength={5}
-                  className={`bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-[#FF5777] focus:ring-[#FF5777] transition-all duration-300 ${
+                  className={`bg-card/10 border-white/20 text-white placeholder:text-muted-foreground focus:border-[#FF5777] focus:ring-[#FF5777] transition-all duration-300 ${
                     errors.expiryDate ? 'border-red-500' : ''
                   }`}
                 />
@@ -416,14 +412,14 @@ const PaymentForm: React.FC = () => {
                     value={formData.cvv}
                     onChange={(e) => handleInputChange('cvv', e.target.value)}
                     maxLength={4}
-                    className={`bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-[#FF5777] focus:ring-[#FF5777] transition-all duration-300 pr-10 ${
+                    className={`bg-card/10 border-white/20 text-white placeholder:text-muted-foreground focus:border-[#FF5777] focus:ring-[#FF5777] transition-all duration-300 pr-10 ${
                       errors.cvv ? 'border-red-500' : ''
                     }`}
                   />
                   <button
                     type="button"
                     onClick={() => setShowCvv(!showCvv)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-white transition-colors"
                   >
                     {showCvv ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -438,7 +434,7 @@ const PaymentForm: React.FC = () => {
             </div>
 
             {/* Informações de Segurança */}
-            <div className="flex items-center space-x-2 text-gray-400 text-sm">
+            <div className="flex items-center space-x-2 text-muted-foreground text-sm">
               <Lock className="w-4 h-4" />
               <span>Seus dados estão protegidos com criptografia SSL</span>
             </div>
@@ -448,7 +444,7 @@ const PaymentForm: React.FC = () => {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-[#FF5777] hover:bg-[#E04B6B] text-white font-bold py-3 text-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-secondary hover:bg-[#E04B6B] text-white font-bold py-3 text-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <div className="flex items-center space-x-2">
@@ -491,9 +487,11 @@ import { Suspense } from 'react';
 const PaymentPage: React.FC = () => {
   return (
     <Suspense fallback={<div className="min-h-screen bg-[#1B191F] flex items-center justify-center p-4"><div className="w-8 h-8 border-4 border-[#FF5777] border-t-transparent rounded-full animate-spin"></div></div>}>
-      <PaymentForm />
+      <PaymentPageContent />
     </Suspense>
   );
 };
+
+const PaymentPageContent = PaymentForm;
 
 export default PaymentPage;

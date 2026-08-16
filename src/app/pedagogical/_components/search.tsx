@@ -13,22 +13,22 @@ interface SearchProps {
 
 export function Search({ searchTerm, setSearchTerm, handleSearch }: SearchProps) {
   return (
-    <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 my-4 w-full px-2 sm:px-4">
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 flex-1 w-full">
+    <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 w-full">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 flex-1 w-full">
         <div className="relative flex-1">
-          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <Input
+          <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9d8f78]" />
+          <input
             type="text"
             placeholder="Pesquisar professor por nome..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            className="bg-white border-2 border-[#E2E5F1] rounded-xl pl-9 pr-3 h-11 text-xs sm:text-sm text-gray-800 placeholder:text-gray-400 focus:border-[#4D44B5] focus-visible:ring-0 w-full transition-all"
+            className="w-full pl-10 pr-4 py-2.5 bg-[#0D0D0D] border border-[#414042] rounded text-sm text-[#e5e2e1] placeholder:text-[#9d8f78] focus:outline-none focus:border-[#C0C2C5] focus:ring-1 focus:ring-[#C0C2C5] transition-all font-hanken"
           />
         </div>
         <Button 
           onClick={handleSearch} 
-          className="bg-[#4D44B5] hover:bg-[#3d3695] text-white h-11 px-4 text-xs sm:text-sm font-semibold rounded-xl transition-all shrink-0 cursor-pointer"
+          className="bg-[#8B5CF6] hover:bg-[#A78BFA] text-black h-10 px-5 text-sm font-hanken font-bold rounded shadow-[0_0_10px_rgba(139, 92, 246,0.35)] hover:shadow-[0_0_14px_rgba(139, 92, 246,0.55)] transition-all shrink-0 cursor-pointer"
         >
           Pesquisar
         </Button>

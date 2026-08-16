@@ -8,15 +8,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div
-      >
-        <SidebarProvider>
-          <AppSidebar  />
-          <main className={`flex flex-col h-screen flex-1 sm:w-full md:w-full xl:w-[1100px] 2xl:w-[1100px]`}>
-            <Header />
+    <div className="min-h-screen w-full bg-[#ECEEF1] dark:bg-[#ECEEF1] dark:bg-[#131313] text-[#090D16] dark:text-[#e5e2e1] overflow-x-hidden font-hanken">
+      <SidebarProvider>
+        <AppSidebar />
+        <main className="flex flex-col min-h-screen flex-1 w-full max-w-full overflow-x-hidden bg-[#ECEEF1] dark:bg-[#ECEEF1] dark:bg-[#131313]">
+          <Header />
+          <div className="flex-1 p-4 sm:p-6 lg:p-8">
             {children}
-          </main>
-        </SidebarProvider>
+          </div>
+        </main>
+      </SidebarProvider>
     </div>
   );
 }

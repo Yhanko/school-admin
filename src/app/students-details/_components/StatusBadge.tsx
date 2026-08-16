@@ -14,8 +14,8 @@ export default function StatusBadge({ status }: StatusBadgeProps) {
       icon: CheckCircle,
     },
     inativo: {
-      bg: 'bg-gray-100',
-      text: 'text-gray-800',
+      bg: 'bg-muted',
+      text: 'text-foreground',
       label: 'Inativo',
       icon: AlertCircle,
     },

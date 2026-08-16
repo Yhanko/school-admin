@@ -1,111 +1,200 @@
-"use client"
-import React from "react";
-//configurações
+"use client";
+
+import React, { useState } from "react";
+import axios from "axios";
 import axiosInstance from "@/service/api";
-//Imagens e icones
-import UploadUserPhoto from "../../../assets/getPicture.svg";
-import RoundedIcon from "../../../assets/roundedIcon.svg";
-import RequestError from "../../../assets/ErroDeResposta.svg";
-import { AiOutlineClose } from "@/lib/icons";
-//Hooks
-//import getCookie from "@/hooks/Hooks/Login/useGetTokenLogin";
+import { Camera, Loader2 } from "@/lib/icons";
 import { useToast } from "@/hooks/use-toast";
-import { ToastAction } from "@/components/ui/toast";
-import { AxiosError } from "axios";
-import Image from "next/image";
+import { useAuth } from "@/store/useAuth";
 
+interface ImageUploadButtonProps {
+  onSuccess?: (photoUrl: string) => void;
+}
 
-export function ImageUploadButton() {
-    const { toast } = useToast();
-    //const { entidade } = getCookie();
-    // Função para enviar a imagem à API
-    const uploadImage = async (file: File) => {
-    
+export function ImageUploadButton({ onSuccess }: ImageUploadButtonProps) {
+  const { toast } = useToast();
+  const { updateUser } = useAuth();
+  const [isUploading, setIsUploading] = useState(false);
+
+  const uploadImage = async (file: File) => {
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "Ficheiro inválido",
+        description: "Por favor selecione um ficheiro de imagem válido (JPG, PNG, WebP).",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Imagem demasiado grande",
+        description: "O tamanho máximo permitido para a foto de perfil é de 5MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      let uploadedUrl = "";
+      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+      const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+
+      // Option A: Direct upload to Cloudinary if client env vars are provided
+      if (cloudName && uploadPreset) {
+        try {
+          const directForm = new FormData();
+          directForm.append("file", file);
+          directForm.append("upload_preset", uploadPreset);
+
+          const directRes = await axios.post(
+            `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+            directForm
+          );
+          uploadedUrl = directRes.data.secure_url || directRes.data.url;
+        } catch (directErr) {
+          console.warn("Falha no upload direto ao Cloudinary, tentando backend...", directErr);
+        }
+      }
+
+      // Option B: Upload through backend Cloudinary endpoint (/uploads/cloudinary)
+      if (!uploadedUrl) {
         const formData = new FormData();
-        formData.append("foto_perfil", file);
+        formData.append("file", file);
+
+        const extractUrl = (data: any): string => {
+          if (!data) return "";
+          if (typeof data === "string" && data.startsWith("http")) return data;
+          return (
+            data.path ||
+            data.url ||
+            data.secure_url ||
+            data.fileUrl ||
+            data.photoUrl ||
+            data.location ||
+            data.data?.url ||
+            data.data?.path ||
+            data.data?.secure_url ||
+            ""
+          );
+        };
 
         try {
-            const response = await axiosInstance.patch(`clientes/mudar/foto/`, formData,{
-                headers:{
-                'Content-Type':'multipart/form-data'
-                }
-            });
-            
-            if(response.status == 202) {
-                toast({
-                    description: (
-                        <div className="flex items-center gap-4 ">
-                        <div className="rounded-full w-8 h-8 flex justify-center items-center">
-                            <Image src={RoundedIcon} alt="icon"  />
-                        </div>
-                        
-                        <span className="text-[#717F96]">{ response.data.mensagem }</span>
-                        </div>
-                    ),
-                    action: <ToastAction altText="close" className="shadow-none border-none text-[#717F96] hover:bg-transparent"><AiOutlineClose /></ToastAction>,
-                    className: "border-l-4 border-l-[#1FC16B]",
-                 });
-                window.location.reload();
-            } 
-
-        } catch (error) {
-            if (error instanceof AxiosError) {
-                toast({
-                 description: (
-                    <div className="flex items-center gap-4 ">
-                        <div className="rounded-full w-8 h-8 flex justify-center items-center bg-[fill: rgba(251, 55, 72, 0.16)">
-                            <Image src={RequestError} alt="icon"  />
-                        </div> 
-                        <span className="text-[#717F96]">{error?.response?.data.mensagem}</span>
-                    </div>
-                 ),
-                action: <ToastAction altText="close" className="shadow-none border-none text-[#717F96] hover:bg-transparent"><AiOutlineClose /></ToastAction>,
-                className: "border-l-4 border-l-[#FB3748]",
-                });
+          const response = await axiosInstance.post("/uploads/cloudinary", formData);
+          uploadedUrl = extractUrl(response.data);
+        } catch (err1) {
+          console.warn("Falha no /uploads/cloudinary, tentando /uploads...", err1);
+          try {
+            const fallbackRes = await axiosInstance.post("/uploads", formData);
+            uploadedUrl = extractUrl(fallbackRes.data);
+          } catch (err2) {
+            console.warn("Falha no /uploads, tentando /users/me/photo...", err2);
+            try {
+              const photoRes = await axiosInstance.post("/users/me/photo", formData);
+              uploadedUrl = extractUrl(photoRes.data);
+            } catch (err3) {
+              const errorObj = err1 as { response?: { data?: { message?: string } } };
+              const errorMsg =
+                errorObj.response?.data?.message ||
+                "O backend retornou erro 500 ao enviar para o Cloudinary. Verifique se o serviço no Railway foi reiniciado após adicionar as variáveis CLOUDINARY_CLOUD_NAME (ou CLOUDINARY_NAME), CLOUDINARY_API_KEY e CLOUDINARY_API_SECRET.";
+              throw new Error(errorMsg);
             }
+          }
         }
-    };
-    
-    // Função para lidar com o upload de imagem
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files ? e.target.files[0] : null;
-        if (file) {
-            uploadImage(file); // Envia a imagem assim que for selecionada
-        }
-        else {
-            toast({
-                description: (
-                  <div className="flex items-center gap-4 ">
-                    <div className="rounded-full w-8 h-8 flex justify-center items-center">
-                      <Image src={RequestError} alt="icon"  />
-                    </div>
-                    
-                    <span className="text-[#717F96]">Nenhuma imagem inserida!</span>
-                  </div>
-                ),
-                action: <ToastAction altText="close" className="shadow-none border-none text-[#717F96] hover:bg-transparent"><AiOutlineClose /></ToastAction>,
-                className: "border-l-4 border-l-[#FB3748]",
-             });
-        }
-    };
+      }
 
-    return (
-        <div className="relative">
-            {/* Botão de upload */}
-            <button
-                onClick={() => document.getElementById("fileInput")?.click()}
-            >
-                <Image src={UploadUserPhoto} alt="takePhoto" className="w-6 h-6 cursor-pointer" />
-            </button>
+      if (!uploadedUrl) {
+        throw new Error("Não foi possível obter a URL da imagem após o upload.");
+      }
 
-            {/* Input oculto de tipo file */}
-            <input
-                type="file"
-                id="fileInput"
-                onChange={handleImageChange}
-                style={{ display: "none" }}
-                accept="image/*" // Permite apenas imagens
-            />
-        </div>
-    );
+      // 2. Persist the Cloudinary image URL in the database for current user
+      try {
+        await axiosInstance.patch("/users/me", {
+          avatar: uploadedUrl,
+          photoUrl: uploadedUrl,
+          profile: {
+            photoUrl: uploadedUrl,
+          },
+          employeeProfile: {
+            photoUrl: uploadedUrl,
+          },
+        });
+      } catch (patchErr) {
+        console.warn("Falha no PATCH /users/me composto, tentando com avatar...", patchErr);
+        await axiosInstance.patch("/users/me", {
+          avatar: uploadedUrl,
+        });
+      }
+
+      // 3. Update global Auth store and cookies
+      updateUser({
+        photoUrl: uploadedUrl,
+        profile: {
+          photoUrl: uploadedUrl,
+        },
+      });
+
+      // 4. Notify parent if callback provided
+      if (onSuccess) {
+        onSuccess(uploadedUrl);
+      }
+
+      toast({
+        title: "Foto de perfil atualizada!",
+        description: "A sua nova foto foi guardada com sucesso no Cloudinary e na base de dados.",
+      });
+    } catch (error) {
+      console.error("Erro ao fazer upload da foto de perfil:", error);
+      const err = error as { message?: string; response?: { data?: { message?: string } } };
+      toast({
+        title: "Erro ao atualizar foto",
+        description:
+          err.response?.data?.message ||
+          err.message ||
+          "Não foi possível enviar a imagem para o Cloudinary.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files ? e.target.files[0] : null;
+    if (file) {
+      uploadImage(file);
+    }
+    // reset input to allow uploading same file again if wanted
+    e.target.value = "";
+  };
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        disabled={isUploading}
+        onClick={() => document.getElementById("profilePhotoInput")?.click()}
+        className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#8B5CF6] hover:bg-[#A78BFA] text-black flex items-center justify-center shadow-[0_0_12px_rgba(139, 92, 246,0.5)] border-2 border-[#131313] transition-transform hover:scale-105 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
+        title="Alterar foto de perfil"
+      >
+        {isUploading ? (
+          <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+        ) : (
+          <Camera className="w-4 h-4 sm:w-5 sm:h-5" />
+        )}
+      </button>
+
+      <input
+        type="file"
+        id="profilePhotoInput"
+        onChange={handleImageChange}
+        style={{ display: "none" }}
+        accept="image/png, image/jpeg, image/jpg, image/webp"
+      />
+    </div>
+  );
 }

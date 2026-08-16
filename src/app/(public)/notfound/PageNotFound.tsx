@@ -63,7 +63,7 @@ export default function NotFoundPage() {
         {/* Link para voltar */}
         <Link
           href="/dashboard"
-          className="mt-6 text-[#171718] cursor-pointer hover:text-primary text-base md:text-lg lg:text-xl"
+          className="mt-6 text-foreground cursor-pointer hover:text-primary text-base md:text-lg lg:text-xl"
         >
           Voltar para a página inicial
         </Link>

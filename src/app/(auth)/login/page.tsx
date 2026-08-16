@@ -23,10 +23,22 @@ import { useAuth } from "@/store/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 
+// Regex simples para bloquear caracteres comuns em ataques de SQL Injection/XSS
+const safeStringRegex = /^[^<>';=]*$/;
+
 // Schema de validação com Zod
 const loginSchema = z.object({
-  email: z.string().email("Formato de e-mail inválido").nonempty("E-mail é obrigatório"),
-  senha: z.string({ required_error: "Senha é obrigatória" }).nonempty("Senha é obrigatória"),
+  email: z.string()
+    .trim()
+    .min(1, "E-mail é obrigatório")
+    .email("Formato de e-mail inválido")
+    .max(100, "E-mail demasiado longo")
+    .regex(safeStringRegex, "Caracteres inválidos não permitidos"),
+  senha: z.string({ required_error: "Senha é obrigatória" })
+    .trim()
+    .min(1, "Senha é obrigatória")
+    .max(100, "Senha demasiada longa")
+    .regex(safeStringRegex, "Caracteres inválidos não permitidos"),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -112,7 +124,7 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen w-full flex bg-white font-sans antialiased overflow-x-hidden">
+    <main className="theme-legacy min-h-screen w-full flex bg-white font-sans antialiased overflow-x-hidden">
 
       {/* Lado Esquerdo - Banner Decorativo (Apenas visível em telas grandes lg+) */}
       <div className="hidden lg:flex lg:w-5/12 xl:w-1/2 min-h-screen backgroundGradient relative flex-col justify-between p-12 text-white">

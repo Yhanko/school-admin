@@ -83,7 +83,7 @@ export function NewSubject({ onCreated }: { onCreated?: () => void }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-primary text-white hover:bg-primary/90 flex items-center gap-2">
+        <Button className="gap-2 flex items-center bg-primary text-primary-foreground border-none rounded-sm hover:bg-[#A78BFA] hover:shadow-[0_0_12px_rgba(139, 92, 246,0.4)] transition-all font-bold font-hanken text-sm px-4 py-2 h-10">
           <BookOpen className="w-4 h-4" />
           <span className="hidden sm:inline">Nova Disciplina</span>
         </Button>
@@ -143,7 +143,7 @@ export function NewSubject({ onCreated }: { onCreated?: () => void }) {
             </div>
           </div>
 
-          <Button onClick={handleCreate} disabled={isSaving || !name.trim()} className="w-full">
+          <Button onClick={handleCreate} disabled={isSaving || !name.trim()} className="w-full flex justify-center bg-primary text-primary-foreground border-none rounded-sm hover:bg-[#A78BFA] hover:shadow-[0_0_12px_rgba(139, 92, 246,0.4)] transition-all font-bold font-hanken text-sm px-4 py-2 h-10">
             {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
             Gravar Disciplina e Vinculos
           </Button>

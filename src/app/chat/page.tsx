@@ -31,7 +31,7 @@ export default function Chat () {
         ${showSidebar ? 'flex' : 'hidden'} sm:flex
         w-full sm:w-72 lg:w-80
         flex-col shrink-0
-        border-r border-gray-200
+        border-r border-border
       `}>
         <ChatSidebar
           onSelectUser={handleSelectUser}
