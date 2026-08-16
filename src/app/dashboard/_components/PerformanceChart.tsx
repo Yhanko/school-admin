@@ -138,14 +138,28 @@ export function PerformanceChart({ report }: { report?: PerformanceReport | null
     },
   };
 
-  const attData =
-    report?.monthlyPerformance?.map((m: MonthlyPerf) => m.attendance ?? 0) || [
-      65, 75, 70, 80, 85, 75, 90, 85, 95, 90, 100, 95,
-    ];
-  const gradeData =
-    report?.monthlyPerformance?.map((m: MonthlyPerf) => m.grade ?? 0) || [
-      55, 65, 60, 70, 75, 65, 80, 75, 85, 80, 90, 85,
-    ];
+  const hasMonthlyData =
+    report?.monthlyPerformance && report.monthlyPerformance.length > 0;
+
+  const attData = hasMonthlyData
+    ? report!.monthlyPerformance!.map((m: MonthlyPerf) => m.attendance ?? 0)
+    : Array(12).fill(0);
+
+  const gradeData = hasMonthlyData
+    ? report!.monthlyPerformance!.map((m: MonthlyPerf) => m.grade ?? 0)
+    : Array(12).fill(0);
+
+  const attendanceRate =
+    report?.overview?.attendanceRate !== undefined &&
+    report?.overview?.attendanceRate !== null
+      ? `${report.overview.attendanceRate}%`
+      : "0%";
+
+  const averageGrade =
+    report?.overview?.averageGrade !== undefined &&
+    report?.overview?.averageGrade !== null
+      ? report.overview.averageGrade
+      : "0";
 
   const chartSeries = [
     {
@@ -159,35 +173,35 @@ export function PerformanceChart({ report }: { report?: PerformanceReport | null
   ];
 
   return (
-    <div className="bg-[#121212] border border-[#414042] rounded-lg p-5 font-hanken text-[#e5e2e1] space-y-4">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-[#414042] pb-4">
+    <div className="bg-[#FAFBFD] dark:bg-[#121212] border border-[#CBD5E1] dark:border-[#414042] rounded-lg p-5 font-hanken text-[#090D16] dark:text-[#e5e2e1] space-y-4 shadow-2xs">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-[#CBD5E1] dark:border-[#414042] pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-[#8B5CF6]" />
-            <h2 className="headline-sm text-[#e5e2e1]">Desempenho Académico</h2>
+            <TrendingUp className="w-4 h-4 text-[#7C3AED] dark:text-[#8B5CF6]" />
+            <h2 className="headline-sm text-[#090D16] dark:text-[#e5e2e1]">Desempenho Académico</h2>
           </div>
-          <p className="text-xs text-[#d5c4ac] mt-0.5">
+          <p className="text-xs text-[#556575] dark:text-[#d5c4ac] mt-0.5">
             Acompanhamento comparativo entre assiduidade e médias globais
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5 text-xs">
-          <div className="flex items-center gap-2 bg-[#1c1b1b] border border-[#414042] px-3 py-1.5 rounded">
-            <div className="w-2.5 h-2.5 bg-[#8B5CF6] rounded-full shadow-[0_0_6px_#8B5CF6]"></div>
-            <span className="font-bold data-mono text-[#DDD6FE]">
-              {report?.overview?.attendanceRate || 85}%
+          <div className="flex items-center gap-2 bg-[#E2E6EA] dark:bg-[#1c1b1b] border border-[#CBD5E1] dark:border-[#414042] px-3 py-1.5 rounded">
+            <div className="w-2.5 h-2.5 bg-[#7C3AED] dark:bg-[#8B5CF6] rounded-full shadow-[0_0_6px_#7C3AED]"></div>
+            <span className="font-bold data-mono text-[#6D28D9] dark:text-[#DDD6FE]">
+              {attendanceRate}
             </span>
-            <span className="label-caps text-[10px] text-[#d5c4ac]">
+            <span className="label-caps text-[10px] text-[#556575] dark:text-[#d5c4ac]">
               Assiduidade
             </span>
           </div>
 
-          <div className="flex items-center gap-2 bg-[#1c1b1b] border border-[#414042] px-3 py-1.5 rounded">
-            <div className="w-2.5 h-2.5 bg-[#C0C2C5] rounded-full"></div>
-            <span className="font-bold data-mono text-[#e5e2e1]">
-              {report?.overview?.averageGrade || 14.5}
+          <div className="flex items-center gap-2 bg-[#E2E6EA] dark:bg-[#1c1b1b] border border-[#CBD5E1] dark:border-[#414042] px-3 py-1.5 rounded">
+            <div className="w-2.5 h-2.5 bg-slate-600 dark:bg-[#C0C2C5] rounded-full"></div>
+            <span className="font-bold data-mono text-[#090D16] dark:text-[#e5e2e1]">
+              {averageGrade}
             </span>
-            <span className="label-caps text-[10px] text-[#d5c4ac]">
+            <span className="label-caps text-[10px] text-[#556575] dark:text-[#d5c4ac]">
               Média Geral
             </span>
           </div>
@@ -203,7 +217,7 @@ export function PerformanceChart({ report }: { report?: PerformanceReport | null
             height="100%"
           />
         ) : (
-          <div className="h-full w-full flex items-center justify-center text-xs text-[#d5c4ac] data-mono">
+          <div className="h-full w-full flex items-center justify-center text-xs text-[#556575] dark:text-[#d5c4ac] data-mono">
             Carregando telemetria...
           </div>
         )}

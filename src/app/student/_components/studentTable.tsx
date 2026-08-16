@@ -26,14 +26,36 @@ interface ApiStudentUser {
   createdAt: string;
   phone?: string;
   email?: string;
+  code?: string;
+  studentNumber?: string;
+  city?: string;
+  profile?: {
+    phone?: string;
+    email?: string;
+    studentNumber?: string;
+    guardianName?: string;
+    guardianPhone?: string;
+    guardianEmail?: string;
+    city?: string;
+    class?: string;
+  };
+  studentProfile?: {
+    phone?: string;
+    email?: string;
+    studentNumber?: string;
+    guardianName?: string;
+    guardianPhone?: string;
+    guardianEmail?: string;
+    city?: string;
+  };
   parent?: {
     name?: string;
     email?: string;
+    phone?: string;
     employeeProfile?: {
       phone?: string;
     };
   };
-  code?: string;
   enrollments?: Array<{
     class: {
       grade: string;
@@ -87,26 +109,61 @@ export function StudentTable({
     async function fetchStudents() {
       try {
         const response = await axiosInstance.get("/users?role=STUDENT");
-        const apiStudents = response.data.map((user: ApiStudentUser) => ({
-          id: user.id,
-          name: user.name,
-          date: new Date(user.createdAt).toLocaleDateString("pt-PT"),
-          parentName: user.parent?.name || "N/A",
-          parentEmail: user.parent?.email || "N/A",
-          parentPhone: user.parent?.employeeProfile?.phone || "N/A",
-          studentNumber: user.code || "N/A",
-          city: "Luanda",
-          grade:
+        const apiStudents = response.data.map((user: ApiStudentUser) => {
+          const resolvedPhone =
+            user.phone ||
+            user.profile?.phone ||
+            user.studentProfile?.phone ||
+            user.profile?.guardianPhone ||
+            user.studentProfile?.guardianPhone ||
+            user.parent?.phone ||
+            user.parent?.employeeProfile?.phone ||
+            "";
+
+          const resolvedEmail =
+            user.email ||
+            user.profile?.email ||
+            user.studentProfile?.email ||
+            user.parent?.email ||
+            user.profile?.guardianEmail ||
+            "";
+
+          const resolvedParentName =
+            user.parent?.name ||
+            user.profile?.guardianName ||
+            user.studentProfile?.guardianName ||
+            "";
+
+          const resolvedStudentNumber =
+            user.code ||
+            user.studentNumber ||
+            user.profile?.studentNumber ||
+            user.studentProfile?.studentNumber ||
+            "";
+
+          const resolvedGrade =
             user.enrollments &&
             user.enrollments.length > 0 &&
             user.enrollments[0].class
               ? `${user.enrollments[0].class.grade} - ${user.enrollments[0].class.name}`
-              : "N/A",
-          gradeColor: "bg-secondary",
-          phone: user.phone || "N/A",
-          email: user.email || "N/A",
-          isSelected: false,
-        }));
+              : user.profile?.class || "";
+
+          return {
+            id: user.id,
+            name: user.name,
+            date: new Date(user.createdAt).toLocaleDateString("pt-PT"),
+            parentName: resolvedParentName || "Não atribuído",
+            parentEmail: user.parent?.email || user.profile?.guardianEmail || "",
+            parentPhone: user.parent?.employeeProfile?.phone || user.parent?.phone || user.profile?.guardianPhone || "",
+            studentNumber: resolvedStudentNumber,
+            city: user.city || user.profile?.city || "Luanda",
+            grade: resolvedGrade || "Sem Turma",
+            gradeColor: "bg-secondary",
+            phone: resolvedPhone,
+            email: resolvedEmail,
+            isSelected: false,
+          };
+        });
         setStudents(apiStudents);
       } catch (error) {
         console.error("Failed to fetch students", error);
