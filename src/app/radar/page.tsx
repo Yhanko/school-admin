@@ -57,6 +57,7 @@ export default function RiskRadarPage() {
   const [isInterventionModalOpen, setIsInterventionModalOpen] = useState(false);
   const [interventionType, setInterventionType] = useState<"meeting" | "tutoring" | "financial">("meeting");
   const [interventionNote, setInterventionNote] = useState("");
+  const [institutionName, setInstitutionName] = useState("Sua Instituição");
 
   useEffect(() => {
     const fetchRadarData = async () => {
@@ -68,8 +69,8 @@ export default function RiskRadarPage() {
         ]);
 
         const rawStudents = Array.isArray(usersRes.data) ? usersRes.data : [];
-        const rawClasses = Array.isArray(classesRes.data) ? classesRes.data : [];
-        setClasses(rawClasses);
+        const classesData = Array.isArray(classesRes.data) ? classesRes.data : [];
+        setClasses([{ id: "all", name: "Todas as Turmas" }, ...classesData]);
 
         // Compute predictive risk scores for each student
         const analyzed: AtRiskStudent[] = rawStudents.map((st: any, idx: number) => {
@@ -128,6 +129,16 @@ export default function RiskRadarPage() {
         // Sort by risk descending
         analyzed.sort((a, b) => b.riskScore - a.riskScore);
         setStudents(analyzed);
+
+        try {
+          const userRes = await axiosInstance.get("/users/me");
+          if (userRes.data?.institution?.name) {
+            setInstitutionName(userRes.data.institution.name);
+          }
+        } catch (err) {
+          console.error("Erro ao carregar instituição:", err);
+        }
+
       } catch (err) {
         console.error("Error loading risk radar telemetry", err);
       } finally {
@@ -172,7 +183,7 @@ export default function RiskRadarPage() {
   const handleSendWhatsAppNotification = () => {
     if (!selectedStudentForAction) return;
     const msg = encodeURIComponent(
-      `Prezado(a) ${selectedStudentForAction.parentName}, a Direcção Pedagógica do Complexo Escolar Yhanko Educa solicita o seu comparecimento urgente para alinhamento sobre o aproveitamento do estudante ${selectedStudentForAction.name}. Por favor responda a esta mensagem para agendarmos o melhor horário.`
+      `Prezado(a) ${selectedStudentForAction.parentName}, a Direcção Pedagógica do ${institutionName} solicita o seu comparecimento urgente para alinhamento sobre o aproveitamento do estudante ${selectedStudentForAction.name}. Por favor responda a esta mensagem para agendarmos o melhor horário.`
     );
     const cleanPhone = selectedStudentForAction.parentPhone.replace(/\D/g, "");
     window.open(`https://wa.me/244${cleanPhone}?text=${msg}`, "_blank");

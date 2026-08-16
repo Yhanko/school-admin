@@ -18,13 +18,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { KeyRound, User, Mail, Phone, Calendar, Monitor, ShieldCheck } from "lucide-react";
+import { KeyRound, User, Mail, Phone, Calendar, Monitor, ShieldCheck, Building2 } from "lucide-react";
 
 interface UserProfileData {
   id: string;
   name: string;
   email: string;
   role: string;
+  institution?: {
+    id: string;
+    name: string;
+    nif?: string;
+  };
   createdAt?: string;
   photoUrl?: string;
   avatar?: string;
@@ -72,6 +77,11 @@ const passwordSchema = z
     path: ["confirmPassword"],
   });
 
+const institutionSchema = z.object({
+  name: z.string().trim().min(1, "Nome da instituição obrigatório").max(255, "Nome muito longo"),
+  nif: z.string().trim().max(50, "NIF muito longo").optional().or(z.literal("")),
+});
+
 export function ProfilePage() {
   const { toast } = useToast();
   const [user, setUser] = useState<UserProfileData | null>(null);
@@ -93,6 +103,12 @@ export function ProfilePage() {
   const [passwordErrors, setPasswordErrors] = useState<Record<string, string>>({});
   const [isChangingPassword, setIsChangingPassword] = useState(false);
 
+  // Edit Institution State
+  const [isEditInstitutionOpen, setIsEditInstitutionOpen] = useState(false);
+  const [institutionData, setInstitutionData] = useState({ name: "", nif: "" });
+  const [institutionErrors, setInstitutionErrors] = useState<Record<string, string>>({});
+  const [isUpdatingInstitution, setIsUpdatingInstitution] = useState(false);
+
   // Password Visibility State
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
@@ -107,6 +123,12 @@ export function ProfilePage() {
         email: response.data?.email || "",
         phone: response.data?.employeeProfile?.phone || "",
       });
+      if (response.data?.institution) {
+        setInstitutionData({
+          name: response.data.institution.name || "",
+          nif: response.data.institution.nif || "",
+        });
+      }
     } catch (error) {
       console.error("Erro ao buscar dados do utilizador:", error);
     } finally {
@@ -160,6 +182,48 @@ export function ProfilePage() {
       });
     } finally {
       setIsUpdatingProfile(false);
+    }
+  };
+
+  const handleUpdateInstitution = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      institutionSchema.parse(institutionData);
+      setInstitutionErrors({});
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        const fieldErrors: Record<string, string> = {};
+        err.errors.forEach((error) => {
+          if (error.path[0])
+            fieldErrors[error.path[0] as string] = error.message;
+        });
+        setInstitutionErrors(fieldErrors);
+      }
+      return;
+    }
+
+    setIsUpdatingInstitution(true);
+    try {
+      await axiosInstance.patch("/institutions/me", {
+        name: institutionData.name,
+        nif: institutionData.nif,
+      });
+      toast({
+        title: "Sucesso",
+        description: "Dados da instituição atualizados com sucesso!",
+      });
+      setIsEditInstitutionOpen(false);
+      fetchUser();
+    } catch (error) {
+      console.error("Erro ao atualizar instituição:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar a instituição.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdatingInstitution(false);
     }
   };
 
@@ -362,10 +426,45 @@ export function ProfilePage() {
           </div>
         </div>
 
+        {(role === "SUPER_ADMIN" || role === "ADMIN") && user?.institution && (
+          <>
+            <Separator className="bg-[#414042]" />
+            {/* Institution Info Card */}
+            <div className="bg-[#121212] border border-[#414042] rounded-lg p-5 space-y-4">
+              <div className="flex items-center gap-2 border-b border-[#414042] pb-3">
+                <Building2 className="w-4 h-4 text-[#8B5CF6]" />
+                <h2 className="headline-sm text-[#e5e2e1]">
+                  Dados da Instituição
+                </h2>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-start sm:items-center gap-3 p-3 rounded bg-[#1c1b1b] border border-[#414042]">
+                  <Building2 className="w-4 h-4 text-[#8B5CF6] mt-0.5 sm:mt-0 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="label-caps text-[10px] text-[#9d8f78]">Nome da Escola</p>
+                    <p className="text-sm font-semibold text-[#e5e2e1] data-mono truncate">
+                      {user.institution.name}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start sm:items-center gap-3 p-3 rounded bg-[#1c1b1b] border border-[#414042]">
+                  <ShieldCheck className="w-4 h-4 text-[#8B5CF6] mt-0.5 sm:mt-0 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="label-caps text-[10px] text-[#9d8f78]">NIF</p>
+                    <p className="text-sm font-semibold text-[#e5e2e1] data-mono">
+                      {user.institution.nif || "Não informado"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
         <Separator className="bg-[#414042]" />
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-3 w-full pb-6">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-3 w-full pb-6">
           {/* Editar Dados */}
           <Dialog
             open={isEditProfileOpen}
@@ -683,6 +782,97 @@ export function ProfilePage() {
             </DialogContent>
           </Dialog>
         </div>
+
+        {/* Editar Instituição */}
+        {(role === "SUPER_ADMIN" || role === "ADMIN") && (
+          <Dialog
+            open={isEditInstitutionOpen}
+            onOpenChange={(open) => {
+              setIsEditInstitutionOpen(open);
+              if (!open) setInstitutionErrors({});
+            }}
+          >
+            <DialogTrigger asChild>
+              <Button
+                variant="secondary"
+                className="flex-1 rounded h-11 border-[#414042] text-[#e5e2e1] hover:border-[#C0C2C5] hover:bg-[#1c1b1b] font-semibold text-xs sm:text-sm cursor-pointer"
+              >
+                <Building2 className="w-4 h-4 mr-2 text-[#d5c4ac]" />
+                Editar Escola
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="w-[95vw] max-w-md rounded-lg bg-[#1A1A1A] border border-[#C0C2C5] text-[#e5e2e1] font-hanken p-5 shadow-[0_0_25px_rgba(0,0,0,0.8)]">
+              <DialogHeader className="border-b border-[#414042] pb-3">
+                <DialogTitle className="flex items-center gap-2 headline-sm text-[#e5e2e1]">
+                  <Building2 className="w-4 h-4 text-[#8B5CF6]" />
+                  Editar Dados da Instituição
+                </DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleUpdateInstitution} className="space-y-4 mt-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="instName" className="label-caps text-[#d5c4ac]">
+                    Nome da Instituição *
+                  </Label>
+                  <Input
+                    id="instName"
+                    value={institutionData.name}
+                    onChange={(e) => {
+                      setInstitutionData({ ...institutionData, name: e.target.value });
+                      if (institutionErrors.name)
+                        setInstitutionErrors((prev) => ({ ...prev, name: "" }));
+                    }}
+                    className={`bg-[#0D0D0D] border rounded h-10 text-sm text-[#e5e2e1] focus:border-[#C0C2C5] focus:ring-1 focus:ring-[#C0C2C5] outline-none ${
+                      institutionErrors.name ? "border-[#ffb4ab]" : "border-[#414042]"
+                    }`}
+                  />
+                  {institutionErrors.name && (
+                    <p className="text-[#ffb4ab] text-xs">{institutionErrors.name}</p>
+                  )}
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="instNif" className="label-caps text-[#d5c4ac]">
+                    NIF
+                  </Label>
+                  <Input
+                    id="instNif"
+                    value={institutionData.nif}
+                    onChange={(e) => {
+                      setInstitutionData({ ...institutionData, nif: e.target.value });
+                      if (institutionErrors.nif)
+                        setInstitutionErrors((prev) => ({ ...prev, nif: "" }));
+                    }}
+                    className={`bg-[#0D0D0D] border rounded h-10 text-sm text-[#e5e2e1] focus:border-[#C0C2C5] focus:ring-1 focus:ring-[#C0C2C5] outline-none ${
+                      institutionErrors.nif ? "border-[#ffb4ab]" : "border-[#414042]"
+                    }`}
+                  />
+                  {institutionErrors.nif && (
+                    <p className="text-[#ffb4ab] text-xs">{institutionErrors.nif}</p>
+                  )}
+                </div>
+
+                <div className="pt-2 flex justify-end gap-2 border-t border-[#414042]">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => setIsEditInstitutionOpen(false)}
+                    className="border-[#414042] text-[#e5e2e1] hover:border-[#C0C2C5] hover:bg-[#1c1b1b] rounded h-10 px-4 text-xs font-semibold"
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={isUpdatingInstitution}
+                    className="bg-[#8B5CF6] hover:bg-[#A78BFA] text-black font-bold rounded h-10 px-5 text-xs sm:text-sm shadow-[0_0_10px_rgba(139, 92, 246,0.35)] hover:shadow-[0_0_14px_rgba(139, 92, 246,0.55)] cursor-pointer"
+                  >
+                    {isUpdatingInstitution ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                    Salvar Instituição
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </section>
   );

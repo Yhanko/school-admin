@@ -10,6 +10,7 @@ function VerifyDocContent() {
   const searchParams = useSearchParams();
   const docNumber = searchParams.get("doc") || "DOC-2025/741892";
   const docType = searchParams.get("type") || "matricula";
+  const institutionName = searchParams.get("inst") || "Complexo Escolar Yhanko Educa";
 
   const getDocTypeName = (t: string) => {
     switch (t) {
@@ -36,7 +37,7 @@ function VerifyDocContent() {
           </div>
           <h1 className="text-xl font-bold">Documento Autêntico e Válido</h1>
           <p className="text-xs text-emerald-100">
-            Registo certificado e autenticado na base de dados oficial Yhanko Educa
+            Registo certificado e autenticado na base de dados oficial
           </p>
         </div>
 
@@ -64,7 +65,7 @@ function VerifyDocContent() {
               <Building className="w-4 h-4 text-primary shrink-0" />
               <div>
                 <span className="text-[10px] text-[#556575] dark:text-[#9d8f78] block">Instituição Emissora</span>
-                <span className="font-bold text-[#090D16] dark:text-[#e5e2e1]">Complexo Escolar Yhanko Educa</span>
+                <span className="font-bold text-[#090D16] dark:text-[#e5e2e1]">{institutionName}</span>
               </div>
             </div>
 

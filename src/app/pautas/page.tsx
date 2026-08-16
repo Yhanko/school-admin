@@ -57,6 +57,7 @@ export default function PautasPage() {
   const [gradeRows, setGradeRows] = useState<StudentGradeRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [institutionName, setInstitutionName] = useState("Sua Instituição");
 
   // Load classes and subjects
   useEffect(() => {
@@ -72,6 +73,15 @@ export default function PautasPage() {
 
         setClasses(cls);
         setSubjects(subs);
+
+        try {
+          const userRes = await axiosInstance.get("/users/me");
+          if (userRes.data?.institution?.name) {
+            setInstitutionName(userRes.data.institution.name);
+          }
+        } catch (err) {
+          console.error("Erro ao carregar instituição:", err);
+        }
 
         if (cls.length > 0) setSelectedClassId(cls[0].id);
         if (subs.length > 0) setSelectedSubjectId(subs[0].id);
@@ -346,7 +356,7 @@ export default function PautasPage() {
       {/* Printable Sheet Header (Visible on print) */}
       <div className="hidden print:block text-center border-b-2 border-black pb-4 mb-4">
         <h2 className="text-xs font-bold uppercase tracking-widest">REPÚBLICA DE ANGOLA • MINISTÉRIO DA EDUCAÇÃO</h2>
-        <h1 className="text-base font-black uppercase">COMPLEXO ESCOLAR YHANKO EDUCA</h1>
+        <h1 className="text-base font-black uppercase">{institutionName}</h1>
         <h3 className="text-sm font-bold mt-1">
           PAUTA OFICIAL DE AVALIAÇÃO • {currentClass?.grade} {currentClass?.name} • {currentSubject?.name}
         </h3>

@@ -19,6 +19,7 @@ export default function SmsPage() {
   const [selectedContactIds, setSelectedContactIds] = useState<Set<string>>(new Set());
   const [roleFilter, setRoleFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+  const [institutionName, setInstitutionName] = useState('Nossa Escola');
 
   useEffect(() => {
     const fetchContacts = async () => {
@@ -28,11 +29,23 @@ export default function SmsPage() {
       } catch (error) {
         toast.error('Erro ao carregar contactos.');
       }
+
+      try {
+        const userRes = await smsService.getContacts(); // wait, we have to fetch /users/me using axiosInstance
+      } catch (err) {}
     };
     fetchContacts();
   }, []);
 
-  const institutionName = 'Nossa Escola'; 
+  useEffect(() => {
+    import('@/service/api').then((api) => {
+      api.default.get('/users/me').then((res) => {
+        if (res.data?.institution?.name) {
+          setInstitutionName(res.data.institution.name);
+        }
+      }).catch(console.error);
+    });
+  }, []);
 
   const filteredContacts = contacts.filter((c) => {
     const matchesRole = roleFilter === 'ALL' || c.role === roleFilter;

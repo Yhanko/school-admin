@@ -50,6 +50,9 @@ export default function DocumentsPage() {
   const [docNumber, setDocNumber] = useState("");
   const [qrCodeUrl, setQrCodeUrl] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  
+  const [institutionName, setInstitutionName] = useState("Sua Instituição");
+  const [institutionNif, setInstitutionNif] = useState("N/D");
 
   const printRef = useRef<HTMLDivElement>(null);
 
@@ -62,8 +65,8 @@ export default function DocumentsPage() {
 
     // Generate verification QR code
     const verificationUrl = typeof window !== "undefined"
-      ? `${window.location.origin}/verify-doc?doc=${encodeURIComponent(generatedNum)}&type=${encodeURIComponent(docType)}`
-      : `https://yhankoeduca.ao/verify-doc?doc=${generatedNum}`;
+      ? `${window.location.origin}/verify-doc?doc=${encodeURIComponent(generatedNum)}&type=${encodeURIComponent(docType)}&inst=${encodeURIComponent(institutionName)}`
+      : `https://yhankoeduca.ao/verify-doc?doc=${generatedNum}&inst=${encodeURIComponent(institutionName)}`;
 
     QRCode.toDataURL(verificationUrl, { width: 140, margin: 1 })
       .then((url) => setQrCodeUrl(url))
@@ -89,6 +92,17 @@ export default function DocumentsPage() {
         if (list.length > 0) {
           setSelectedStudent(list[0]);
         }
+
+        try {
+          const userRes = await axiosInstance.get("/users/me");
+          if (userRes.data?.institution) {
+            setInstitutionName(userRes.data.institution.name || "Sua Instituição");
+            setInstitutionNif(userRes.data.institution.nif || "N/D");
+          }
+        } catch (err) {
+          console.error("Erro ao carregar instituição:", err);
+        }
+
       } catch (err) {
         console.error("Error loading students", err);
       } finally {
@@ -97,7 +111,7 @@ export default function DocumentsPage() {
     };
 
     fetchStudents();
-  }, [docType]);
+  }, [docType, institutionName]);
 
   const filteredStudents = students.filter(
     (s) =>
@@ -286,10 +300,10 @@ export default function DocumentsPage() {
                 GOVERNO PROVINCIAL DE LUANDA • MINISTÉRIO DA EDUCAÇÃO
               </h3>
               <h1 className="text-base sm:text-lg font-black uppercase tracking-wide text-slate-950 font-sans">
-                COMPLEXO ESCOLAR YHANKO EDUCA
+                {institutionName}
               </h1>
               <p className="text-[10px] text-slate-600 font-sans">
-                Ensino Primário e Secundário • NIF: 5417089201 • Luanda, Angola
+                Ensino Primário e Secundário • NIF: {institutionNif} • Luanda, Angola
               </p>
             </div>
 
