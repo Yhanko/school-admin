@@ -45,35 +45,14 @@ export default function VerifyCode() {
 
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true); 
-    const responseBody = {
-      codigo_seguranca: data.code,
-      entidade: entidade
-    };
-    try {
-      const response = await axiosInstance.post("clientes/codigo-seguranca/redifinir", responseBody);
+    
+    // Simular um pequeno delay de UX
+    setTimeout(() => {
+      sessionStorage.setItem("resetCode", data.code);
       setIsLoading(false);
-
-      if (response.status === 202) {
-        reset();
-        router.push("/newPassword"); 
-      } 
-    } catch (error: unknown) {
-      setIsLoading(false); 
-      if (error instanceof AxiosError) {
-        toast({
-          description: (
-            <div className="flex items-center gap-3 font-hanken">
-              <div className="rounded-full w-8 h-8 flex justify-center items-center shrink-0 bg-red-100 dark:bg-red-950/40">
-                <Image src={RequestError} alt="erro" width={24} height={24} />
-              </div>
-              <span className="text-[#334155] dark:text-[#e5e2e1] text-sm font-medium">{error?.response?.data.mensagem || "Código inválido ou expirado."}</span>
-            </div>
-          ),
-          action: <ToastAction altText="fechar" className="shadow-none border-none text-[#717F96] hover:bg-transparent"><AiOutlineClose /></ToastAction>,
-          className: "border-l-4 border-l-[#DC2626]",
-        });
-      }
-    } 
+      reset();
+      router.push("/newPassword"); 
+    }, 500);
   };
       
   return (

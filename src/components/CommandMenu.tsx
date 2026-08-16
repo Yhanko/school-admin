@@ -19,6 +19,7 @@ import {
   Receipt,
   Printer,
   Sparkles,
+  MessagesSquare,
 } from "@/lib/icons";
 import axiosInstance from "@/service/api";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -139,6 +140,12 @@ export function CommandMenu({
       icon: Award,
       path: "/pautas",
       badge: "Pedagógico",
+    },
+    {
+      title: "Enviar SMS (Comunicados)",
+      icon: MessagesSquare,
+      path: "/sms",
+      badge: "Comunicação",
     },
     {
       title: "Radar Preditivo de Risco (IA)",

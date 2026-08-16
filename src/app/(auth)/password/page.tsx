@@ -7,10 +7,9 @@ import Logo from "../../../assets/yhankoIMG.svg";
 import RequestError from "../../../assets/ErroDeResposta.svg";
 import { AiOutlineClose, Loader2 } from "@/lib/icons";
 import { KeyRound } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
-import { useEntityStore } from "@/hooks/useEntityStore";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -28,15 +27,12 @@ const getPasswordSchema = z.object({
     .email("Formato de e-mail inválido")
     .max(100, "E-mail demasiado longo")
     .regex(safeStringRegex, "Caracteres inválidos não permitidos"),
-  canal: z.enum(["E-mail", "SMS"]),
 });
 
 type FormData = z.infer<typeof getPasswordSchema>;
 
 export default function ResetPassword() {
-  const { setEtidade } = useEntityStore();
   const { toast } = useToast();
-  const [canal, setCanal] = useState<"E-mail" | "SMS">("SMS");
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -45,31 +41,19 @@ export default function ResetPassword() {
     handleSubmit,
     formState: { errors },
     reset,
-    setValue
   } = useForm<FormData>({
     resolver: zodResolver(getPasswordSchema),
-    defaultValues: { canal: "SMS" },
   });
-
-  useEffect(() => {
-    setValue("canal", canal);
-  }, [canal, setValue]);
 
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
 
-    const requestBody = {
-      email: data.email,
-      canal,
-    };
-
     try {
-      const response = await axiosInstance.post("/clientes/codigo-seguranca/recuperar", requestBody);
+      const response = await axiosInstance.post("/auth/forgot-password", { email: data.email });
       setIsLoading(false);
 
       if (response.status === 202) {
-        const infoData = await response.data.info.entidade; 
-        setEtidade(infoData);
+        sessionStorage.setItem("resetEmail", data.email);
         reset();
         router.push("/verifyCode");
       }
@@ -110,7 +94,7 @@ export default function ResetPassword() {
             </div>
             <h2 className="text-2xl font-bold text-foreground">Redefinir Palavra-passe</h2>
             <p className="text-sm text-muted-foreground mt-1 max-w-xs sm:max-w-sm mx-auto leading-relaxed">
-              Insira o seu e-mail institucional e escolha como prefere receber o código de segurança.
+              Insira o seu e-mail institucional para receber um código SMS no seu telemóvel.
             </p>
           </div>
         </div>
@@ -136,37 +120,7 @@ export default function ResetPassword() {
             )}
           </div>
 
-          {/* Seleção do Canal */}
-          <div className="space-y-2 pt-1">
-            <label className="block text-xs font-semibold text-foreground uppercase tracking-wide">
-              Receber código por:
-            </label>
-            <div className="grid grid-cols-2 gap-2.5">
-              <button
-                type="button"
-                onClick={() => setCanal("SMS")}
-                className={`h-10 text-xs font-semibold rounded border transition-all cursor-pointer flex items-center justify-center ${
-                  canal === "SMS"
-                    ? "bg-primary text-white border-primary shadow-xs"
-                    : "bg-background text-foreground border-border hover:bg-muted"
-                }`}
-              >
-                SMS (Telemóvel)
-              </button>
 
-              <button
-                type="button"
-                onClick={() => setCanal("E-mail")}
-                className={`h-10 text-xs font-semibold rounded border transition-all cursor-pointer flex items-center justify-center ${
-                  canal === "E-mail"
-                    ? "bg-primary text-white border-primary shadow-xs"
-                    : "bg-background text-foreground border-border hover:bg-muted"
-                }`}
-              >
-                E-mail
-              </button>
-            </div>
-          </div>
 
           {/* Botões */}
           <div className="space-y-3 pt-3">

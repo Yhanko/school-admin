@@ -33,7 +33,6 @@ const passwordSchema = z
 type FormData = z.infer<typeof passwordSchema>;
 
 export default function NewPassword() {
-  const { entidade } = useEntityStore();
   const { toast } = useToast();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -60,29 +59,42 @@ export default function NewPassword() {
 
     try {
       setIsLoading(true);
-      const response = await axiosInstance.patch(`/clientes/${entidade}/redifinir-senha`, data);
+      const email = sessionStorage.getItem("resetEmail");
+      const otp = sessionStorage.getItem("resetCode");
+
+      if (!email || !otp) {
+        throw new Error("Informações de recuperação ausentes.");
+      }
+
+      const requestBody = {
+        email: email,
+        otp: otp,
+        newPassword: data.senha,
+      };
+
+      const response = await axiosInstance.post("/auth/reset-password", requestBody);
       setIsLoading(false);
 
-      if (response.status === 202) {
+      if (response.status === 200 || response.status === 201 || response.status === 202) {
+        sessionStorage.removeItem("resetEmail");
+        sessionStorage.removeItem("resetCode");
         reset(); 
         router.push("/changed");
       } 
-    } catch (error: unknown) {
+    } catch (error: any) {
       setIsLoading(false); 
-      if (error instanceof AxiosError) {
-        toast({
-          description: (
-            <div className="flex items-center gap-3 font-hanken">
-              <div className="rounded-full w-8 h-8 flex justify-center items-center shrink-0 bg-red-100 dark:bg-red-950/40">
-                <Image src={RequestError} alt="erro" width={24} height={24} />
-              </div>
-              <span className="text-[#334155] dark:text-[#e5e2e1] text-sm font-medium">{error?.response?.data.mensagem || "Erro ao redefinir a palavra-passe."}</span>
+      toast({
+        description: (
+          <div className="flex items-center gap-3 font-hanken">
+            <div className="rounded-full w-8 h-8 flex justify-center items-center shrink-0 bg-red-100 dark:bg-red-950/40">
+              <Image src={RequestError} alt="erro" width={24} height={24} />
             </div>
-          ),
-          action: <ToastAction altText="fechar" className="shadow-none border-none text-[#717F96] hover:bg-transparent"><AiOutlineClose /></ToastAction>,
-          className: "border-l-4 border-l-[#DC2626]",
-        });
-      }
+            <span className="text-[#334155] dark:text-[#e5e2e1] text-sm font-medium">{error?.response?.data.message || error.message || "Erro ao redefinir a palavra-passe."}</span>
+          </div>
+        ),
+        action: <ToastAction altText="fechar" className="shadow-none border-none text-[#717F96] hover:bg-transparent"><AiOutlineClose /></ToastAction>,
+        className: "border-l-4 border-l-[#DC2626]",
+      });
     }
   };
 

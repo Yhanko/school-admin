@@ -63,7 +63,7 @@ export const routes: AppRoute[] = [
     icon: SiGoogleclassroom,
   },
   {
-    id: 6,
+    id: 16,
     title: "Horários",
     url: "/schedules",
     icon: Clock,
@@ -97,6 +97,12 @@ export const routes: AppRoute[] = [
     title: "Relatórios",
     url: "/report",
     icon: FaRegFileAlt,
+  },
+  {
+    id: 17,
+    title: "Envio de SMS",
+    url: "/sms",
+    icon: MessagesSquare, // Or another icon, like Smartphone
   },
   {
     id: 12,

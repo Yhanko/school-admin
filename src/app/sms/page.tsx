@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 
 export default function SmsPage() {
@@ -17,6 +18,7 @@ export default function SmsPage() {
   const [contacts, setContacts] = useState<SmsContact[]>([]);
   const [selectedContactIds, setSelectedContactIds] = useState<Set<string>>(new Set());
   const [roleFilter, setRoleFilter] = useState<string>('ALL');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const fetchContacts = async () => {
@@ -32,9 +34,12 @@ export default function SmsPage() {
 
   const institutionName = 'Nossa Escola'; 
 
-  const filteredContacts = contacts.filter(
-    (c) => roleFilter === 'ALL' || c.role === roleFilter
-  );
+  const filteredContacts = contacts.filter((c) => {
+    const matchesRole = roleFilter === 'ALL' || c.role === roleFilter;
+    const matchesSearch = c.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          c.phone.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesRole && matchesSearch;
+  });
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -138,6 +143,12 @@ export default function SmsPage() {
         <h2 className="font-semibold mb-4">Destinatários ({contacts.length})</h2>
         
         <div className="mb-4">
+          <Input 
+            placeholder="Pesquisar por nome ou número..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="h-9 text-sm mb-3"
+          />
           <Select value={roleFilter} onValueChange={setRoleFilter}>
             <SelectTrigger className="h-8 text-xs">
               <SelectValue placeholder="Filtrar por grupo" />
