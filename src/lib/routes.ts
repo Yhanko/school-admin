@@ -14,6 +14,7 @@ import {
   Clock,
   Award,
   FileCheck,
+  Sparkles,
 } from "@/lib/icons";
 
 export interface AppRoute {
@@ -51,6 +52,12 @@ export const routes: AppRoute[] = [
   },
   {
     id: 5,
+    title: "Radar de Risco (IA)",
+    url: "/radar",
+    icon: Sparkles,
+  },
+  {
+    id: 6,
     title: "Turmas",
     url: "/turma",
     icon: SiGoogleclassroom,

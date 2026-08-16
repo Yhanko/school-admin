@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -7,16 +9,17 @@ import {
   Check,
   ChevronRight,
   Eye,
-  EyeOff
+  EyeOff,
+  Sparkles,
 } from "@/lib/icons";
 import axiosInstance from "@/service/api";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { BiDocumentScanner, ExtractedBiData } from "@/components/BiDocumentScanner";
 
 type AcademicLevel = "1-6" | "7-9" | "10-13" | "transfer" | null;
 
 interface StudentFormData {
-  // Student Info
   studentNumber: string;
   firstName: string;
   lastName: string;
@@ -60,7 +63,6 @@ interface StudentFormData {
   previousSchool: string; // for transfer
   previousClass: string; // for transfer
 }
-
 
 const safeStringRegex = /^[^<>\';=]*$/;
 const baseString = z.string().trim().regex(safeStringRegex, "Caracteres inválidos").min(1, "Obrigatório").max(100, "Muito longo");
@@ -122,6 +124,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showOcrScanner, setShowOcrScanner] = useState(false);
   const [availableClasses, setAvailableClasses] = useState<{ id: string; name: string; academicLevel?: string; grade?: string; roomName?: string }[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState<StudentFormData>({
@@ -161,6 +164,31 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
     previousClass: "",
   });
 
+  const handleApplyBiData = (biData: ExtractedBiData) => {
+    const parentFirst = biData.fatherName.split(" ")[0] || "";
+    const parentLast = biData.fatherName.split(" ").slice(1).join(" ") || "";
+    const guardianFirst = biData.motherName.split(" ")[0] || "";
+    const guardianLast = biData.motherName.split(" ").slice(1).join(" ") || "";
+
+    setFormData((prev) => ({
+      ...prev,
+      firstName: biData.firstName,
+      lastName: biData.lastName,
+      dateOfBirth: biData.dateOfBirth,
+      gender: biData.gender === "M" ? "Masculino" : "Feminino",
+      parentFirstName: parentFirst,
+      parentLastName: parentLast,
+      guardianFirstName: guardianFirst,
+      guardianLastName: guardianLast,
+    }));
+
+    setShowOcrScanner(false);
+    toast({
+      title: "⚡ BI Reconhecido com Sucesso!",
+      description: `Campos preenchidos automaticamente para ${biData.fullName}.`,
+    });
+  };
+
   useEffect(() => {
     if (isOpen) {
       const fetchClasses = async () => {
@@ -180,20 +208,20 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
     const random = Math.floor(Math.random() * 10000)
       .toString()
       .padStart(4, "0");
-    setFormData({ ...formData, studentNumber: `${year}${random}` });
+    setFormData((prev) => ({ ...prev, studentNumber: `${year}${random}` }));
   };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, files } = e.target;
     if (files && files[0]) {
-      setFormData({ ...formData, [name]: files[0] });
+      setFormData((prev) => ({ ...prev, [name]: files[0] }));
     }
   };
 
@@ -233,6 +261,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
     setErrors({});
     setShowPassword(false);
     setShowConfirmPassword(false);
+    setShowOcrScanner(false);
     setFormData({
       studentNumber: "",
       firstName: "",
@@ -262,6 +291,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
       cycle: "",
       course: "",
       class: "",
+      classe: "",
       previousCertificate: null,
       grade9Certificate: null,
       transferRequest: null,
@@ -331,9 +361,28 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
 
   const renderStudentInfo = () => (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-foreground mb-4">
-        Informações do Aluno
-      </h3>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-2 border-b border-border">
+        <h3 className="text-lg font-semibold text-foreground">
+          Informações do Aluno
+        </h3>
+        <Button
+          type="button"
+          onClick={() => setShowOcrScanner(!showOcrScanner)}
+          className="bg-primary/10 hover:bg-primary text-primary hover:text-white border border-primary/30 font-bold text-xs h-8 px-3 rounded flex items-center gap-1.5 cursor-pointer transition-all w-fit"
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>⚡ Preencher com BI (OCR Express)</span>
+        </Button>
+      </div>
+
+      {showOcrScanner && (
+        <div className="mb-4">
+          <BiDocumentScanner
+            onDataExtracted={handleApplyBiData}
+            onClose={() => setShowOcrScanner(false)}
+          />
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="flex flex-col space-y-2">
@@ -348,6 +397,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
               className="flex-1 bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2 bg-muted"
             />
             <Button
+              type="button"
               onClick={generateStudentNumber}
               className="bg-primary text-primary-foreground border-none rounded-sm hover:bg-[#A78BFA] hover:shadow-[0_0_12px_rgba(139, 92, 246,0.4)] text-white hover:bg-primary text-primary-foreground border-none rounded-sm hover:bg-[#A78BFA] hover:shadow-[0_0_12px_rgba(139, 92, 246,0.4)] hover:text-white"
             >
@@ -368,12 +418,12 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
             placeholder="João"
           />
-            {errors.firstName && <p className="text-red-500 text-xs mt-1 pl-1">{errors.firstName}</p>}
+          {errors.firstName && <p className="text-red-500 text-xs mt-1 pl-1">{errors.firstName}</p>}
         </div>
 
         <div className="flex flex-col space-y-2">
           <label className="text-sm font-medium text-foreground">
-          Último Nome *
+            Último Nome *
           </label>
           <input
             type="text"
@@ -383,7 +433,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
             placeholder="Silva"
           />
-            {errors.lastName && <p className="text-red-500 text-xs mt-1 pl-1">{errors.lastName}</p>}
+          {errors.lastName && <p className="text-red-500 text-xs mt-1 pl-1">{errors.lastName}</p>}
         </div>
 
         <div className="flex flex-col space-y-2">
@@ -397,7 +447,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             onChange={handleInputChange}
             className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
           />
-            {errors.dateOfBirth && <p className="text-red-500 text-xs mt-1 pl-1">{errors.dateOfBirth}</p>}
+          {errors.dateOfBirth && <p className="text-red-500 text-xs mt-1 pl-1">{errors.dateOfBirth}</p>}
         </div>
 
         <div className="flex flex-col space-y-2">
@@ -409,8 +459,8 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
           >
             <option value="">Selecione</option>
-            <option value="M">Masculino</option>
-            <option value="F">Feminino</option>
+            <option value="Masculino">Masculino</option>
+            <option value="Feminino">Feminino</option>
           </select>
           {errors.gender && <p className="text-red-500 text-xs mt-1 pl-1">{errors.gender}</p>}
         </div>
@@ -425,7 +475,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
             placeholder="joao@example.com"
           />
-            {errors.email && <p className="text-red-500 text-xs mt-1 pl-1">{errors.email}</p>}
+          {errors.email && <p className="text-red-500 text-xs mt-1 pl-1">{errors.email}</p>}
         </div>
 
         <div className="flex flex-col space-y-2">
@@ -440,9 +490,8 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
             placeholder="+244 923 456 789"
           />
-            {errors.phone && <p className="text-red-500 text-xs mt-1 pl-1">{errors.phone}</p>}
+          {errors.phone && <p className="text-red-500 text-xs mt-1 pl-1">{errors.phone}</p>}
         </div>
-
 
         {selectedLevel === "transfer" && (
           <div className="flex flex-col space-y-2">
@@ -458,7 +507,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
               <option value="7-9">Ensino Secundário I (7-9)</option>
               <option value="10-13">Ensino Secundário II (10-13)</option>
             </select>
-          {errors.cycle && <p className="text-red-500 text-xs mt-1 pl-1">{errors.cycle}</p>}
+            {errors.cycle && <p className="text-red-500 text-xs mt-1 pl-1">{errors.cycle}</p>}
           </div>
         )}
 
@@ -533,7 +582,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
           >
             <option value="">Selecione uma turma</option>
             {availableClasses.filter(c => {
-               const classLevel = c.academicLevel; // Use DB academicLevel property
+               const classLevel = c.academicLevel;
                if (selectedLevel === "transfer") {
                   return formData.cycle ? classLevel === formData.cycle : true;
                }
@@ -546,6 +595,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
           </select>
           {errors.class && <p className="text-red-500 text-xs mt-1 pl-1">{errors.class}</p>}
         </div>
+
         <div className="flex flex-col space-y-2">
           <label className="text-sm font-medium text-foreground">Senha *</label>
           <div className="relative">
@@ -588,7 +638,6 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
           {errors.confirmPassword && <p className="text-red-500 text-xs mt-1 pl-1">{errors.confirmPassword}</p>}
         </div>
       </div>
-
     </div>
   );
 
@@ -611,12 +660,12 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
             placeholder="Maria"
           />
-            {errors.parentFirstName && <p className="text-red-500 text-xs mt-1 pl-1">{errors.parentFirstName}</p>}
+          {errors.parentFirstName && <p className="text-red-500 text-xs mt-1 pl-1">{errors.parentFirstName}</p>}
         </div>
 
         <div className="flex flex-col space-y-2">
           <label className="text-sm font-medium text-foreground">
-          Último Nome *
+            Último Nome *
           </label>
           <input
             type="text"
@@ -626,7 +675,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
             placeholder="Silva"
           />
-            {errors.parentLastName && <p className="text-red-500 text-xs mt-1 pl-1">{errors.parentLastName}</p>}
+          {errors.parentLastName && <p className="text-red-500 text-xs mt-1 pl-1">{errors.parentLastName}</p>}
         </div>
 
         <div className="flex flex-col space-y-2">
@@ -639,7 +688,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
             placeholder="maria@example.com"
           />
-            {errors.parentEmail && <p className="text-red-500 text-xs mt-1 pl-1">{errors.parentEmail}</p>}
+          {errors.parentEmail && <p className="text-red-500 text-xs mt-1 pl-1">{errors.parentEmail}</p>}
         </div>
 
         <div className="flex flex-col space-y-2">
@@ -654,7 +703,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
             placeholder="+244 923 456 789"
           />
-            {errors.parentPhone && <p className="text-red-500 text-xs mt-1 pl-1">{errors.parentPhone}</p>}
+          {errors.parentPhone && <p className="text-red-500 text-xs mt-1 pl-1">{errors.parentPhone}</p>}
         </div>
 
         <div className="flex flex-col space-y-2">
@@ -720,12 +769,12 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             onChange={handleInputChange}
             className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
           />
-            {errors.guardianFirstName && <p className="text-red-500 text-xs mt-1 pl-1">{errors.guardianFirstName}</p>}
+          {errors.guardianFirstName && <p className="text-red-500 text-xs mt-1 pl-1">{errors.guardianFirstName}</p>}
         </div>
 
         <div className="flex flex-col space-y-2">
           <label className="text-sm font-medium text-foreground">
-          Último Nome *
+            Último Nome *
           </label>
           <input
             type="text"
@@ -734,7 +783,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             onChange={handleInputChange}
             className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
           />
-            {errors.guardianLastName && <p className="text-red-500 text-xs mt-1 pl-1">{errors.guardianLastName}</p>}
+          {errors.guardianLastName && <p className="text-red-500 text-xs mt-1 pl-1">{errors.guardianLastName}</p>}
         </div>
 
         <div className="flex flex-col space-y-2">
@@ -768,7 +817,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             onChange={handleInputChange}
             className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
           />
-            {errors.guardianEmail && <p className="text-red-500 text-xs mt-1 pl-1">{errors.guardianEmail}</p>}
+          {errors.guardianEmail && <p className="text-red-500 text-xs mt-1 pl-1">{errors.guardianEmail}</p>}
         </div>
 
         <div className="flex flex-col space-y-2">
@@ -782,7 +831,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             onChange={handleInputChange}
             className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
           />
-            {errors.guardianPhone && <p className="text-red-500 text-xs mt-1 pl-1">{errors.guardianPhone}</p>}
+          {errors.guardianPhone && <p className="text-red-500 text-xs mt-1 pl-1">{errors.guardianPhone}</p>}
         </div>
 
         <div className="flex flex-col space-y-2">
@@ -853,7 +902,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             onChange={handleFileChange}
             className="hidden"
           />
-            {errors.previousCertificate && <p className="text-red-500 text-xs mt-1 pl-1">{errors.previousCertificate}</p>}
+          {errors.previousCertificate && <p className="text-red-500 text-xs mt-1 pl-1">{errors.previousCertificate}</p>}
         </label>
       </div>
     </div>
@@ -878,7 +927,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
             placeholder="Nome da escola anterior"
           />
-            {errors.previousSchool && <p className="text-red-500 text-xs mt-1 pl-1">{errors.previousSchool}</p>}
+          {errors.previousSchool && <p className="text-red-500 text-xs mt-1 pl-1">{errors.previousSchool}</p>}
         </div>
 
         <div className="flex flex-col space-y-2">
@@ -893,7 +942,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
             className="bg-input border border-border focus:border-secondary-foreground focus:ring-0 rounded-sm font-hanken text-sm text-foreground placeholder:text-muted-foreground transition-colors p-2"
             placeholder="Ex: 9ª Classe"
           />
-            {errors.previousClass && <p className="text-red-500 text-xs mt-1 pl-1">{errors.previousClass}</p>}
+          {errors.previousClass && <p className="text-red-500 text-xs mt-1 pl-1">{errors.previousClass}</p>}
         </div>
       </div>
 
@@ -962,7 +1011,6 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
     return null;
   };
 
-  
   const validateStep = (step: number) => {
     try {
       if (step === 2) {

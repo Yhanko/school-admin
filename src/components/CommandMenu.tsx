@@ -18,6 +18,7 @@ import {
   Loader2,
   Receipt,
   Printer,
+  Sparkles,
 } from "@/lib/icons";
 import axiosInstance from "@/service/api";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -138,6 +139,12 @@ export function CommandMenu({
       icon: Award,
       path: "/pautas",
       badge: "Pedagógico",
+    },
+    {
+      title: "Radar Preditivo de Risco (IA)",
+      icon: Sparkles,
+      path: "/radar",
+      badge: "Prevenção",
     },
     {
       title: "Fecho de Caixa Diário",
