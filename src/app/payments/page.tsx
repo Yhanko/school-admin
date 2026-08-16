@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { Loader2, RefreshCw, DollarSign, ShieldAlert } from "@/lib/icons";
+import { Loader2, RefreshCw, DollarSign, ShieldAlert, Receipt } from "@/lib/icons";
 import { Button } from "@/components/ui/button";
 import axiosInstance from "@/service/api";
 import { useToast } from "@/hooks/use-toast";
@@ -13,6 +13,7 @@ import { PaymentSummary } from "./_components/PaymentSummary";
 import { PaymentTable } from "./_components/PaymentTable";
 import { LatePaymentsAlert } from "./_components/LatePaymentsAlert";
 import { PaymentRecord } from "./_components/PaymentDetailModal";
+import { DailyCashCloseModal } from "./_components/DailyCashCloseModal";
 
 export default function Payments() {
   const { toast } = useToast();
@@ -20,6 +21,7 @@ export default function Payments() {
   const [isLoading, setIsLoading] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isCashCloseOpen, setIsCashCloseOpen] = useState(false);
 
   const fetchPayments = useCallback(async (isManualRefresh = false) => {
     if (isManualRefresh) setIsRefreshing(true);
@@ -55,10 +57,10 @@ export default function Payments() {
   const stats = useMemo(() => {
     const total = payments.reduce((acc, curr) => acc + (curr.amount || 0), 0);
     const paid = payments
-      .filter((p) => p.status === "confirmed")
+      .filter((p) => p.status === "confirmed" || p.status === "pago")
       .reduce((acc, curr) => acc + (curr.amount || 0), 0);
     const pending = payments
-      .filter((p) => p.status === "pending")
+      .filter((p) => p.status === "pending" || p.status === "pendente")
       .reduce((acc, curr) => acc + (curr.amount || 0), 0);
     const cancelled = payments
       .filter((p) => p.status === "cancelled")
@@ -94,14 +96,14 @@ export default function Payments() {
       // Title & Subtitle in Header
       doc.setFont("helvetica", "bold");
       doc.setFontSize(16);
-      doc.setTextColor(253, 185, 19); // Gold #8B5CF6
+      doc.setTextColor(139, 92, 246); // Yhanko Purple
       doc.text("Yhanko Educa • Relatório Financeiro", 14, 16);
 
       doc.setFont("helvetica", "normal");
       doc.setFontSize(9);
-      doc.setTextColor(229, 226, 225); // Light Silver
+      doc.setTextColor(200, 200, 200);
       doc.text(
-        `Emitido em: ${new Date().toLocaleString("pt-PT")} | Autenticação: SEC-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
+        `Emitido em: ${new Date().toLocaleDateString("pt-PT")} às ${new Date().toLocaleTimeString("pt-PT")}`,
         14,
         24
       );
@@ -157,9 +159,9 @@ export default function Payments() {
           payment.student?.name || "Desconhecido",
           payment.type || "Mensalidade",
           `${(payment.amount || 0).toLocaleString()} Kz`,
-          payment.status === "confirmed"
+          payment.status === "confirmed" || payment.status === "pago"
             ? "Pago"
-            : payment.status === "pending"
+            : payment.status === "pending" || payment.status === "pendente"
             ? "Pendente"
             : "Cancelado",
           payment.paymentDate
@@ -175,50 +177,35 @@ export default function Payments() {
           headStyles: {
             fillColor: headerColor,
             textColor: [255, 255, 255],
-            fontSize: 8,
             fontStyle: "bold",
           },
           styles: {
             fontSize: 8,
-            cellPadding: 2.5,
-          },
-          alternateRowStyles: {
-            fillColor: [248, 248, 248],
+            cellPadding: 3,
           },
         });
 
-        return (
-          (doc as unknown as { lastAutoTable: { finalY: number } })
-            .lastAutoTable.finalY + 12
-        );
+        // @ts-ignore - jspdf-autotable adds lastAutoTable
+        return doc.lastAutoTable.finalY + 12;
       };
 
-      const confirmedList = payments.filter((p) => p.status === "confirmed");
-      const pendingList = payments.filter((p) => p.status === "pending");
-      const cancelledList = payments.filter((p) => p.status === "cancelled");
+      const paidPayments = payments.filter((p) => p.status === "confirmed" || p.status === "pago");
+      const pendingPayments = payments.filter((p) => p.status === "pending" || p.status === "pendente");
 
-      if (confirmedList.length > 0) {
+      if (paidPayments.length > 0) {
         currentY = drawTable(
-          "1. Pagamentos Confirmados (Liquidados)",
-          confirmedList,
+          "PAGAMENTOS CONFIRMADOS / RECEBIDOS",
+          paidPayments,
           currentY,
           [45, 106, 79]
         );
       }
-      if (pendingList.length > 0) {
+      if (pendingPayments.length > 0) {
         currentY = drawTable(
-          "2. Pagamentos Pendentes (Em Aberto)",
-          pendingList,
+          "PAGAMENTOS PENDENTES / EM COBRANÇA",
+          pendingPayments,
           currentY,
-          [160, 110, 0]
-        );
-      }
-      if (cancelledList.length > 0) {
-        drawTable(
-          "3. Pagamentos em Atraso / Cancelados",
-          cancelledList,
-          currentY,
-          [155, 34, 38]
+          [180, 120, 0]
         );
       }
 
@@ -241,14 +228,14 @@ export default function Payments() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col justify-center items-center w-full min-h-[70vh] bg-[#131313] text-[#e5e2e1] space-y-4">
+      <div className="flex flex-col justify-center items-center w-full min-h-[70vh] bg-[#FAFBFD] dark:bg-[#131313] text-[#090D16] dark:text-[#e5e2e1] space-y-4 font-hanken">
         <div className="relative">
-          <Loader2 className="w-10 h-10 animate-spin text-[#8B5CF6]" />
-          <div className="absolute inset-0 rounded-full blur-md bg-[#8B5CF6]/30 animate-pulse" />
+          <Loader2 className="w-10 h-10 animate-spin text-[#7C3AED] dark:text-[#8B5CF6]" />
+          <div className="absolute inset-0 rounded-full blur-md bg-primary/20 dark:bg-[#8B5CF6]/30 animate-pulse" />
         </div>
         <div className="text-center space-y-1">
-          <p className="headline-sm text-[#e5e2e1]">Carregando Telemetria</p>
-          <p className="label-caps text-[#d5c4ac]">
+          <p className="headline-sm text-[#090D16] dark:text-[#e5e2e1]">Carregando Telemetria</p>
+          <p className="label-caps text-[#556575] dark:text-[#d5c4ac]">
             A conectar com o módulo financeiro yhankoEduca...
           </p>
         </div>
@@ -257,32 +244,41 @@ export default function Payments() {
   }
 
   return (
-    <section className="w-full max-w-full bg-[#131313] text-[#e5e2e1] px-4 sm:px-6 lg:px-8 py-6 space-y-6 overflow-x-hidden min-h-screen font-hanken">
+    <section className="w-full max-w-full bg-[#FAFBFD] dark:bg-[#131313] text-[#090D16] dark:text-[#e5e2e1] px-4 sm:px-6 lg:px-8 py-6 space-y-6 overflow-x-hidden min-h-screen font-hanken">
       {/* Top Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#414042] pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#CBD5E1] dark:border-[#414042] pb-6">
         <div>
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#8B5CF6] shadow-[0_0_10px_#8B5CF6]" />
-            <h1 className="headline-lg text-[#e5e2e1]">
-              Relatório de Pagamentos
+            <span className="w-2.5 h-2.5 rounded-full bg-primary shadow-[0_0_10px_#7C3AED]" />
+            <h1 className="headline-lg text-[#090D16] dark:text-[#e5e2e1]">
+              Gestão Financeira & Caixa
             </h1>
           </div>
-          <p className="body-md text-[#d5c4ac] mt-1">
-            Auditoria, conciliação e telemetria de pagamentos mensais e receitas
+          <p className="body-md text-[#556575] dark:text-[#d5c4ac] mt-1">
+            Auditoria, conciliação, fecho de caixa diário e telemetria de propinas
           </p>
         </div>
 
         {/* Header Actions */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <Button
+            size="sm"
+            onClick={() => setIsCashCloseOpen(true)}
+            className="bg-primary hover:bg-[#A78BFA] text-white font-bold rounded h-9 px-3.5 text-xs sm:text-sm gap-2 shadow-xs transition-all cursor-pointer"
+          >
+            <Receipt className="w-4 h-4" />
+            <span>Fecho de Caixa Diário</span>
+          </Button>
+
           <Button
             variant="secondary"
             size="sm"
             onClick={() => fetchPayments(true)}
             disabled={isRefreshing}
-            className="border-[#414042] text-[#e5e2e1] hover:bg-[#1A1A1A] hover:border-[#C0C2C5] rounded h-9 px-3.5 text-xs sm:text-sm font-semibold gap-2 transition-all cursor-pointer"
+            className="border-[#CBD5E1] dark:border-[#414042] text-[#090D16] dark:text-[#e5e2e1] hover:bg-[#E2E6EA] dark:hover:bg-[#1A1A1A] rounded h-9 px-3.5 text-xs sm:text-sm font-semibold gap-2 transition-all cursor-pointer"
           >
             <RefreshCw
-              className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin text-[#8B5CF6]" : "text-[#d5c4ac]"}`}
+              className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin text-primary" : "text-[#556575] dark:text-[#d5c4ac]"}`}
             />
             <span>{isRefreshing ? "A Atualizar..." : "Sincronizar"}</span>
           </Button>
@@ -321,6 +317,13 @@ export default function Payments() {
         payments={payments}
         onExportPDF={exportToPDF}
         isExporting={isExporting}
+      />
+
+      {/* Daily Cash Close Modal */}
+      <DailyCashCloseModal
+        isOpen={isCashCloseOpen}
+        onClose={() => setIsCashCloseOpen(false)}
+        payments={payments}
       />
     </section>
   );

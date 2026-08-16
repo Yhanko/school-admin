@@ -17,7 +17,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 
 export const metadata: Metadata = {
-  title: "Yhanko Educa • School Admin",
+  title: "Yhanko Educa",
   description: "A melhor gestão para a tua instituição de ensino",
   icons: {
     icon: [

@@ -14,10 +14,11 @@ import {
   Users,
   GraduationCap,
 } from "@/lib/icons";
-import { ShieldCheck, UserCheck } from "lucide-react";
+import { ShieldCheck, UserCheck, ShieldAlert } from "lucide-react";
 import { AddNewUserPermission } from "./_components/add_permission";
 import axiosInstance from "@/service/api";
 import { useToast } from "@/hooks/use-toast";
+import { usePermissions } from "@/hooks/usePermissions";
 
 interface UserPermissionItem {
   id: string;
@@ -29,6 +30,7 @@ interface UserPermissionItem {
 
 export default function Permission() {
   const { toast } = useToast();
+  const { isDirector } = usePermissions();
   const [users, setUsers] = useState<UserPermissionItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showPermissionDetails, setShowPermissionDetails] = useState<string | null>(null);
@@ -154,11 +156,27 @@ export default function Permission() {
     return labels[role] || role;
   };
 
+  if (!isDirector) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4 font-hanken text-center px-4">
+        <div className="p-4 bg-red-100 dark:bg-red-950/40 rounded-full text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800">
+          <ShieldAlert className="w-10 h-10" />
+        </div>
+        <div className="space-y-1 max-w-md">
+          <h2 className="text-xl font-bold text-[#090D16] dark:text-[#e5e2e1]">Acesso Restrito à Direcção Geral</h2>
+          <p className="text-xs text-[#556575] dark:text-[#d5c4ac] leading-relaxed">
+            Apenas a Direcção Geral e Administradores têm autorização para gerir credenciais, privilégios e permissões de utilizadores.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="flex flex-col justify-center items-center w-full min-h-[60vh] space-y-3 font-hanken">
-        <Loader2 className="w-8 h-8 animate-spin text-[#8B5CF6]" />
-        <span className="label-caps text-[#d5c4ac]">Carregando permissões do sistema...</span>
+        <Loader2 className="w-8 h-8 animate-spin text-[#7C3AED] dark:text-[#8B5CF6]" />
+        <span className="label-caps text-[#556575] dark:text-[#d5c4ac]">Carregando permissões do sistema...</span>
       </div>
     );
   }
@@ -170,7 +188,7 @@ export default function Permission() {
   );
 
   return (
-    <div className="w-full max-w-full space-y-6 font-hanken text-[#e5e2e1]">
+    <div className="w-full max-w-full space-y-6 font-hanken text-[#090D16] dark:text-[#e5e2e1]">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#414042] pb-6">
         <div>

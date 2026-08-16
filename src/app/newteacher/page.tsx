@@ -4,11 +4,12 @@ import axiosInstance from '@/service/api';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from '@/lib/icons';
 
+const safeStringRegex = /^[^<>';=]*$/;
+
 const AddNewTeacher: React.FC = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  
   const [formData, setFormData] = useState({
       firstName: '',
       lastName: '',
@@ -54,12 +55,6 @@ const AddNewTeacher: React.FC = () => {
     if (typeof formData !== 'undefined' && formData !== null) {
       Object.entries(formData).forEach(([k, v]) => validateString(v, k));
     }
-    if (typeof newRule !== 'undefined' && newRule !== null) {
-      Object.entries(newRule).forEach(([k, v]) => validateString(v, k));
-    }
-    // Suporte para title / description avulsos
-    if (typeof title !== 'undefined') validateString(title, 'title');
-    if (typeof description !== 'undefined') validateString(description, 'description');
     
     if (hasValidationErrors) {
       setErrors(formErrors);

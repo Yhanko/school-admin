@@ -11,10 +11,20 @@ import {
   LuUserCog,
   BsExclamationCircle,
   BsCashCoin,
-  Clock
+  Clock,
+  Award,
+  FileCheck,
 } from "@/lib/icons";
 
-export const routes = [
+export interface AppRoute {
+  id: number;
+  title: string;
+  url: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  directorOnly?: boolean;
+}
+
+export const routes: AppRoute[] = [
   {
     id: 1,
     title: "Dashboard",
@@ -35,62 +45,75 @@ export const routes = [
   },
   {
     id: 4,
+    title: "Pautas & Avaliações",
+    url: "/pautas",
+    icon: Award,
+  },
+  {
+    id: 5,
     title: "Turmas",
     url: "/turma",
     icon: SiGoogleclassroom,
   },
   {
-    id: 5,
+    id: 6,
     title: "Horários",
     url: "/schedules",
     icon: Clock,
   },
   {
-    id: 6,
-    title: "Eventos",
-    url: "/events",
-    icon: CalendarDays,
+    id: 7,
+    title: "Documentos & QR Code",
+    url: "/documents",
+    icon: FileCheck,
   },
   {
-    id: 7,
+    id: 8,
     title: "Pagamentos",
     url: "/payments",
     icon: BsCashCoin,
   },
   {
-    id: 8,
-    title: "Chat",
-    url: "/chat",
-    icon:  MessagesSquare,
+    id: 9,
+    title: "Eventos",
+    url: "/events",
+    icon: CalendarDays,
   },
   {
-    id: 9,
+    id: 10,
+    title: "Chat",
+    url: "/chat",
+    icon: MessagesSquare,
+  },
+  {
+    id: 11,
     title: "Relatórios",
     url: "/report",
     icon: FaRegFileAlt,
   },
   {
-    id: 10,
+    id: 12,
     title: "Regulamento",
     url: "/schoolRules",
     icon: PiFilesLight,
   },
   {
-    id: 11,
+    id: 13,
     title: "Disciplinar",
     url: "/disciplinar",
     icon: BsExclamationCircle,
   },
   {
-    id: 12,
+    id: 14,
     title: "Permissões",
     url: "/permission",
     icon: LuUserCog,
+    directorOnly: true,
   },
   {
-    id: 13,
+    id: 15,
     title: "Perfil",
     url: "/profile",
     icon: UserCircle,
   },
-]
+];

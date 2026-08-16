@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,8 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import axiosInstance from "@/service/api";
+
+const safeStringRegex = /^[^<>';=]*$/;
 
 function ChangeEventContent() {
   const searchParams = useSearchParams();
@@ -50,7 +52,7 @@ function ChangeEventContent() {
           setFormData({
             title: event.title,
             description: event.description,
-            date: event.date.split('T')[0], // format YYYY-MM-DD
+            date: event.date.split('T')[0],
             location: event.location,
             type: event.type,
             organizer: event.organizer,
@@ -103,12 +105,6 @@ function ChangeEventContent() {
     if (typeof formData !== 'undefined' && formData !== null) {
       Object.entries(formData).forEach(([k, v]) => validateString(v, k));
     }
-    if (typeof newRule !== 'undefined' && newRule !== null) {
-      Object.entries(newRule).forEach(([k, v]) => validateString(v, k));
-    }
-    // Suporte para title / description avulsos
-    if (typeof title !== 'undefined') validateString(title, 'title');
-    if (typeof description !== 'undefined') validateString(description, 'description');
     
     if (hasValidationErrors) {
       setErrors(formErrors);

@@ -1,9 +1,12 @@
-"use client"
+
+"use client";
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import axiosInstance from '@/service/api';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from '@/lib/icons';
+
+const safeStringRegex = /^[^<>';=]*$/;
 
 interface StudentData {
   photo: string;
@@ -127,16 +130,12 @@ function StudentParentFormContent() {
       }
     };
 
-    // Dinamicamente valida o estado do formulário se for um objeto como formData
-    if (typeof formData !== 'undefined' && formData !== null) {
-      Object.entries(formData).forEach(([k, v]) => validateString(v, k));
+    if (typeof studentData !== 'undefined' && studentData !== null) {
+      Object.entries(studentData).forEach(([k, v]) => validateString(v, k));
     }
-    if (typeof newRule !== 'undefined' && newRule !== null) {
-      Object.entries(newRule).forEach(([k, v]) => validateString(v, k));
+    if (typeof parentData !== 'undefined' && parentData !== null) {
+      Object.entries(parentData).forEach(([k, v]) => validateString(v, k));
     }
-    // Suporte para title / description avulsos
-    if (typeof title !== 'undefined') validateString(title, 'title');
-    if (typeof description !== 'undefined') validateString(description, 'description');
     
     if (hasValidationErrors) {
       setErrors(formErrors);

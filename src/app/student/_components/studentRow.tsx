@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "@/lib/icons";
+import { usePermissions } from "@/hooks/usePermissions";
 
 export interface Student {
   id: string;
@@ -38,6 +39,8 @@ interface StudentRowProps {
 }
 
 export function StudentRow({ student, onAction }: StudentRowProps) {
+  const { isDirector } = usePermissions();
+
   const getInitials = (name: string) => {
     return name
       .split(" ")
@@ -158,12 +161,14 @@ export function StudentRow({ student, onAction }: StudentRowProps) {
             >
               Editar Estudante
             </DropdownMenuItem>
-            <DropdownMenuItem
-              className="hover:bg-[#FEE2E2] dark:hover:bg-[#9B2226]/20 focus:bg-[#FEE2E2] dark:focus:bg-[#9B2226]/20 text-[#DC2626] dark:text-[#ffb4ab] cursor-pointer text-xs font-semibold"
-              onClick={() => onAction("delete", student)}
-            >
-              Excluir Estudante
-            </DropdownMenuItem>
+            {isDirector && (
+              <DropdownMenuItem
+                className="hover:bg-[#FEE2E2] dark:hover:bg-[#9B2226]/20 focus:bg-[#FEE2E2] dark:focus:bg-[#9B2226]/20 text-[#DC2626] dark:text-[#ffb4ab] cursor-pointer text-xs font-semibold"
+                onClick={() => onAction("delete", student)}
+              >
+                Excluir Estudante
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </TableCell>

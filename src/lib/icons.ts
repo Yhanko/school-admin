@@ -84,7 +84,10 @@ import {
   ShieldAlert,
   UserCheck,
   ArrowRight,
-  Camera
+  Camera,
+  FileCheck,
+  Save,
+  QrCode
 } from "lucide-react";
 import { IoIosAlert } from "react-icons/io";
 import { TbFileText, TbPigOff, TbFileArrowRight } from "react-icons/tb";
@@ -228,4 +231,7 @@ export {
   UserCheck,
   ArrowRight,
   Camera,
+  FileCheck,
+  Save,
+  QrCode,
 }

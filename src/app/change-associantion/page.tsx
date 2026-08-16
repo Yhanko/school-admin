@@ -1,9 +1,12 @@
-"use client"
+
+"use client";
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import axiosInstance from '@/service/api';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from '@/lib/icons';
+
+const safeStringRegex = /^[^<>';=]*$/;
 
 function ChangeAssociationContent() {
   const searchParams = useSearchParams();
@@ -90,12 +93,6 @@ function ChangeAssociationContent() {
     if (typeof formData !== 'undefined' && formData !== null) {
       Object.entries(formData).forEach(([k, v]) => validateString(v, k));
     }
-    if (typeof newRule !== 'undefined' && newRule !== null) {
-      Object.entries(newRule).forEach(([k, v]) => validateString(v, k));
-    }
-    // Suporte para title / description avulsos
-    if (typeof title !== 'undefined') validateString(title, 'title');
-    if (typeof description !== 'undefined') validateString(description, 'description');
     
     if (hasValidationErrors) {
       setErrors(formErrors);

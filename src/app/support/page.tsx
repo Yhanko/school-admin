@@ -1,4 +1,5 @@
 "use client";
+"use client";
 
 import { useState, useEffect } from 'react';
 import axiosInstance from '@/service/api';
@@ -11,6 +12,8 @@ interface SupportTicket {
   status: string;
   createdAt: string;
 }
+
+const safeStringRegex = /^[^<>';=]*$/;
 
 export default function SupportPage() {
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
@@ -58,16 +61,8 @@ export default function SupportPage() {
       }
     };
 
-    // Dinamicamente valida o estado do formulário se for um objeto como formData
-    if (typeof formData !== 'undefined' && formData !== null) {
-      Object.entries(formData).forEach(([k, v]) => validateString(v, k));
-    }
-    if (typeof newRule !== 'undefined' && newRule !== null) {
-      Object.entries(newRule).forEach(([k, v]) => validateString(v, k));
-    }
-    // Suporte para title / description avulsos
-    if (typeof title !== 'undefined') validateString(title, 'title');
-    if (typeof description !== 'undefined') validateString(description, 'description');
+    validateString(title, 'title');
+    validateString(description, 'description');
     
     if (hasValidationErrors) {
       setErrors(formErrors);

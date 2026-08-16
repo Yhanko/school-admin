@@ -25,9 +25,12 @@ import { useToast } from "@/hooks/use-toast";
 export interface PaymentRecord {
   id?: string;
   student?: { name?: string; email?: string; id?: string };
+  studentName?: string;
   type?: string;
+  description?: string;
   amount?: number;
   status?: string;
+  paymentMethod?: string;
   paymentDate?: string;
   createdAt?: string;
 }
