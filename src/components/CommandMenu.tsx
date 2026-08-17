@@ -127,7 +127,7 @@ export function CommandMenu({
       title: "Nova Matrícula de Aluno",
       icon: Plus,
       path: "/student",
-      badge: "Estudantes",
+      badge: "Alunos",
     },
     {
       title: "Emitir Declaração / Certificado",
@@ -184,7 +184,7 @@ export function CommandMenu({
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Pesquisar estudantes, professores, turmas, páginas ou ações (Ctrl+K)..."
+            placeholder="Pesquisar alunos, professores, turmas, páginas ou ações (Ctrl+K)..."
             className="w-full bg-transparent text-sm sm:text-base outline-none text-[#090D16] dark:text-[#e5e2e1] placeholder-[#556575] dark:placeholder-[#9d8f78]"
             autoFocus
           />
@@ -234,7 +234,7 @@ export function CommandMenu({
           {searchResults.students.length > 0 && (
             <div>
               <span className="label-caps text-[10px] text-[#556575] dark:text-[#9d8f78] px-2 block mb-1.5 font-bold">
-                Estudantes Encontrados
+                Alunos Encontrados
               </span>
               <div className="space-y-1">
                 {searchResults.students.map((st) => (

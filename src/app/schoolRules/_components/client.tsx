@@ -33,6 +33,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import { z } from 'zod';
+import { ShareWhatsappDialog } from '@/components/whatsapp/ShareWhatsappDialog';
 
 const ruleSchema = z.object({
   title: z.string().trim().min(1, "O título é obrigatório").max(255, "Título muito longo").regex(/^[^<>';=]*$/, "Caracteres inválidos (Não use < > ' ; =)"),
@@ -493,6 +494,10 @@ export function RegulationsClient() {
                       </div>
                     </DialogContent>
                   </Dialog>
+
+                  {regulation.fileUrl && (
+                    <ShareWhatsappDialog mediaUrl={regulation.fileUrl} />
+                  )}
 
                   <Button
                     size="sm"

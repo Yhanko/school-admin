@@ -183,7 +183,7 @@ export default function RiskRadarPage() {
   const handleSendWhatsAppNotification = () => {
     if (!selectedStudentForAction) return;
     const msg = encodeURIComponent(
-      `Prezado(a) ${selectedStudentForAction.parentName}, a Direcção Pedagógica do ${institutionName} solicita o seu comparecimento urgente para alinhamento sobre o aproveitamento do estudante ${selectedStudentForAction.name}. Por favor responda a esta mensagem para agendarmos o melhor horário.`
+      `Prezado(a) ${selectedStudentForAction.parentName}, a Direcção Pedagógica do ${institutionName} solicita o seu comparecimento urgente para alinhamento sobre o aproveitamento do aluno ${selectedStudentForAction.name}. Por favor responda a esta mensagem para agendarmos o melhor horário.`
     );
     const cleanPhone = selectedStudentForAction.parentPhone.replace(/\D/g, "");
     window.open(`https://wa.me/244${cleanPhone}?text=${msg}`, "_blank");
@@ -299,7 +299,7 @@ export default function RiskRadarPage() {
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Pesquisar por nome do estudante ou nº de processo..."
+            placeholder="Pesquisar por nome do aluno ou nº de processo..."
             className="w-full bg-[#EDF0F3] dark:bg-[#1c1b1b] border border-[#CBD5E1] dark:border-[#414042] focus:border-primary rounded text-xs text-[#090D16] dark:text-[#e5e2e1] pl-9 pr-3 py-2 outline-none font-medium"
           />
         </div>
@@ -350,7 +350,7 @@ export default function RiskRadarPage() {
           <table className="w-full text-xs text-left border-collapse font-hanken">
             <thead className="bg-[#E2E6EA] dark:bg-[#1c1b1b] border-b border-[#CBD5E1] dark:border-[#414042] text-[#334155] dark:text-[#d5c4ac] label-caps">
               <tr>
-                <th className="p-3">Estudante</th>
+                <th className="p-3">Aluno</th>
                 <th className="p-3">Turma</th>
                 <th className="p-3 text-center">Faltas no Trimestre</th>
                 <th className="p-3 text-center">Média Geral</th>
@@ -494,7 +494,7 @@ export default function RiskRadarPage() {
                   Diagnóstico Preditivo: Score de Risco {selectedStudentForAction.riskScore} / 100
                 </strong>
                 <p className="text-red-700 dark:text-red-400">
-                  O estudante acumulou <strong>{selectedStudentForAction.absencesCount} faltas</strong> e apresenta média de <strong>{selectedStudentForAction.gradeAverage} valores</strong>. Recomenda-se convocatória imediata aos pais para prevenir retenção/abandono.
+                  O aluno acumulou <strong>{selectedStudentForAction.absencesCount} faltas</strong> e apresenta média de <strong>{selectedStudentForAction.gradeAverage} valores</strong>. Recomenda-se convocatória imediata aos pais para prevenir retenção/abandono.
                 </p>
               </div>
             </div>

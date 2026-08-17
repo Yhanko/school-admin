@@ -66,6 +66,15 @@ export function NewTeacher() {
       setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleGeneratePassword = () => {
+    const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+    let pwd = "";
+    for (let i = 0; i < 8; i++) pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+    
+    setFormData(prev => ({ ...prev, password: pwd, confirmPassword: pwd }));
+    toast({ title: 'Senha Gerada', description: 'A senha foi gerada e copiada para os campos.' });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -167,7 +176,10 @@ export function NewTeacher() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                    <label className="block label-caps text-[#d5c4ac] mb-1.5">Senha de Acesso *</label>
+                    <div className="flex justify-between items-center mb-1.5">
+                      <label className="block label-caps text-[#d5c4ac]">Senha de Acesso *</label>
+                      <button type="button" onClick={handleGeneratePassword} className="text-[10px] text-[#8B5CF6] hover:underline font-bold uppercase">Gerar Senha</button>
+                    </div>
                     <input required minLength={6} type="password" name="password" value={formData.password} onChange={handleChange} className="w-full px-3 py-2 bg-[#0D0D0D] border border-[#414042] focus:border-[#C0C2C5] focus:ring-1 focus:ring-[#C0C2C5] rounded text-sm text-[#e5e2e1] placeholder:text-[#9d8f78] outline-none transition-colors" placeholder="Mínimo 6 caracteres" />
                     {errors.password && <p className="text-[#ffb4ab] text-xs mt-1">{errors.password}</p>}
                 </div>

@@ -32,15 +32,15 @@ Art. 3º - São objetivos da instituição:
    II. Desenvolver competências cognitivas e socioemocionais;
    III. Preparar cidadãos para participação ativa na sociedade.
 
-CAPÍTULO II - DIREITOS E DEVERES DOS ESTUDANTES
+CAPÍTULO II - DIREITOS E DEVERES DOS ALUNOS
 
-Art. 4º - Todo estudante tem direito a:
+Art. 4º - Todo aluno tem direito a:
    I. Educação de qualidade centrada no desenvolvimento integral;
    II. Ambiente acolhedor e seguro;
    III. Participação em atividades culturais e desportivas;
    IV. Avaliação justa e transparente.
 
-Art. 5º - São deveres do estudante:
+Art. 5º - São deveres do aluno:
    I. Frequentar regularmente as aulas;
    II. Cumprir as normas de disciplina;
    III. Respeitar professores, colegas e funcionários;

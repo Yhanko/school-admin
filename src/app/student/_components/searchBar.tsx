@@ -25,7 +25,7 @@ export function SearchBar({
           <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8] dark:text-[#9d8f78]" />
           <input
             type="text"
-            placeholder="Pesquisar por nome do estudante..."
+            placeholder="Pesquisar por nome do aluno..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
@@ -40,13 +40,13 @@ export function SearchBar({
         </Button>
       </div>
 
-      {/* Botão Novo Estudante */}
+      {/* Botão Novo Aluno */}
       <Button
         onClick={onNewStudentClick}
         className="bg-[#8B5CF6] hover:bg-[#A78BFA] text-white font-bold rounded h-10 px-5 text-sm font-hanken shadow-xs cursor-pointer shrink-0 transition-all flex items-center justify-center gap-2"
       >
         <Plus className="h-4 w-4" />
-        <span>Novo Estudante</span>
+        <span>Novo Aluno</span>
       </Button>
     </div>
   );

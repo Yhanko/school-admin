@@ -41,7 +41,7 @@ const AboutSection: React.FC<AboutSectionProps> = ({ className = '' }) => {
     { title: "Dashboard", description: "Visão geral completa" },
     { title: "Professores", description: "Gestão de docentes" },
     { title: "Comunicação", description: "Chat integrado" },
-    { title: "Estudantes", description: "Perfis de alunos" },
+    { title: "Alunos", description: "Perfis de alunos" },
     { title: "Financeiro", description: "Controle de pagamentos" },
     { title: "Eventos", description: "Calendário escolar" }
   ];

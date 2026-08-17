@@ -180,6 +180,7 @@ export interface Student {
   classroom: Classroom;
   enrollmentDate: string;
   dateOfBirth?: string;
+  photoUrl?: string;
 }
 export interface Activity {
   id: string;

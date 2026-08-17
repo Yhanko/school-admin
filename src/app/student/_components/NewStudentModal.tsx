@@ -32,6 +32,7 @@ interface StudentFormData {
   birthCertificate: File | null;
   vaccineCard: File | null;
   proofOfAddress: File | null;
+  photoFile: File | null;
 
   // Parent Info (for 1-6)
   parentFirstName: string;
@@ -140,6 +141,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
     birthCertificate: null,
     vaccineCard: null,
     proofOfAddress: null,
+    photoFile: null,
     parentFirstName: "",
     parentLastName: "",
     parentEmail: "",
@@ -200,6 +202,27 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
         }
       };
       fetchClasses();
+
+      const generatePwd = () => {
+        const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+        let pwd = "";
+        for (let i = 0; i < 8; i++) pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+        return pwd;
+      };
+      
+      const studentPwd = generatePwd();
+      const parentPwd = generatePwd();
+      const guardianPwd = generatePwd();
+
+      setFormData(prev => ({
+        ...prev,
+        password: studentPwd,
+        confirmPassword: studentPwd,
+        parentPassword: parentPwd,
+        parentConfirmPassword: parentPwd,
+        guardianPassword: guardianPwd,
+        guardianConfirmPassword: guardianPwd,
+      }));
     }
   }, [isOpen]);
 
@@ -209,6 +232,20 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
       .toString()
       .padStart(4, "0");
     setFormData((prev) => ({ ...prev, studentNumber: `${year}${random}` }));
+  };
+
+  const handleGeneratePassword = (target: 'student' | 'parent' | 'guardian') => {
+    const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+    let pwd = "";
+    for (let i = 0; i < 8; i++) pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+    
+    setFormData(prev => {
+      if (target === 'student') return { ...prev, password: pwd, confirmPassword: pwd };
+      if (target === 'parent') return { ...prev, parentPassword: pwd, parentConfirmPassword: pwd };
+      if (target === 'guardian') return { ...prev, guardianPassword: pwd, guardianConfirmPassword: pwd };
+      return prev;
+    });
+    toast({ title: 'Senha Gerada', description: 'A senha foi gerada e copiada para os campos.' });
   };
 
   const handleInputChange = (
@@ -228,6 +265,16 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
+      let photoUrl = undefined;
+      if (formData.photoFile) {
+        const uploadData = new FormData();
+        uploadData.append('file', formData.photoFile);
+        const uploadRes = await axiosInstance.post('/uploads/cloudinary', uploadData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        photoUrl = uploadRes.data.url;
+      }
+
       await axiosInstance.post('/users/student', {
         name: `${formData.firstName} ${formData.lastName}`,
         studentNumber: formData.studentNumber || undefined,
@@ -235,6 +282,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
         password: formData.password || "DefaultPassword123!",
         phone: formData.phone,
         classId: formData.class,
+        photoUrl: photoUrl,
         parentName: formData.parentFirstName ? `${formData.parentFirstName} ${formData.parentLastName}`.trim() : undefined,
         parentEmail: formData.parentEmail || undefined,
         parentPhone: formData.parentPhone || undefined,
@@ -275,6 +323,7 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
       birthCertificate: null,
       vaccineCard: null,
       proofOfAddress: null,
+      photoFile: null,
       parentFirstName: "",
       parentLastName: "",
       parentEmail: "",
@@ -384,10 +433,48 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
         </div>
       )}
 
+      <div className="mb-6 flex justify-center">
+        <div className="flex flex-col items-center gap-2">
+          <div className="relative w-24 h-24 rounded-full border-2 border-dashed border-border flex items-center justify-center overflow-hidden bg-muted hover:bg-muted/80 transition-colors cursor-pointer"
+               onClick={() => document.getElementById('photoUpload')?.click()}
+          >
+            {formData.photoFile ? (
+              <img 
+                src={URL.createObjectURL(formData.photoFile)} 
+                alt="Preview" 
+                className="w-full h-full object-cover" 
+              />
+            ) : (
+              <span className="text-muted-foreground flex flex-col items-center">
+                <span className="text-2xl mb-1">📷</span>
+                <span className="text-[10px] uppercase font-bold tracking-wider">Foto</span>
+              </span>
+            )}
+          </div>
+          <input 
+            type="file" 
+            id="photoUpload" 
+            name="photoFile" 
+            accept="image/*" 
+            className="hidden" 
+            onChange={handleFileChange} 
+          />
+          {formData.photoFile && (
+            <button 
+              type="button" 
+              onClick={() => setFormData(prev => ({ ...prev, photoFile: null }))}
+              className="text-xs text-red-500 hover:text-red-600 font-semibold"
+            >
+              Remover Foto
+            </button>
+          )}
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="flex flex-col space-y-2">
           <label className="text-sm font-medium text-foreground">
-            Número de Estudante
+            Número de Aluno
           </label>
           <div className="flex gap-2">
             <input
@@ -597,7 +684,12 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
         </div>
 
         <div className="flex flex-col space-y-2">
-          <label className="text-sm font-medium text-foreground">Senha *</label>
+          <div className="flex justify-between items-center">
+            <label className="text-sm font-medium text-foreground">Senha *</label>
+            <button type="button" onClick={() => handleGeneratePassword('student')} className="text-xs text-primary hover:underline font-semibold flex items-center gap-1">
+              <Sparkles className="w-3 h-3" /> Gerar
+            </button>
+          </div>
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
@@ -707,7 +799,12 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
         </div>
 
         <div className="flex flex-col space-y-2">
-          <label className="text-sm font-medium text-foreground">Senha *</label>
+          <div className="flex justify-between items-center">
+            <label className="text-sm font-medium text-foreground">Senha *</label>
+            <button type="button" onClick={() => handleGeneratePassword('parent')} className="text-xs text-primary hover:underline font-semibold flex items-center gap-1">
+              <Sparkles className="w-3 h-3" /> Gerar
+            </button>
+          </div>
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
@@ -835,7 +932,12 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
         </div>
 
         <div className="flex flex-col space-y-2">
-          <label className="text-sm font-medium text-foreground">Senha *</label>
+          <div className="flex justify-between items-center">
+            <label className="text-sm font-medium text-foreground">Senha *</label>
+            <button type="button" onClick={() => handleGeneratePassword('guardian')} className="text-xs text-primary hover:underline font-semibold flex items-center gap-1">
+              <Sparkles className="w-3 h-3" /> Gerar
+            </button>
+          </div>
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}

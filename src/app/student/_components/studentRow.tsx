@@ -159,16 +159,9 @@ export function StudentRow({ student, onAction }: StudentRowProps) {
               className="hover:bg-[#F1F5F9] dark:hover:bg-[#201f1f] focus:bg-[#F1F5F9] dark:focus:bg-[#201f1f] cursor-pointer text-xs font-semibold text-[#0F172A] dark:text-[#e5e2e1]"
               onClick={() => onAction("edit", student)}
             >
-              Editar Estudante
+              Editar Aluno
             </DropdownMenuItem>
-            {isDirector && (
-              <DropdownMenuItem
-                className="hover:bg-[#FEE2E2] dark:hover:bg-[#9B2226]/20 focus:bg-[#FEE2E2] dark:focus:bg-[#9B2226]/20 text-[#DC2626] dark:text-[#ffb4ab] cursor-pointer text-xs font-semibold"
-                onClick={() => onAction("delete", student)}
-              >
-                Excluir Estudante
-              </DropdownMenuItem>
-            )}
+
           </DropdownMenuContent>
         </DropdownMenu>
       </TableCell>

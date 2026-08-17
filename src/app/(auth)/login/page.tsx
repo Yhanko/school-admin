@@ -161,11 +161,11 @@ export default function LoginPage() {
             
             <div className="pt-2">
               <div className="inline-block px-2.5 py-0.5 rounded text-[11px] font-bold bg-primary/10 text-primary border border-primary/20 uppercase tracking-wide mb-2">
-                Acesso Direção
+                Acesso Institucional
               </div>
-              <h1 className="text-2xl font-bold text-foreground">Director Geral</h1>
+              <h1 className="text-2xl font-bold text-foreground">Login</h1>
               <p className="text-sm text-muted-foreground mt-1 max-w-xs sm:max-w-sm mx-auto leading-relaxed">
-                Aceda com as suas credenciais para gerir o painel da instituição.
+                Aceda com as suas credenciais para gerir a sua área na instituição.
               </p>
             </div>
           </div>
@@ -263,15 +263,7 @@ export default function LoginPage() {
                 {isLoading ? <Loader2 className="w-4 h-4 animate-spin mx-auto text-white" /> : "Iniciar Sessão"}
               </Button>
 
-              <Link href="/afiliate" className="block w-full">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full h-11 border border-border bg-background hover:bg-muted text-foreground font-semibold text-sm rounded transition-all cursor-pointer"
-                >
-                  Entrar como Secretaria
-                </Button>
-              </Link>
+
             </div>
 
           </form>

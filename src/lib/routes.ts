@@ -34,7 +34,7 @@ export const routes: AppRoute[] = [
   },
   {
     id: 2,
-    title: "Estudantes",
+    title: "Alunos",
     url: "/student",
     icon: Student,
   },

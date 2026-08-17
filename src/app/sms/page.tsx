@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { smsService, SmsContact } from '@/service/sms.service';
 import { emailService, EmailContact } from '@/service/email.service';
+import { whatsappService, WhatsappContact } from '@/service/whatsapp.service';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -18,13 +19,15 @@ export default function CommunicationsPage() {
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
-  // SMS State
+  // State
   const [smsContacts, setSmsContacts] = useState<SmsContact[]>([]);
   const [selectedSmsIds, setSelectedSmsIds] = useState<Set<string>>(new Set());
   
-  // Email State
   const [emailContacts, setEmailContacts] = useState<EmailContact[]>([]);
   const [selectedEmailIds, setSelectedEmailIds] = useState<Set<string>>(new Set());
+
+  const [whatsappContacts, setWhatsappContacts] = useState<WhatsappContact[]>([]);
+  const [selectedWhatsappIds, setSelectedWhatsappIds] = useState<Set<string>>(new Set());
 
   const [roleFilter, setRoleFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
@@ -35,15 +38,15 @@ export default function CommunicationsPage() {
       try {
         const smsData = await smsService.getContacts();
         setSmsContacts(smsData);
-      } catch (error) {
-        toast.error('Erro ao carregar contactos SMS.');
-      }
+      } catch (error) {}
       try {
         const emailData = await emailService.getContacts();
         setEmailContacts(emailData);
-      } catch (error) {
-        toast.error('Erro ao carregar contactos de E-mail.');
-      }
+      } catch (error) {}
+      try {
+        const wppData = await whatsappService.getContacts();
+        setWhatsappContacts(wppData);
+      } catch (error) {}
     };
     fetchData();
   }, []);
@@ -59,10 +62,10 @@ export default function CommunicationsPage() {
   }, []);
 
   const getFilteredContacts = () => {
-    const sourceContacts = activeTab === 'sms' ? smsContacts : emailContacts;
+    const sourceContacts = activeTab === 'sms' ? smsContacts : activeTab === 'email' ? emailContacts : whatsappContacts;
     return sourceContacts.filter((c: any) => {
       const matchesRole = roleFilter === 'ALL' || c.role === roleFilter;
-      const term = activeTab === 'sms' ? c.phone : c.email;
+      const term = activeTab === 'sms' ? c.phone : activeTab === 'whatsapp' ? c.phone : c.email;
       const matchesSearch = c.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             (term && term.toLowerCase().includes(searchQuery.toLowerCase()));
       return matchesRole && matchesSearch;
@@ -70,8 +73,8 @@ export default function CommunicationsPage() {
   };
 
   const filteredContacts = getFilteredContacts();
-  const selectedSet = activeTab === 'sms' ? selectedSmsIds : selectedEmailIds;
-  const setSelectedSet = activeTab === 'sms' ? setSelectedSmsIds : setSelectedEmailIds;
+  const selectedSet = activeTab === 'sms' ? selectedSmsIds : activeTab === 'email' ? selectedEmailIds : selectedWhatsappIds;
+  const setSelectedSet = activeTab === 'sms' ? setSelectedSmsIds : activeTab === 'email' ? setSelectedEmailIds : setSelectedWhatsappIds;
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -98,8 +101,8 @@ export default function CommunicationsPage() {
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!subject || !message) {
-      toast.error('Por favor, preencha o assunto e a mensagem.');
+    if ((activeTab === 'email' && !subject) || !message) {
+      toast.error('Por favor, preencha todos os campos.');
       return;
     }
 
@@ -118,13 +121,13 @@ export default function CommunicationsPage() {
 
         await smsService.sendBulkSms({
           institutionName,
-          subject,
+          subject: subject || 'Aviso',
           message,
           phoneNumbers,
         });
         toast.success('SMS enviado com sucesso!');
         setSelectedSmsIds(new Set());
-      } else {
+      } else if (activeTab === 'email') {
         const emails = Array.from(selectedEmailIds)
           .map(id => emailContacts.find(c => c.id === id)?.email)
           .filter((email): email is string => !!email);
@@ -135,15 +138,27 @@ export default function CommunicationsPage() {
           message,
           emails,
         });
-        toast.success('E-mails em processamento de envio!');
+        toast.success('E-mails em processamento!');
         setSelectedEmailIds(new Set());
+      } else {
+        const phoneNumbers = Array.from(selectedWhatsappIds)
+          .map(id => whatsappContacts.find(c => c.id === id)?.phone)
+          .filter((phone): phone is string => !!phone);
+
+        await whatsappService.sendBulkWhatsapp({
+          institutionName,
+          message,
+          phoneNumbers,
+        });
+        toast.success('WhatsApp enviado com sucesso!');
+        setSelectedWhatsappIds(new Set());
       }
 
       setSubject('');
       setMessage('');
     } catch (error: any) {
       console.error(error);
-      toast.error('Erro ao processar o envio. Tente novamente mais tarde.');
+      toast.error('Erro ao processar o envio. Tente novamente.');
     } finally {
       setIsLoading(false);
     }
@@ -158,44 +173,48 @@ export default function CommunicationsPage() {
       </div>
 
       <Tabs defaultValue="sms" onValueChange={setActiveTab} className="w-full mb-6">
-        <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
+        <TabsList className="grid w-full grid-cols-3 max-w-[600px]">
           <TabsTrigger value="sms">Enviar SMS</TabsTrigger>
           <TabsTrigger value="email">Enviar E-mail</TabsTrigger>
+          <TabsTrigger value="whatsapp">Enviar WhatsApp</TabsTrigger>
         </TabsList>
       </Tabs>
 
       <div className="flex flex-col md:flex-row gap-8">
         <div className="flex-1">
           <form onSubmit={handleSend} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium mb-2">Assunto</label>
-              {activeTab === 'sms' ? (
-                <Select value={subject} onValueChange={setSubject}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o assunto" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Faltas">Faltas</SelectItem>
-                    <SelectItem value="Atraso no Pagamento">Atraso no Pagamento</SelectItem>
-                    <SelectItem value="Boletim">Levantamento de Boletim</SelectItem>
-                    <SelectItem value="Reunião">Reunião de Encarregados</SelectItem>
-                    <SelectItem value="Outro">Outro</SelectItem>
-                  </SelectContent>
-                </Select>
-              ) : (
-                <Input 
-                  placeholder="Escreva o assunto do E-mail..." 
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                />
-              )}
-            </div>
+            
+            {activeTab !== 'whatsapp' && (
+              <div>
+                <label className="block text-sm font-medium mb-2">Assunto</label>
+                {activeTab === 'sms' ? (
+                  <Select value={subject} onValueChange={setSubject}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o assunto" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Faltas">Faltas</SelectItem>
+                      <SelectItem value="Atraso no Pagamento">Atraso no Pagamento</SelectItem>
+                      <SelectItem value="Boletim">Levantamento de Boletim</SelectItem>
+                      <SelectItem value="Reunião">Reunião de Encarregados</SelectItem>
+                      <SelectItem value="Outro">Outro</SelectItem>
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Input 
+                    placeholder="Escreva o assunto do E-mail..." 
+                    value={subject}
+                    onChange={(e) => setSubject(e.target.value)}
+                  />
+                )}
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium mb-2">Mensagem Personalizada</label>
               <Textarea 
                 rows={6}
-                placeholder={activeTab === 'sms' ? "Escreva aqui a mensagem SMS adicional..." : "Corpo do E-mail..."}
+                placeholder={`Corpo da mensagem para ${activeTab.toUpperCase()}...`}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
               />
@@ -208,11 +227,15 @@ export default function CommunicationsPage() {
         </div>
 
         <div className="w-full md:w-80 flex flex-col border rounded-md p-4 bg-gray-50/50">
-          <h2 className="font-semibold mb-4">Destinatários ({activeTab === 'sms' ? smsContacts.length : emailContacts.length})</h2>
+          <h2 className="font-semibold mb-4">Destinatários ({
+            activeTab === 'sms' ? smsContacts.length : 
+            activeTab === 'email' ? emailContacts.length : 
+            whatsappContacts.length
+          })</h2>
           
           <div className="mb-4">
             <Input 
-              placeholder={`Pesquisar por nome ou ${activeTab === 'sms' ? 'número' : 'email'}...`} 
+              placeholder={`Pesquisar por nome ou ${activeTab === 'email' ? 'email' : 'número'}...`} 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="h-9 text-sm mb-3"
@@ -258,7 +281,7 @@ export default function CommunicationsPage() {
                       {contact.name}
                     </label>
                     <p className="text-xs text-muted-foreground">
-                      {activeTab === 'sms' ? contact.phone : contact.email} • {contact.role}
+                      {activeTab === 'email' ? contact.email : contact.phone} • {contact.role}
                     </p>
                   </div>
                 </div>

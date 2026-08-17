@@ -194,7 +194,7 @@ export function StudentTable({
                   Nº Registo
                 </TableHead>
                 <TableHead className="px-3 sm:px-4 py-3 label-caps text-[#334155] dark:text-[#d5c4ac]">
-                  Nome Estudante
+                  Nome Aluno
                 </TableHead>
                 <TableHead className="px-3 sm:px-4 py-3 label-caps text-[#334155] dark:text-[#d5c4ac]">
                   Data Matrícula
@@ -223,7 +223,7 @@ export function StudentTable({
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <Loader2 className="h-8 w-8 animate-spin text-[#8B5CF6]" />
                       <span className="label-caps text-[#556575] dark:text-[#d5c4ac]">
-                        Carregando base de estudantes...
+                        Carregando base de alunos...
                       </span>
                     </div>
                   </TableCell>
@@ -242,7 +242,7 @@ export function StudentTable({
                     colSpan={9}
                     className="h-32 text-center text-[#718096] dark:text-[#9d8f78] text-sm"
                   >
-                    Nenhum estudante encontrado na base de dados.
+                    Nenhum aluno encontrado na base de dados.
                   </TableCell>
                 </TableRow>
               )}
@@ -261,7 +261,7 @@ export function StudentTable({
             <span className="font-semibold text-[#090D16] dark:text-[#e5e2e1]">
               {filteredStudents.length}
             </span>{" "}
-            estudantes
+            alunos
           </div>
           <div className="flex items-center space-x-1.5">
             <Button
@@ -302,7 +302,7 @@ export function StudentTable({
           <div className="space-y-5 font-hanken text-[#0F172A] dark:text-[#e5e2e1]">
             <div className="space-y-3">
               <div className="flex items-center justify-between border-b border-[#E2E8F0] dark:border-[#414042] pb-2">
-                <h3 className="label-caps text-[#7C3AED] dark:text-[#DDD6FE]">Dados do Estudante</h3>
+                <h3 className="label-caps text-[#7C3AED] dark:text-[#DDD6FE]">Dados do Aluno</h3>
                 <span className="data-mono text-xs text-[#64748B] dark:text-[#9d8f78]">
                   ID: #{selectedStudentForAction.studentNumber}
                 </span>
@@ -399,13 +399,13 @@ export function StudentTable({
         <Modal
           isOpen={modalType === "edit"}
           onClose={() => setModalType(null)}
-          title="Editar Estudante"
+          title="Editar Aluno"
           size="md"
         >
           <div className="space-y-4 font-hanken text-[#0F172A] dark:text-[#e5e2e1]">
             <div className="space-y-1.5">
               <label className="label-caps text-[#64748B] dark:text-[#d5c4ac]">
-                Nome do Estudante
+                Nome do Aluno
               </label>
               <input
                 type="text"
@@ -438,7 +438,7 @@ export function StudentTable({
                 onClick={() => {
                   toast({
                     title: "Atualizado",
-                    description: "Dados do estudante guardados com sucesso.",
+                    description: "Dados do aluno guardados com sucesso.",
                   });
                   setModalType(null);
                 }}
@@ -455,12 +455,12 @@ export function StudentTable({
         <Modal
           isOpen={modalType === "delete"}
           onClose={() => setModalType(null)}
-          title="Excluir Estudante"
+          title="Excluir Aluno"
           size="sm"
         >
           <div className="space-y-4 font-hanken text-[#0F172A] dark:text-[#e5e2e1]">
             <p className="text-sm text-[#64748B] dark:text-[#d5c4ac]">
-              Tem a certeza de que deseja excluir o estudante{" "}
+              Tem a certeza de que deseja excluir o aluno{" "}
               <strong className="text-[#0F172A] dark:text-[#e5e2e1]">
                 {selectedStudentForAction.name}
               </strong>
@@ -481,7 +481,7 @@ export function StudentTable({
                 onClick={() => {
                   toast({
                     title: "Excluído",
-                    description: `Estudante ${selectedStudentForAction.name} foi removido.`,
+                    description: `Aluno ${selectedStudentForAction.name} foi removido.`,
                   });
                   setModalType(null);
                 }}

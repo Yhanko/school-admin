@@ -13,8 +13,12 @@ export default function StudentHeader({ student }: StudentHeaderProps) {
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-16 h-16 bg-blue-200 rounded-full flex items-center justify-center">
-              <User className="w-8 h-8 text-blue-700" />
+            <div className="w-16 h-16 bg-blue-200 rounded-full flex items-center justify-center overflow-hidden">
+              {student.photoUrl ? (
+                <img src={student.photoUrl} alt={student.fullName} className="w-full h-full object-cover" />
+              ) : (
+                <User className="w-8 h-8 text-blue-700" />
+              )}
             </div>
             <div>
               <h1 className="text-3xl font-bold text-foreground">{student.fullName}</h1>

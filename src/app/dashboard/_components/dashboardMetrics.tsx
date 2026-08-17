@@ -44,7 +44,7 @@ export function DashboardMetrics({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
       <MetricCard
-        title="Total de Estudantes"
+        title="Total de Alunos"
         value={totalStudents.toLocaleString()}
         subValue="Matrículas Ativas"
         icon={<Users className="w-6 h-6 text-[#8B5CF6]" />}

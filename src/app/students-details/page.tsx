@@ -47,7 +47,8 @@ function StudentDetailsContent() {
             relationship: user.profile?.guardianRelationship || mockStudent.guardian.relationship,
             phone: user.profile?.guardianPhone || mockStudent.guardian.phone,
             email: user.profile?.guardianEmail || mockStudent.guardian.email,
-          }
+          },
+          photoUrl: user.employeeProfile?.photoUrl || user.photoUrl || null,
         };
         
         setStudent(mappedStudent);
@@ -65,7 +66,7 @@ function StudentDetailsContent() {
     return (
       <div className="min-h-[60vh] flex flex-col justify-center items-center space-y-3 font-hanken">
         <Loader2 className="w-8 h-8 animate-spin text-[#8B5CF6]" />
-        <span className="label-caps text-[#d5c4ac]">Carregando ficha do estudante...</span>
+        <span className="label-caps text-[#d5c4ac]">Carregando ficha do aluno...</span>
       </div>
     );
   }
@@ -88,14 +89,18 @@ function StudentDetailsContent() {
         </div>
         
         <div className="px-6 pb-6 pt-0 flex flex-col sm:flex-row items-start sm:items-end gap-4 -mt-12">
-          <div className="w-20 h-20 bg-[#201f1f] border-2 border-[#414042] rounded-full flex items-center justify-center shadow-lg shrink-0">
-            <span className="text-2xl font-bold font-jetbrains text-[#DDD6FE]">
-              {student.fullName ? student.fullName[0] : "A"}
-            </span>
+          <div className="w-20 h-20 bg-[#201f1f] border-2 border-[#414042] rounded-full flex items-center justify-center shadow-lg shrink-0 overflow-hidden">
+            {student.photoUrl ? (
+              <img src={student.photoUrl} alt={student.fullName} className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-2xl font-bold font-jetbrains text-[#DDD6FE]">
+                {student.fullName ? student.fullName[0] : "A"}
+              </span>
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="headline-md text-[#e5e2e1] truncate">{student.fullName}</h1>
-            <p className="label-caps text-[#d5c4ac] text-xs mt-0.5">Estudante • Nº #{student.studentNumber}</p>
+            <p className="label-caps text-[#d5c4ac] text-xs mt-0.5">Aluno • Nº #{student.studentNumber}</p>
           </div>
         </div>
       </div>

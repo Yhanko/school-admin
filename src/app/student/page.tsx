@@ -19,10 +19,10 @@ const Student = () => {
       <div className="border-b border-[#E2E8F0] dark:border-[#414042] pb-6">
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-[#8B5CF6] shadow-[0_0_10px_#8B5CF6]" />
-          <h1 className="headline-lg text-[#0F172A] dark:text-[#e5e2e1]">Estudantes</h1>
+          <h1 className="headline-lg text-[#0F172A] dark:text-[#e5e2e1]">Alunos</h1>
         </div>
         <p className="body-md text-[#475569] dark:text-[#d5c4ac] mt-1">
-          Base de dados e gestão integral de matrículas, turmas e percurso escolar dos estudantes
+          Base de dados e gestão integral de matrículas, turmas e percurso escolar dos alunos
         </p>
       </div>
       

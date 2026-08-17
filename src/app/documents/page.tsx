@@ -20,6 +20,7 @@ import axiosInstance from "@/service/api";
 import { useToast } from "@/hooks/use-toast";
 import QRCode from "qrcode";
 import { useAuth } from "@/store/useAuth";
+import { ShareWhatsappDialog } from "@/components/whatsapp/ShareWhatsappDialog";
 
 interface StudentOption {
   id: string;
@@ -134,7 +135,7 @@ export default function DocumentsPage() {
       case "transferencia":
         return "GUIA OFICIAL DE TRANSFERÊNCIA ESCOLAR";
       case "ficha":
-        return "FICHA BIOGRÁFICA DO ESTUDANTE";
+        return "FICHA BIOGRÁFICA DO ALUNO";
       default:
         return "DECLARAÇÃO ESCOLAR";
     }
@@ -165,6 +166,17 @@ export default function DocumentsPage() {
         </div>
 
         <div className="flex items-center gap-2.5">
+          {selectedStudent && (
+            <ShareWhatsappDialog 
+              contactId={selectedStudent.id}
+              defaultMessage={`Olá ${selectedStudent.name}. Foi emitido um documento escolar (${getDocTitle()}). Para aceder e validar o documento online: ${typeof window !== 'undefined' ? `${window.location.origin}/verify-doc?doc=${encodeURIComponent(docNumber)}` : ''}`}
+              trigger={
+                <Button className="bg-[#25D366] hover:bg-[#1ebd5a] text-white font-bold h-10 px-4 rounded text-xs flex items-center gap-2 cursor-pointer shadow-sm transition-all">
+                  <span>Partilhar no WhatsApp</span>
+                </Button>
+              }
+            />
+          )}
           <Button
             onClick={handlePrint}
             className="bg-primary hover:bg-[#A78BFA] text-white font-bold h-10 px-4 rounded text-xs flex items-center gap-2 cursor-pointer shadow-sm transition-all"
@@ -208,10 +220,10 @@ export default function DocumentsPage() {
             </div>
           </div>
 
-          {/* Selecionar Estudante */}
+          {/* Selecionar Aluno */}
           <div className="bg-[#FAFBFD] dark:bg-[#121212] border border-[#CBD5E1] dark:border-[#414042] rounded-lg p-4 shadow-2xs space-y-3">
             <span className="label-caps text-[#6D28D9] dark:text-[#DDD6FE] block font-bold text-xs">
-              2. Selecionar Estudante
+              2. Selecionar Aluno
             </span>
             
             <div className="relative">
@@ -320,7 +332,7 @@ export default function DocumentsPage() {
             {/* Document Body */}
             <div className="space-y-4 text-xs sm:text-sm text-justify leading-relaxed text-slate-900 font-sans">
               <p>
-                Para os devidos efeitos e a pedido da parte interessada, declara-se que o(a) estudante{" "}
+                Para os devidos efeitos e a pedido da parte interessada, declara-se que o(a) aluno{" "}
                 <strong className="uppercase font-bold underline">
                   {selectedStudent ? selectedStudent.name : "__________________________"}
                 </strong>

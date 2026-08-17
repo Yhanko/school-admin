@@ -368,7 +368,7 @@ export default function PautasPage() {
           <thead className="bg-[#E2E6EA] dark:bg-[#1c1b1b] border-b border-[#CBD5E1] dark:border-[#414042] text-[#334155] dark:text-[#d5c4ac] label-caps">
             <tr>
               <th className="p-3 w-12 text-center">Nº</th>
-              <th className="p-3">Nome Completo do Estudante</th>
+              <th className="p-3">Nome Completo do Aluno</th>
               <th className="p-3 text-center">Nº Proc.</th>
               <th className="p-3 text-center">MAC (0-20)</th>
               <th className="p-3 text-center">NPP (0-20)</th>

@@ -16,7 +16,7 @@ export function RelatoriosPage() {
     {
       id: 'academic',
       title: 'Relatório Acadêmico',
-      description: 'Desempenho acadêmico dos estudantes, notas e frequências',
+      description: 'Desempenho acadêmico dos alunos, notas e frequências',
       date: new Date().toLocaleDateString(),
     },
     {
@@ -114,7 +114,7 @@ export function RelatoriosPage() {
           
           autoTable(doc, {
             startY: currentY + 4,
-            head: [['Estudante', 'Tipo', 'Valor (Kz)', 'Status', 'Data']],
+            head: [['Aluno', 'Tipo', 'Valor (Kz)', 'Status', 'Data']],
             body: data.recentTransactions.map((t: { studentName: string; type: string; amount: number; status: string; date: string }) => [
               t.studentName,
               t.type,

@@ -157,7 +157,7 @@ export function DailyCashCloseModal({
               <table className="w-full text-xs text-left">
                 <thead className="bg-[#E2E6EA] dark:bg-[#1c1b1b] border-b border-[#CBD5E1] dark:border-[#414042] text-[#334155] dark:text-[#d5c4ac] label-caps">
                   <tr>
-                    <th className="p-2.5">Estudante</th>
+                    <th className="p-2.5">Aluno</th>
                     <th className="p-2.5">Descrição</th>
                     <th className="p-2.5">Método</th>
                     <th className="p-2.5 text-right">Valor</th>

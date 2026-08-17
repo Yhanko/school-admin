@@ -21,6 +21,7 @@ import {
   Hash,
 } from "@/lib/icons";
 import { useToast } from "@/hooks/use-toast";
+import { ShareWhatsappDialog } from "@/components/whatsapp/ShareWhatsappDialog";
 
 export interface PaymentRecord {
   id?: string;
@@ -33,6 +34,7 @@ export interface PaymentRecord {
   paymentMethod?: string;
   paymentDate?: string;
   createdAt?: string;
+  proofUrl?: string;
 }
 
 interface PaymentDetailModalProps {
@@ -209,6 +211,12 @@ export function PaymentDetailModal({
 
         {/* Footer Actions */}
         <div className="mt-4 pt-4 border-t border-[#414042] flex justify-end gap-3">
+          {payment.proofUrl && payment.student?.id && (
+            <ShareWhatsappDialog 
+              contactId={payment.student.id} 
+              mediaUrl={payment.proofUrl} 
+            />
+          )}
           <Button
             variant="secondary"
             size="sm"

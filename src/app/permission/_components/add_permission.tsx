@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { z } from "zod";
 import {
   Sheet,
@@ -68,9 +68,24 @@ export function AddNewUserPermission({ onCreated }: { onCreated?: () => void }) 
     role: "SECRETARY",
   });
 
+  useEffect(() => {
+    if (isOpen && !formData.password) {
+      handleGeneratePassword();
+    }
+  }, [isOpen]);
+
   const [permissions, setPermissions] = useState<Record<string, boolean>>(
     PERMISSIONS.reduce((acc, p) => ({ ...acc, [p.key]: false }), {})
   );
+
+  const handleGeneratePassword = () => {
+    const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+    let pwd = "";
+    for (let i = 0; i < 8; i++) pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+    
+    setFormData(prev => ({ ...prev, password: pwd }));
+    toast({ title: 'Senha Gerada', description: 'A senha foi gerada e copiada.' });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -204,9 +219,12 @@ export function AddNewUserPermission({ onCreated }: { onCreated?: () => void }) 
             </div>
 
             <div>
-              <label className="label-caps text-[#d5c4ac] block mb-1.5">
-                Senha de Acesso *
-              </label>
+              <div className="flex justify-between items-center mb-1.5">
+                <label className="label-caps text-[#d5c4ac]">
+                  Senha de Acesso *
+                </label>
+                <button type="button" onClick={handleGeneratePassword} className="text-[10px] text-[#8B5CF6] hover:underline font-bold uppercase">Gerar Senha</button>
+              </div>
               <input
                 type="password"
                 value={formData.password}

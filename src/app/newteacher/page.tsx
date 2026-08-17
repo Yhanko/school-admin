@@ -2,14 +2,20 @@
 import React, { useState } from 'react';
 import axiosInstance from '@/service/api';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from '@/lib/icons';
+import { Loader2, Eye, EyeOff, Sparkles } from '@/lib/icons';
 
 const safeStringRegex = /^[^<>';=]*$/;
 
 const AddNewTeacher: React.FC = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+
+  React.useEffect(() => {
+    handleGeneratePassword();
+  }, []);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
       firstName: '',
       lastName: '',
@@ -20,11 +26,22 @@ const AddNewTeacher: React.FC = () => {
       university: '',
       degree: '',
       educationPeriod: '',
+      password: '',
+      confirmPassword: '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const { name, value } = e.target;
       setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleGeneratePassword = () => {
+    const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+    let pwd = "";
+    for (let i = 0; i < 8; i++) pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+    
+    setFormData(prev => ({ ...prev, password: pwd, confirmPassword: pwd }));
+    toast({ title: 'Senha Gerada', description: 'A senha foi gerada e copiada.' });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -51,9 +68,21 @@ const AddNewTeacher: React.FC = () => {
       }
     };
 
-    // Dinamicamente valida o estado do formulário se for um objeto como formData
     if (typeof formData !== 'undefined' && formData !== null) {
-      Object.entries(formData).forEach(([k, v]) => validateString(v, k));
+      Object.entries(formData).forEach(([k, v]) => {
+        if (k !== 'password' && k !== 'confirmPassword') {
+          validateString(v, k);
+        }
+      });
+    }
+
+    if (!formData.password || formData.password.length < 6) {
+      formErrors.password = "No mínimo 6 caracteres";
+      hasValidationErrors = true;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      formErrors.confirmPassword = "Senhas não conferem";
+      hasValidationErrors = true;
     }
     
     if (hasValidationErrors) {
@@ -71,7 +100,7 @@ const AddNewTeacher: React.FC = () => {
           await axiosInstance.post('/users/employee', {
               name,
               email: formData.email,
-              password: 'Password123!', // Default password for new teachers
+              password: formData.password,
               role: 'TEACHER',
               phone: formData.phone,
               address: formData.address,
@@ -84,7 +113,7 @@ const AddNewTeacher: React.FC = () => {
           toast({ title: 'Sucesso', description: 'Professor criado com sucesso!' });
           setFormData({
               firstName: '', lastName: '', email: '', phone: '', address: '',
-              city: '', university: '', degree: '', educationPeriod: ''
+              city: '', university: '', degree: '', educationPeriod: '', password: '', confirmPassword: ''
           });
       } catch (error) {
           const err = error as { response?: { data?: { message?: string } } };
@@ -108,13 +137,11 @@ const AddNewTeacher: React.FC = () => {
             <div>
                 <label className="block text-foreground">Primeiro Nome *</label>
                 <input required type="text" name="firstName" value={formData.firstName} onChange={handleChange} className="mt-1 p-2 border rounded w-full" placeholder="Nome" />
-{errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>}
               {errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>}
             </div>
             <div>
                 <label className="block text-foreground">Último Nome *</label>
                 <input required type="text" name="lastName" value={formData.lastName} onChange={handleChange} className="mt-1 p-2 border rounded w-full" placeholder="Sobrenome" />
-{errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>}
               {errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>}
             </div>
             </div>
@@ -123,13 +150,11 @@ const AddNewTeacher: React.FC = () => {
             <div>
                 <label className="block text-foreground">Email *</label>
                 <input required type="email" name="email" value={formData.email} onChange={handleChange} className="mt-1 p-2 border rounded w-full" placeholder="exemplo@email.com" />
-{errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
               {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
             </div>
             <div>
                 <label className="block text-foreground">Telemóvel *</label>
                 <input required type="tel" name="phone" value={formData.phone} onChange={handleChange} className="mt-1 p-2 border rounded w-full" placeholder="(xxx) xxx-xxxx" />
-{errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
               {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
             </div>
             </div>
@@ -153,9 +178,57 @@ const AddNewTeacher: React.FC = () => {
             <div>
                 <label className="block text-foreground">Cidade / País</label>
                 <input type="text" name="city" value={formData.city} onChange={handleChange} className="mt-1 p-2 border rounded w-full" placeholder="Cidade, País" />
-{errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
               {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
             </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <div className="flex flex-col space-y-2">
+                <div className="flex justify-between items-center">
+                  <label className="block text-foreground text-sm">Senha *</label>
+                  <button type="button" onClick={handleGeneratePassword} className="text-xs text-primary hover:underline font-semibold flex items-center gap-1">
+                    <Sparkles className="w-3 h-3" /> Gerar
+                  </button>
+                </div>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="mt-1 p-2 border rounded w-full pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-[60%] -translate-y-1/2 text-muted-foreground hover:text-muted-foreground"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                {errors.password && <p className="text-red-500 text-xs mt-1 pl-1">{errors.password}</p>}
+              </div>
+
+              <div className="flex flex-col space-y-2">
+                <label className="block text-foreground text-sm mt-[2px]">Confirmar Senha *</label>
+                <div className="relative mt-1">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    className="mt-1 p-2 border rounded w-full pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-[60%] -translate-y-1/2 text-muted-foreground hover:text-muted-foreground"
+                  >
+                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                {errors.confirmPassword && <p className="text-red-500 text-xs mt-1 pl-1">{errors.confirmPassword}</p>}
+              </div>
             </div>
           </div>
         </div>
@@ -164,13 +237,10 @@ const AddNewTeacher: React.FC = () => {
           <div className="bg-primary text-white p-5 rounded-tr-lg">
             <h2 className="text-lg font-semibold">Formação Académica</h2>
           </div>
-          
             <div className="grid grid-cols-1 gap-4 p-4">
               <div>
                 <label className="block text-foreground">Universidade *</label>
                 <input required type="text" name="university" value={formData.university} onChange={handleChange} className="mt-1 p-2 border rounded w-full" placeholder="Nome da Instituição" />
-{errors.university && <p className="text-red-500 text-xs mt-1">{errors.university}</p>}
-              {errors.university && <p className="text-red-500 text-xs mt-1">{errors.university}</p>}
               </div>
               <div>
                 <label className="block text-foreground">Grau Académico *</label>
