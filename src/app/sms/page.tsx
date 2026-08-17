@@ -2,39 +2,50 @@
 
 import { useState, useEffect } from 'react';
 import { smsService, SmsContact } from '@/service/sms.service';
-import { useAuth } from '@/store/useAuth';
+import { emailService, EmailContact } from '@/service/email.service';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from 'sonner';
 
-export default function SmsPage() {
+export default function CommunicationsPage() {
+  const [activeTab, setActiveTab] = useState('sms');
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [contacts, setContacts] = useState<SmsContact[]>([]);
-  const [selectedContactIds, setSelectedContactIds] = useState<Set<string>>(new Set());
+  
+  // SMS State
+  const [smsContacts, setSmsContacts] = useState<SmsContact[]>([]);
+  const [selectedSmsIds, setSelectedSmsIds] = useState<Set<string>>(new Set());
+  
+  // Email State
+  const [emailContacts, setEmailContacts] = useState<EmailContact[]>([]);
+  const [selectedEmailIds, setSelectedEmailIds] = useState<Set<string>>(new Set());
+
   const [roleFilter, setRoleFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [institutionName, setInstitutionName] = useState('Nossa Escola');
 
   useEffect(() => {
-    const fetchContacts = async () => {
+    const fetchData = async () => {
       try {
-        const data = await smsService.getContacts();
-        setContacts(data);
+        const smsData = await smsService.getContacts();
+        setSmsContacts(smsData);
       } catch (error) {
-        toast.error('Erro ao carregar contactos.');
+        toast.error('Erro ao carregar contactos SMS.');
       }
-
       try {
-        const userRes = await smsService.getContacts(); // wait, we have to fetch /users/me using axiosInstance
-      } catch (err) {}
+        const emailData = await emailService.getContacts();
+        setEmailContacts(emailData);
+      } catch (error) {
+        toast.error('Erro ao carregar contactos de E-mail.');
+      }
     };
-    fetchContacts();
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -47,33 +58,41 @@ export default function SmsPage() {
     });
   }, []);
 
-  const filteredContacts = contacts.filter((c) => {
-    const matchesRole = roleFilter === 'ALL' || c.role === roleFilter;
-    const matchesSearch = c.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          c.phone.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesRole && matchesSearch;
-  });
+  const getFilteredContacts = () => {
+    const sourceContacts = activeTab === 'sms' ? smsContacts : emailContacts;
+    return sourceContacts.filter((c: any) => {
+      const matchesRole = roleFilter === 'ALL' || c.role === roleFilter;
+      const term = activeTab === 'sms' ? c.phone : c.email;
+      const matchesSearch = c.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                            (term && term.toLowerCase().includes(searchQuery.toLowerCase()));
+      return matchesRole && matchesSearch;
+    });
+  };
+
+  const filteredContacts = getFilteredContacts();
+  const selectedSet = activeTab === 'sms' ? selectedSmsIds : selectedEmailIds;
+  const setSelectedSet = activeTab === 'sms' ? setSelectedSmsIds : setSelectedEmailIds;
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      const newSelected = new Set(selectedContactIds);
-      filteredContacts.forEach((c) => newSelected.add(c.id));
-      setSelectedContactIds(newSelected);
+      const newSelected = new Set(selectedSet);
+      filteredContacts.forEach((c: any) => newSelected.add(c.id));
+      setSelectedSet(newSelected);
     } else {
-      const newSelected = new Set(selectedContactIds);
-      filteredContacts.forEach((c) => newSelected.delete(c.id));
-      setSelectedContactIds(newSelected);
+      const newSelected = new Set(selectedSet);
+      filteredContacts.forEach((c: any) => newSelected.delete(c.id));
+      setSelectedSet(newSelected);
     }
   };
 
   const handleToggleContact = (id: string) => {
-    const newSelected = new Set(selectedContactIds);
+    const newSelected = new Set(selectedSet);
     if (newSelected.has(id)) {
       newSelected.delete(id);
     } else {
       newSelected.add(id);
     }
-    setSelectedContactIds(newSelected);
+    setSelectedSet(newSelected);
   };
 
   const handleSend = async (e: React.FormEvent) => {
@@ -84,135 +103,172 @@ export default function SmsPage() {
       return;
     }
 
-    if (selectedContactIds.size === 0) {
+    if (selectedSet.size === 0) {
       toast.error('Selecione pelo menos um destinatário.');
       return;
     }
 
-    const phoneNumbers = Array.from(selectedContactIds)
-      .map(id => contacts.find(c => c.id === id)?.phone)
-      .filter((phone): phone is string => !!phone);
-
     try {
       setIsLoading(true);
-      await smsService.sendBulkSms({
-        institutionName,
-        subject,
-        message,
-        phoneNumbers,
-      });
-      toast.success('SMS enviado com sucesso!');
+
+      if (activeTab === 'sms') {
+        const phoneNumbers = Array.from(selectedSmsIds)
+          .map(id => smsContacts.find(c => c.id === id)?.phone)
+          .filter((phone): phone is string => !!phone);
+
+        await smsService.sendBulkSms({
+          institutionName,
+          subject,
+          message,
+          phoneNumbers,
+        });
+        toast.success('SMS enviado com sucesso!');
+        setSelectedSmsIds(new Set());
+      } else {
+        const emails = Array.from(selectedEmailIds)
+          .map(id => emailContacts.find(c => c.id === id)?.email)
+          .filter((email): email is string => !!email);
+
+        await emailService.sendBulkEmail({
+          institutionName,
+          subject,
+          message,
+          emails,
+        });
+        toast.success('E-mails em processamento de envio!');
+        setSelectedEmailIds(new Set());
+      }
+
       setSubject('');
       setMessage('');
-      setSelectedContactIds(new Set());
     } catch (error: any) {
       console.error(error);
-      toast.error('Erro ao enviar SMS. Tente novamente mais tarde.');
+      toast.error('Erro ao processar o envio. Tente novamente mais tarde.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const isAllSelected = filteredContacts.length > 0 && filteredContacts.every(c => selectedContactIds.has(c.id));
+  const isAllSelected = filteredContacts.length > 0 && filteredContacts.every((c: any) => selectedSet.has(c.id));
 
   return (
-    <div className="p-8 max-w-4xl mx-auto flex flex-col md:flex-row gap-8">
-      <div className="flex-1">
-        <h1 className="text-2xl font-bold mb-6">Enviar SMS</h1>
-        <form onSubmit={handleSend} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium mb-2">Assunto</label>
-            <Select value={subject} onValueChange={setSubject}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o assunto" />
+    <div className="p-8 max-w-4xl mx-auto">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">Comunicações</h1>
+      </div>
+
+      <Tabs defaultValue="sms" onValueChange={setActiveTab} className="w-full mb-6">
+        <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
+          <TabsTrigger value="sms">Enviar SMS</TabsTrigger>
+          <TabsTrigger value="email">Enviar E-mail</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      <div className="flex flex-col md:flex-row gap-8">
+        <div className="flex-1">
+          <form onSubmit={handleSend} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium mb-2">Assunto</label>
+              {activeTab === 'sms' ? (
+                <Select value={subject} onValueChange={setSubject}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o assunto" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Faltas">Faltas</SelectItem>
+                    <SelectItem value="Atraso no Pagamento">Atraso no Pagamento</SelectItem>
+                    <SelectItem value="Boletim">Levantamento de Boletim</SelectItem>
+                    <SelectItem value="Reunião">Reunião de Encarregados</SelectItem>
+                    <SelectItem value="Outro">Outro</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input 
+                  placeholder="Escreva o assunto do E-mail..." 
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                />
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Mensagem Personalizada</label>
+              <Textarea 
+                rows={6}
+                placeholder={activeTab === 'sms' ? "Escreva aqui a mensagem SMS adicional..." : "Corpo do E-mail..."}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+              />
+            </div>
+
+            <Button type="submit" disabled={isLoading || selectedSet.size === 0} className="w-full">
+              {isLoading ? 'A processar...' : `Enviar ${activeTab.toUpperCase()} para ${selectedSet.size} contactos`}
+            </Button>
+          </form>
+        </div>
+
+        <div className="w-full md:w-80 flex flex-col border rounded-md p-4 bg-gray-50/50">
+          <h2 className="font-semibold mb-4">Destinatários ({activeTab === 'sms' ? smsContacts.length : emailContacts.length})</h2>
+          
+          <div className="mb-4">
+            <Input 
+              placeholder={`Pesquisar por nome ou ${activeTab === 'sms' ? 'número' : 'email'}...`} 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-9 text-sm mb-3"
+            />
+            <Select value={roleFilter} onValueChange={setRoleFilter}>
+              <SelectTrigger className="h-8 text-xs">
+                <SelectValue placeholder="Filtrar por grupo" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Faltas">Faltas</SelectItem>
-                <SelectItem value="Atraso no Pagamento">Atraso no Pagamento</SelectItem>
-                <SelectItem value="Boletim">Levantamento de Boletim</SelectItem>
-                <SelectItem value="Reunião">Reunião de Encarregados</SelectItem>
-                <SelectItem value="Outro">Outro</SelectItem>
+                <SelectItem value="ALL">Todos os Grupos</SelectItem>
+                <SelectItem value="STUDENT">Alunos</SelectItem>
+                <SelectItem value="PARENT">Encarregados</SelectItem>
+                <SelectItem value="TEACHER">Professores</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-2">Mensagem Personalizada</label>
-            <Textarea 
-              rows={6}
-              placeholder="Escreva aqui a mensagem adicional..."
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
+          <div className="flex items-center space-x-2 mb-4 pb-2 border-b">
+            <Checkbox 
+              id="selectAll" 
+              checked={isAllSelected}
+              onCheckedChange={handleSelectAll}
             />
+            <label htmlFor="selectAll" className="text-sm font-medium leading-none cursor-pointer">
+              Selecionar Todos ({filteredContacts.length})
+            </label>
           </div>
 
-          <Button type="submit" disabled={isLoading || selectedContactIds.size === 0} className="w-full">
-            {isLoading ? 'A enviar...' : `Enviar SMS para ${selectedContactIds.size} contactos`}
-          </Button>
-        </form>
-      </div>
-
-      <div className="w-full md:w-80 flex flex-col border rounded-md p-4 bg-gray-50/50">
-        <h2 className="font-semibold mb-4">Destinatários ({contacts.length})</h2>
-        
-        <div className="mb-4">
-          <Input 
-            placeholder="Pesquisar por nome ou número..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-9 text-sm mb-3"
-          />
-          <Select value={roleFilter} onValueChange={setRoleFilter}>
-            <SelectTrigger className="h-8 text-xs">
-              <SelectValue placeholder="Filtrar por grupo" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">Todos os Grupos</SelectItem>
-              <SelectItem value="STUDENT">Alunos</SelectItem>
-              <SelectItem value="PARENT">Encarregados</SelectItem>
-              <SelectItem value="TEACHER">Professores</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="flex items-center space-x-2 mb-4 pb-2 border-b">
-          <Checkbox 
-            id="selectAll" 
-            checked={isAllSelected}
-            onCheckedChange={handleSelectAll}
-          />
-          <label htmlFor="selectAll" className="text-sm font-medium leading-none cursor-pointer">
-            Selecionar Todos ({filteredContacts.length})
-          </label>
-        </div>
-
-        <ScrollArea className="flex-1 h-[400px]">
-          <div className="space-y-3">
-            {filteredContacts.map(contact => (
-              <div key={contact.id} className="flex items-start space-x-2">
-                <Checkbox 
-                  id={contact.id} 
-                  checked={selectedContactIds.has(contact.id)}
-                  onCheckedChange={() => handleToggleContact(contact.id)}
-                />
-                <div className="grid gap-1.5 leading-none">
-                  <label
-                    htmlFor={contact.id}
-                    className="text-sm font-medium leading-none cursor-pointer"
-                  >
-                    {contact.name}
-                  </label>
-                  <p className="text-xs text-muted-foreground">
-                    {contact.phone} • {contact.role}
-                  </p>
+          <ScrollArea className="flex-1 h-[400px]">
+            <div className="space-y-3">
+              {filteredContacts.map((contact: any) => (
+                <div key={contact.id} className="flex items-start space-x-2">
+                  <Checkbox 
+                    id={contact.id} 
+                    checked={selectedSet.has(contact.id)}
+                    onCheckedChange={() => handleToggleContact(contact.id)}
+                  />
+                  <div className="grid gap-1.5 leading-none">
+                    <label
+                      htmlFor={contact.id}
+                      className="text-sm font-medium leading-none cursor-pointer"
+                    >
+                      {contact.name}
+                    </label>
+                    <p className="text-xs text-muted-foreground">
+                      {activeTab === 'sms' ? contact.phone : contact.email} • {contact.role}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
-            {filteredContacts.length === 0 && (
-              <p className="text-sm text-gray-500 text-center py-4">Nenhum contacto encontrado.</p>
-            )}
-          </div>
-        </ScrollArea>
+              ))}
+              {filteredContacts.length === 0 && (
+                <p className="text-sm text-gray-500 text-center py-4">Nenhum contacto encontrado.</p>
+              )}
+            </div>
+          </ScrollArea>
+        </div>
       </div>
     </div>
   );
