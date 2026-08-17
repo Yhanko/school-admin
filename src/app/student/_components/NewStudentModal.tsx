@@ -27,8 +27,8 @@ interface StudentFormData {
   gender: string;
   email: string;
   phone: string;
-  password?: string;
-  confirmPassword?: string;
+  password: string;
+  confirmPassword: string;
   birthCertificate: File | null;
   vaccineCard: File | null;
   proofOfAddress: File | null;
@@ -39,8 +39,8 @@ interface StudentFormData {
   parentLastName: string;
   parentEmail: string;
   parentPhone: string;
-  parentPassword?: string;
-  parentConfirmPassword?: string;
+  parentPassword: string;
+  parentConfirmPassword: string;
 
   // Guardian Info (for 10-13)
   guardianFirstName: string;
@@ -414,14 +414,6 @@ export function NewStudentModal({ isOpen, onClose, onAdded }: { isOpen: boolean,
         <h3 className="text-lg font-semibold text-foreground">
           Informações do Aluno
         </h3>
-        <Button
-          type="button"
-          onClick={() => setShowOcrScanner(!showOcrScanner)}
-          className="bg-primary/10 hover:bg-primary text-primary hover:text-white border border-primary/30 font-bold text-xs h-8 px-3 rounded flex items-center gap-1.5 cursor-pointer transition-all w-fit"
-        >
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>⚡ Preencher com BI (OCR Express)</span>
-        </Button>
       </div>
 
       {showOcrScanner && (
