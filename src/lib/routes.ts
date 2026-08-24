@@ -129,4 +129,10 @@ export const routes: AppRoute[] = [
     url: "/profile",
     icon: UserCircle,
   },
+  {
+    id: 18,
+    title: "Suporte (Tickets)",
+    url: "/support",
+    icon: MessagesSquare, // or another appropriate icon
+  },
 ];

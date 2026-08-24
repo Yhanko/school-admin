@@ -33,17 +33,17 @@ export function AppSidebar() {
     if (isDirector) return true;
 
     if (isPedagogicalDirector) {
-      const allowed = ["/dashboard", "/student", "/pedagogical", "/pautas", "/radar", "/turma", "/schedules", "/events", "/disciplinar", "/profile", "/chat", "/schoolRules"];
+      const allowed = ["/dashboard", "/student", "/pedagogical", "/pautas", "/radar", "/turma", "/schedules", "/events", "/disciplinar", "/profile", "/chat", "/schoolRules", "/support"];
       return allowed.includes(item.url);
     }
 
     if (isSecretary) {
-      const allowed = ["/dashboard", "/student", "/documents", "/payments", "/sms", "/profile", "/chat", "/schoolRules"];
+      const allowed = ["/dashboard", "/student", "/documents", "/payments", "/sms", "/profile", "/chat", "/schoolRules", "/support"];
       return allowed.includes(item.url);
     }
 
     if (isTeacher) {
-      const allowed = ["/dashboard", "/pautas", "/turma", "/schedules", "/profile", "/chat", "/schoolRules"];
+      const allowed = ["/dashboard", "/pautas", "/turma", "/schedules", "/profile", "/chat", "/schoolRules", "/support"];
       return allowed.includes(item.url);
     }
 
