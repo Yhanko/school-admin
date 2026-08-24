@@ -150,7 +150,7 @@ export function ClassDetails({ classId }: ClassDetailsProps) {
                         <li key={student.id} className="p-3 border rounded-xl flex justify-between items-center bg-muted/50">
                           <span className="font-medium text-sm">{student.name}</span>
                           <span className="text-xs text-muted-foreground">
-                            {student.profile?.studentNumber ? `Nº ${student.profile.studentNumber}` : ''}
+                            {student.code ? `Nº ${student.code}` : ''}
                           </span>
                         </li>
                       ))}

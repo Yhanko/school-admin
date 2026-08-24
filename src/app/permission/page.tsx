@@ -138,6 +138,8 @@ export default function Permission() {
         return "bg-slate-100 text-slate-800 border border-slate-300 dark:bg-[#1c1b1b] dark:text-[#C0C2C5] dark:border-[#414042]";
       case "PARENT":
         return "bg-amber-100 text-amber-800 border border-amber-300 dark:bg-[#1c1b1b] dark:text-[#d5c4ac] dark:border-[#414042]";
+      case "PEDAGOGICAL_DIRECTOR":
+        return "bg-blue-100 text-blue-800 border border-blue-300 dark:bg-[#1E3A8A]/30 dark:text-[#93C5FD] dark:border-[#1E3A8A]/60";
       default:
         return "bg-slate-100 text-slate-800 border border-slate-300 dark:bg-[#1c1b1b] dark:text-[#e5e2e1] dark:border-[#414042]";
     }
@@ -152,6 +154,7 @@ export default function Permission() {
       STUDENT: "Aluno",
       PARENT: "Encarregado",
       ASSOCIATION_MEMBER: "Associação",
+      PEDAGOGICAL_DIRECTOR: "Director Pedagógico",
     };
     return labels[role] || role;
   };
@@ -579,6 +582,23 @@ export default function Permission() {
               <p className="text-emerald-700 dark:text-[#2D6A4F] font-medium">✓ Ficha e Matrícula de Alunos</p>
               <p className="text-emerald-700 dark:text-[#2D6A4F] font-medium">✓ Gestão e Recibos de Pagamento</p>
               <p className="text-red-600 dark:text-[#ffb4ab] font-medium">✗ Lançamento Direto de Notas</p>
+            </div>
+          </div>
+
+          <div className="border border-blue-200 dark:border-[#1E3A8A]/40 rounded-lg p-4 bg-[#FAFBFD] dark:bg-[#1c1b1b] space-y-2 sm:col-span-2 lg:col-span-1">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="px-2.5 py-0.5 rounded text-xs font-bold bg-blue-100 text-blue-800 border border-blue-300 dark:bg-[#1E3A8A]/30 dark:text-[#93C5FD] dark:border-[#1E3A8A]/60 data-mono">
+                PEDAGOGICAL_DIRECTOR
+              </span>
+            </div>
+            <p className="text-xs text-[#334155] dark:text-[#d5c4ac]">
+              Gestão pedagógica, currículo e acompanhamento escolar
+            </p>
+            <div className="space-y-1 text-xs text-[#556575] dark:text-[#9d8f78] pt-2 border-t border-[#CBD5E1] dark:border-[#414042]">
+              <p className="text-emerald-700 dark:text-[#2D6A4F] font-medium">✓ Acompanhamento de Pautas e Notas</p>
+              <p className="text-emerald-700 dark:text-[#2D6A4F] font-medium">✓ Eventos, Horários e Disciplinar</p>
+              <p className="text-emerald-700 dark:text-[#2D6A4F] font-medium">✓ Gestão de Professores e Turmas</p>
+              <p className="text-red-600 dark:text-[#ffb4ab] font-medium">✗ Módulo Financeiro Restrito</p>
             </div>
           </div>
         </div>

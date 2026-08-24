@@ -21,7 +21,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 export function AppSidebar() {
   const pathname = usePathname();
   const { isMobile, setOpenMobile } = useSidebar();
-  const { isDirector } = usePermissions();
+  const { isDirector, isSecretary, isTeacher, isPedagogicalDirector } = usePermissions();
 
   const handleNavClick = () => {
     if (isMobile) {
@@ -30,6 +30,23 @@ export function AppSidebar() {
   };
 
   const visibleRoutes = routes.filter((item) => {
+    if (isDirector) return true;
+
+    if (isPedagogicalDirector) {
+      const allowed = ["/dashboard", "/student", "/pedagogical", "/pautas", "/radar", "/turma", "/schedules", "/events", "/disciplinar", "/profile", "/chat", "/schoolRules"];
+      return allowed.includes(item.url);
+    }
+
+    if (isSecretary) {
+      const allowed = ["/dashboard", "/student", "/documents", "/payments", "/sms", "/profile", "/chat", "/schoolRules"];
+      return allowed.includes(item.url);
+    }
+
+    if (isTeacher) {
+      const allowed = ["/dashboard", "/pautas", "/turma", "/schedules", "/profile", "/chat", "/schoolRules"];
+      return allowed.includes(item.url);
+    }
+
     if (item.directorOnly && !isDirector) {
       return false;
     }

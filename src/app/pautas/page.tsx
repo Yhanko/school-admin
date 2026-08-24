@@ -123,12 +123,12 @@ export default function PautasPage() {
             studentId: st.id,
             studentName: st.name,
             studentCode: st.code || st.studentNumber || "N/D",
-            mac: macGrade !== undefined ? macGrade : 14,
-            npp: nppGrade !== undefined ? nppGrade : 15,
-            npt: nptGrade !== undefined ? nptGrade : 13,
-            mt1: 14,
-            mt2: 15,
-            mt3: 16,
+            mac: macGrade !== undefined ? macGrade : "",
+            npp: nppGrade !== undefined ? nppGrade : "",
+            npt: nptGrade !== undefined ? nptGrade : "",
+            mt1: undefined,
+            mt2: undefined,
+            mt3: undefined,
           };
         });
 

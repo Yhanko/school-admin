@@ -12,6 +12,8 @@ export function usePermissions() {
   const isSecretary = role === "SECRETARY";
   const isTeacher = role === "TEACHER";
 
+  const isPedagogicalDirector = role === "PEDAGOGICAL_DIRECTOR";
+
   return {
     role,
     isSuperAdmin,
@@ -19,25 +21,28 @@ export function usePermissions() {
     isDirector,
     isSecretary,
     isTeacher,
+    isPedagogicalDirector,
     
     // Ações Críticas
     canDeleteUsers: isDirector,
-    canDeleteClasses: isDirector,
+    canDeleteClasses: isDirector || isPedagogicalDirector,
     canManagePermissions: isDirector,
-    canConfigureAcademicYear: isDirector,
+    canConfigureAcademicYear: isDirector || isPedagogicalDirector,
     canViewProfitReports: isDirector,
     
     // Ações Operacionais
-    canEnrollStudents: isDirector || isSecretary,
+    canEnrollStudents: isDirector || isSecretary || isPedagogicalDirector,
     canIssuePayments: isDirector || isSecretary,
     canCloseCashier: isDirector || isSecretary,
-    canGenerateDocuments: isDirector || isSecretary,
-    canLaunchGrades: isDirector || isSecretary || isTeacher,
+    canGenerateDocuments: isDirector || isSecretary || isPedagogicalDirector,
+    canLaunchGrades: isDirector || isSecretary || isTeacher || isPedagogicalDirector,
     
     roleLabel: isDirector
       ? "Direcção Geral"
       : isSecretary
       ? "Secretaria Administrativa"
+      : isPedagogicalDirector
+      ? "Director Pedagógico"
       : isTeacher
       ? "Docente"
       : "Utilizador",

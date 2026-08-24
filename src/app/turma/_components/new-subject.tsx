@@ -20,13 +20,16 @@ export function NewSubject({ onCreated }: { onCreated?: () => void }) {
   const [name, setName] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [classes, setClasses] = useState<{id: string, name: string, period: string}[]>([]);
+  const [teachers, setTeachers] = useState<{id: string, name: string}[]>([]);
   const [selectedLevels, setSelectedLevels] = useState<string[]>([]);
   const [selectedClassIds, setSelectedClassIds] = useState<string[]>([]);
+  const [selectedTeacherId, setSelectedTeacherId] = useState<string>("");
   const { toast } = useToast();
 
   useEffect(() => {
     if (open) {
       axiosInstance.get('/classes').then(res => setClasses(res.data)).catch(console.error);
+      axiosInstance.get('/users?role=TEACHER').then(res => setTeachers(res.data)).catch(console.error);
     }
   }, [open]);
 
@@ -57,7 +60,8 @@ export function NewSubject({ onCreated }: { onCreated?: () => void }) {
       await axiosInstance.post('/subjects', { 
         name,
         academicLevels: selectedLevels.length > 0 ? selectedLevels : undefined,
-        classIds: selectedClassIds.length > 0 ? selectedClassIds : undefined
+        classIds: selectedClassIds.length > 0 ? selectedClassIds : undefined,
+        teacherId: selectedTeacherId || undefined,
       });
       toast({
         title: "Sucesso",
@@ -102,6 +106,21 @@ export function NewSubject({ onCreated }: { onCreated?: () => void }) {
               onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="teacher">Professor Responsável (Opcional)</Label>
+            <select
+              id="teacher"
+              value={selectedTeacherId}
+              onChange={(e) => setSelectedTeacherId(e.target.value)}
+              className="w-full flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <option value="">-- Nenhum (Atribuir mais tarde) --</option>
+              {teachers.map(t => (
+                <option key={t.id} value={t.id}>{t.name}</option>
+              ))}
+            </select>
           </div>
 
           <div className="space-y-4 bg-muted/20 p-4 rounded-xl border">

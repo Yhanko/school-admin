@@ -32,13 +32,13 @@ export default function Turma() {
   const fetchClasses = async () => {
     try {
       const response = await axiosInstance.get('/classes');
-      const mappedClasses = response.data.map((c: {id: string, name: string, academicLevel: string, teachers?: {name: string}[], room?: string, students?: unknown[], capacity?: number, period?: string}) => ({
+      const mappedClasses = response.data.map((c: {id: string, name: string, academicLevel: string, teachers?: {name: string}[], room?: string, students?: unknown[], _count?: {students: number}, capacity?: number, period?: string}) => ({
         id: c.id,
         name: c.name,
         level: c.academicLevel === '1-6' ? 'Ensino Primário (1-6)' : c.academicLevel === '7-9' ? 'Ensino Secundário I (7-9)' : c.academicLevel === '10-13' ? 'Ensino Secundário II (10-13)' : c.academicLevel,
         teacher: c.teachers && c.teachers.length > 0 ? c.teachers.map((t) => t.name).join(", ") : "Sem professor atribuído",
         room: c.room || 'Sem sala',
-        students: c.students?.length || 0,
+        students: c._count?.students ?? c.students?.length ?? 0,
         capacity: c.capacity || 35,
         schedule: c.period || 'Integral',
         status: "Ativo"

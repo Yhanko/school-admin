@@ -18,7 +18,9 @@ import { useToast } from "@/hooks/use-toast";
 
 const ROLES = [
   { value: "ADMIN", label: "Diretor / Administrador" },
+  { value: "TEACHER", label: "Professor(a)" },
   { value: "SECRETARY", label: "Secretaria / Tesouraria" },
+  { value: "PEDAGOGICAL_DIRECTOR", label: "Director Pedagógico" },
 ];
 
 const PERMISSIONS = [
@@ -110,7 +112,7 @@ export function AddNewUserPermission({ onCreated }: { onCreated?: () => void }) 
 
     try {
       // 1. Create the user
-      const userRes = await axiosInstance.post("/users", formData);
+      const userRes = await axiosInstance.post("/users/employee", formData);
       const newUser = userRes.data;
 
       // 2. Set the permissions
