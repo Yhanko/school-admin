@@ -2,7 +2,6 @@
 import { AppSidebar } from "@/components/AppSidebarMenu";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Header } from "@/components/Header";
-import { BroadcastBanner } from "@/components/BroadcastBanner";
 import { useAuth } from "@/store/useAuth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -35,7 +34,6 @@ export default function SmsLayout({
         <main className="flex flex-col min-h-screen flex-1 w-full max-w-full overflow-x-hidden bg-[#ECEEF1] dark:bg-[#131313]">
           <Header />
           <div className="flex-1 p-4 sm:p-6 lg:p-8">
-            <BroadcastBanner />
             {children}
           </div>
         </main>

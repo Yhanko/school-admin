@@ -12,7 +12,7 @@ interface ClassDetailsProps {
 
 export function ClassDetails({ classId }: ClassDetailsProps) {
   const [open, setOpen] = useState(false);
-  const [turma, setTurma] = useState<{name?: string, academicLevel?: string, students?: {id: string, name: string, profile?: {studentNumber: string}}[], capacity?: number, period?: string, roomName?: string, room?: {name: string} | string, grade?: string, course?: string, classSubjects?: {id: string, subject?: {name: string}, teacher?: {name: string}}[]} | null>(null);
+  const [turma, setTurma] = useState<{name?: string, academicLevel?: string, students?: {id: string, name: string, code?: string, profile?: {studentNumber: string}}[], capacity?: number, period?: string, roomName?: string, room?: {name: string} | string, grade?: string, course?: string, classSubjects?: {id: string, subject?: {name: string}, teacher?: {name: string}}[]} | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -150,7 +150,7 @@ export function ClassDetails({ classId }: ClassDetailsProps) {
                         <li key={student.id} className="p-3 border rounded-xl flex justify-between items-center bg-muted/50">
                           <span className="font-medium text-sm">{student.name}</span>
                           <span className="text-xs text-muted-foreground">
-                            {student.code ? `Nº ${student.code}` : ''}
+                            {(student.code || student.profile?.studentNumber) ? `Nº ${student.code || student.profile?.studentNumber}` : ''}
                           </span>
                         </li>
                       ))}

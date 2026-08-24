@@ -30,9 +30,12 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
   fetchNotifications: async () => {
     set({ isLoading: true, error: null });
     try {
-      const response = await axiosInstance.get('/notifications');
+      const [notifResponse, broadcastResponse] = await Promise.all([
+        axiosInstance.get('/notifications').catch(() => ({ data: [] })),
+        axiosInstance.get('/broadcasts').catch(() => ({ data: [] }))
+      ]);
       
-      const mappedNotifications = response.data.map((notification: Notification) => ({
+      const mappedNotifications = notifResponse.data.map((notification: Notification) => ({
         id: notification.id,
         title: notification.title,
         description: notification.description,
@@ -42,19 +45,31 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
         priority: notification.priority
       }));
 
+      const mappedBroadcasts = broadcastResponse.data.map((b: any) => ({
+        id: b.id,
+        title: b.type === 'error' ? 'Aviso Crítico' : b.type === 'warning' ? 'Aviso do Sistema' : 'Informação',
+        description: b.message,
+        createdAt: b.createdAt || new Date().toISOString(),
+        isRead: false,
+        type: b.type,
+        priority: 'HIGH'
+      }));
+
+      const allMessages = [...mappedNotifications, ...mappedBroadcasts];
+
       // Ordenar por data decrescente
-      mappedNotifications.sort((a: Notification, b: Notification) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      allMessages.sort((a: Notification, b: Notification) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       
-      const unreadCount = mappedNotifications.filter((msg: Notification) => !msg.isRead).length;
-      const totalPages = Math.ceil(mappedNotifications.length / get().notificationsPerPage);
+      const unreadCount = allMessages.filter((msg: Notification) => !msg.isRead).length;
+      const totalPages = Math.ceil(allMessages.length / get().notificationsPerPage);
       const safePage = Math.min(get().page, totalPages || 1);
-      const paginated = mappedNotifications.slice(
+      const paginated = allMessages.slice(
         (safePage - 1) * get().notificationsPerPage,
         safePage * get().notificationsPerPage
       );
 
       set({
-        notifications: mappedNotifications,
+        notifications: allMessages,
         unreadNotificationsCount: unreadCount,
         pages: totalPages,
         paginatedNotifications: paginated,
