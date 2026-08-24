@@ -14,6 +14,8 @@ import { PaymentTable } from "./_components/PaymentTable";
 import { LatePaymentsAlert } from "./_components/LatePaymentsAlert";
 import { PaymentRecord } from "./_components/PaymentDetailModal";
 import { DailyCashCloseModal } from "./_components/DailyCashCloseModal";
+import { PaymentMethodsModal } from "./_components/PaymentMethodsModal";
+import { Settings } from "lucide-react";
 
 export default function Payments() {
   const { toast } = useToast();
@@ -22,6 +24,7 @@ export default function Payments() {
   const [isExporting, setIsExporting] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isCashCloseOpen, setIsCashCloseOpen] = useState(false);
+  const [isPaymentMethodsOpen, setIsPaymentMethodsOpen] = useState(false);
 
   const fetchPayments = useCallback(async (isManualRefresh = false) => {
     if (isManualRefresh) setIsRefreshing(true);
@@ -263,6 +266,16 @@ export default function Payments() {
         <div className="flex flex-wrap items-center gap-2.5">
           <Button
             size="sm"
+            onClick={() => setIsPaymentMethodsOpen(true)}
+            variant="outline"
+            className="border-[#CBD5E1] dark:border-[#414042] text-[#090D16] dark:text-[#e5e2e1] hover:bg-[#E2E6EA] dark:hover:bg-[#1A1A1A] rounded h-9 px-3.5 text-xs sm:text-sm font-semibold gap-2 transition-all cursor-pointer"
+          >
+            <Settings className="w-4 h-4" />
+            <span>Métodos de Pagamento</span>
+          </Button>
+
+          <Button
+            size="sm"
             onClick={() => setIsCashCloseOpen(true)}
             className="bg-primary hover:bg-[#A78BFA] text-white font-bold rounded h-9 px-3.5 text-xs sm:text-sm gap-2 shadow-xs transition-all cursor-pointer"
           >
@@ -324,6 +337,10 @@ export default function Payments() {
         isOpen={isCashCloseOpen}
         onClose={() => setIsCashCloseOpen(false)}
         payments={payments}
+      />
+      <PaymentMethodsModal 
+        open={isPaymentMethodsOpen}
+        onOpenChange={setIsPaymentMethodsOpen}
       />
     </section>
   );

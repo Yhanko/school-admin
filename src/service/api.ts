@@ -30,7 +30,8 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    // Only redirect to login if we are not already on the login page
+    if (error.response?.status === 401 && window.location.pathname !== "/login") {
       Cookies.remove('yhanko_school_admin_token', { path: '/' });
       Cookies.remove('yhanko_school_admin_user', { path: '/' });
       window.location.href = '/login';
