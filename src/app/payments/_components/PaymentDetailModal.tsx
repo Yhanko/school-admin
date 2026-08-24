@@ -9,6 +9,8 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import axiosInstance from "@/service/api";
+import { useState } from "react";
 import {
   CheckCircle,
   Clock,
@@ -41,16 +43,41 @@ interface PaymentDetailModalProps {
   payment: PaymentRecord | null;
   isOpen: boolean;
   onClose: () => void;
+  onUpdate?: () => void;
 }
 
 export function PaymentDetailModal({
   payment,
   isOpen,
   onClose,
+  onUpdate,
 }: PaymentDetailModalProps) {
   const { toast } = useToast();
+  const [isUpdating, setIsUpdating] = useState(false);
 
   if (!payment) return null;
+
+  const handleStatusUpdate = async (newStatus: string) => {
+    setIsUpdating(true);
+    try {
+      await axiosInstance.patch(`/finance/payments/${payment.id}/status`, { status: newStatus });
+      toast({
+        title: "Status Atualizado",
+        description: `O pagamento foi marcado como ${newStatus}.`,
+      });
+      if (onUpdate) onUpdate();
+      onClose();
+    } catch (error) {
+      console.error("Erro ao atualizar status:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar o status do pagamento.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
@@ -210,21 +237,64 @@ export function PaymentDetailModal({
         </div>
 
         {/* Footer Actions */}
-        <div className="mt-4 pt-4 border-t border-[#414042] flex justify-end gap-3">
-          {payment.proofUrl && payment.student?.id && (
-            <ShareWhatsappDialog 
-              contactId={payment.student.id} 
-              mediaUrl={payment.proofUrl} 
-            />
-          )}
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={onClose}
-            className="border-[#C0C2C5] text-[#e5e2e1] hover:bg-[#201f1f] hover:border-white rounded text-xs cursor-pointer"
-          >
-            Fechar
-          </Button>
+        <div className="mt-4 pt-4 border-t border-[#414042] flex justify-between gap-3 flex-wrap">
+          <div className="flex gap-2">
+            {payment.proofUrl && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.open(payment.proofUrl, '_blank')}
+                className="border-[#8B5CF6] text-[#8B5CF6] hover:bg-[#8B5CF6]/10 rounded text-xs gap-2"
+              >
+                <FileText className="w-3.5 h-3.5" />
+                Ver Comprovativo
+              </Button>
+            )}
+            {payment.proofUrl && payment.student?.id && (
+              <ShareWhatsappDialog 
+                contactId={payment.student.id} 
+                mediaUrl={payment.proofUrl} 
+              />
+            )}
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleStatusUpdate('cancelled')}
+              disabled={isUpdating || payment.status === 'cancelled'}
+              className="border-[#9B2226] text-[#9B2226] hover:bg-[#9B2226]/10 rounded text-xs"
+            >
+              Marcar Atraso
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleStatusUpdate('pending')}
+              disabled={isUpdating || payment.status === 'pending'}
+              className="border-[#B45309] text-[#B45309] hover:bg-[#B45309]/10 rounded text-xs"
+            >
+              Marcar Pendente
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleStatusUpdate('confirmed')}
+              disabled={isUpdating || payment.status === 'confirmed'}
+              className="bg-[#2D6A4F] text-white hover:bg-[#2D6A4F]/90 border-transparent rounded text-xs"
+            >
+              Confirmar Pagamento
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={onClose}
+              disabled={isUpdating}
+              className="border-[#C0C2C5] text-[#e5e2e1] hover:bg-[#201f1f] hover:border-white rounded text-xs cursor-pointer"
+            >
+              Fechar
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

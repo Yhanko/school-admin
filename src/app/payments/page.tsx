@@ -330,6 +330,7 @@ export default function Payments() {
         payments={payments}
         onExportPDF={exportToPDF}
         isExporting={isExporting}
+        onUpdate={() => fetchPayments(true)}
       />
 
       {/* Daily Cash Close Modal */}

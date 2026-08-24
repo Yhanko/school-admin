@@ -19,6 +19,7 @@ interface PaymentTableProps {
   payments: PaymentRecord[];
   onExportPDF: () => void;
   isExporting: boolean;
+  onUpdate?: () => void;
 }
 
 type TabFilter = "all" | "confirmed" | "pending" | "cancelled";
@@ -27,6 +28,7 @@ export function PaymentTable({
   payments,
   onExportPDF,
   isExporting,
+  onUpdate,
 }: PaymentTableProps) {
   const [activeTab, setActiveTab] = useState<TabFilter>("all");
   const [searchTerm, setSearchTerm] = useState("");
@@ -442,6 +444,7 @@ export function PaymentTable({
           setIsModalOpen(false);
           setSelectedPayment(null);
         }}
+        onUpdate={onUpdate}
       />
     </div>
   );
