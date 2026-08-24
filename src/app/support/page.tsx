@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import axiosInstance from '@/service/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
 
 interface SupportTicket {
   id: string;
@@ -76,9 +77,9 @@ export default function SupportPage() {
       setTitle('');
       setDescription('');
       fetchTickets();
-      alert('Ticket criado com sucesso!');
+      toast.success('Ticket criado com sucesso!');
     } catch {
-      alert('Erro ao criar ticket.');
+      toast.error('Erro ao criar ticket.');
     }
   };
 
