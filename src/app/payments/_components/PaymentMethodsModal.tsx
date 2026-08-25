@@ -40,9 +40,8 @@ export function PaymentMethodsModal({ open, onOpenChange }: PaymentMethodsModalP
     setIsLoading(true);
     try {
       // The API probably has an endpoint to get the institution details
-      const response = await axiosInstance.get("/institutions/me/subscription"); 
-      // Using /me/subscription because it returns the institution data in current implementation.
-      const inst = response.data?.institution || response.data; 
+      const response = await axiosInstance.get("/institutions/me"); 
+      const inst = response.data; 
       
       setData({
         iban: inst?.iban || "",
