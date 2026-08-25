@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { Loader2, RefreshCw, DollarSign, ShieldAlert, Receipt } from "@/lib/icons";
+import { Loader2, RefreshCw, DollarSign, ShieldAlert, Receipt, Users, FileSpreadsheet } from "@/lib/icons";
 import { Button } from "@/components/ui/button";
 import axiosInstance from "@/service/api";
 import { useToast } from "@/hooks/use-toast";
@@ -15,12 +15,18 @@ import { LatePaymentsAlert } from "./_components/LatePaymentsAlert";
 import { PaymentRecord } from "./_components/PaymentDetailModal";
 import { DailyCashCloseModal } from "./_components/DailyCashCloseModal";
 import { PaymentMethodsModal } from "./_components/PaymentMethodsModal";
+import { StudentsOverviewTable, StudentOverview } from "./_components/StudentsOverviewTable";
 import { Settings } from "lucide-react";
+
+type ViewMode = "transactions" | "students";
 
 export default function Payments() {
   const { toast } = useToast();
   const [payments, setPayments] = useState<PaymentRecord[]>([]);
+  const [studentsOverview, setStudentsOverview] = useState<StudentOverview[]>([]);
+  const [viewMode, setViewMode] = useState<ViewMode>("students");
   const [isLoading, setIsLoading] = useState(true);
+  const [isStudentsLoading, setIsStudentsLoading] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isCashCloseOpen, setIsCashCloseOpen] = useState(false);
@@ -29,32 +35,41 @@ export default function Payments() {
   const fetchPayments = useCallback(async (isManualRefresh = false) => {
     if (isManualRefresh) setIsRefreshing(true);
     else setIsLoading(true);
-
     try {
       const response = await axiosInstance.get("/finance/payments");
       setPayments(response.data.data || response.data || []);
       if (isManualRefresh) {
-        toast({
-          title: "Telemetria Atualizada",
-          description: "Dados financeiros sincronizados com o servidor.",
-        });
+        toast({ title: "Telemetria Atualizada", description: "Dados financeiros sincronizados com o servidor." });
       }
-    } catch (error) {
-      console.error("Erro ao carregar pagamentos:", error);
-      toast({
-        title: "Falha na Conexão",
-        description: "Não foi possível carregar os registros de pagamentos.",
-        variant: "destructive",
-      });
+    } catch {
+      toast({ title: "Falha na Conexão", description: "Não foi possível carregar os pagamentos.", variant: "destructive" });
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
     }
   }, [toast]);
 
+  const fetchStudentsOverview = useCallback(async () => {
+    setIsStudentsLoading(true);
+    try {
+      const res = await axiosInstance.get("/finance/students-overview");
+      setStudentsOverview(Array.isArray(res.data) ? res.data : []);
+    } catch {
+      // silent — students table will show empty state
+    } finally {
+      setIsStudentsLoading(false);
+    }
+  }, []);
+
+  const refreshAll = useCallback((isManual = false) => {
+    fetchPayments(isManual);
+    fetchStudentsOverview();
+  }, [fetchPayments, fetchStudentsOverview]);
+
   useEffect(() => {
     fetchPayments();
-  }, [fetchPayments]);
+    fetchStudentsOverview();
+  }, [fetchPayments, fetchStudentsOverview]);
 
   // Dynamic calculations
   const stats = useMemo(() => {
@@ -264,6 +279,30 @@ export default function Payments() {
 
         {/* Header Actions */}
         <div className="flex flex-wrap items-center gap-2.5">
+          {/* View toggle */}
+          <div className="flex gap-1 bg-[#1c1b1b] border border-[#414042] rounded p-0.5">
+            <button
+              onClick={() => setViewMode("students")}
+              className={`px-3 py-1.5 rounded text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                viewMode === "students"
+                  ? "bg-[#8B5CF6] text-black"
+                  : "text-[#9d8f78] hover:text-[#e5e2e1]"
+              }`}
+            >
+              <Users className="w-3.5 h-3.5" /> Por Aluno
+            </button>
+            <button
+              onClick={() => setViewMode("transactions")}
+              className={`px-3 py-1.5 rounded text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                viewMode === "transactions"
+                  ? "bg-[#8B5CF6] text-black"
+                  : "text-[#9d8f78] hover:text-[#e5e2e1]"
+              }`}
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5" /> Por Transação
+            </button>
+          </div>
+
           <Button
             size="sm"
             onClick={() => setIsPaymentMethodsOpen(true)}
@@ -286,13 +325,11 @@ export default function Payments() {
           <Button
             variant="secondary"
             size="sm"
-            onClick={() => fetchPayments(true)}
+            onClick={() => refreshAll(true)}
             disabled={isRefreshing}
             className="border-[#CBD5E1] dark:border-[#414042] text-[#090D16] dark:text-[#e5e2e1] hover:bg-[#E2E6EA] dark:hover:bg-[#1A1A1A] rounded h-9 px-3.5 text-xs sm:text-sm font-semibold gap-2 transition-all cursor-pointer"
           >
-            <RefreshCw
-              className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin text-primary" : "text-[#556575] dark:text-[#d5c4ac]"}`}
-            />
+            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin text-primary" : "text-[#556575] dark:text-[#d5c4ac]"}`} />
             <span>{isRefreshing ? "A Atualizar..." : "Sincronizar"}</span>
           </Button>
         </div>
@@ -325,13 +362,21 @@ export default function Payments() {
         cancelledAmount={stats.cancelled}
       />
 
-      {/* Payments Table & Subsystem */}
-      <PaymentTable
-        payments={payments}
-        onExportPDF={exportToPDF}
-        isExporting={isExporting}
-        onUpdate={() => fetchPayments(true)}
-      />
+      {/* Main view: Students or Transactions */}
+      {viewMode === "students" ? (
+        <StudentsOverviewTable
+          students={studentsOverview}
+          onUpdate={() => refreshAll(true)}
+          isLoading={isStudentsLoading}
+        />
+      ) : (
+        <PaymentTable
+          payments={payments}
+          onExportPDF={exportToPDF}
+          isExporting={isExporting}
+          onUpdate={() => refreshAll(true)}
+        />
+      )}
 
       {/* Daily Cash Close Modal */}
       <DailyCashCloseModal
