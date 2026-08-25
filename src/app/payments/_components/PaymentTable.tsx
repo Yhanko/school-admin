@@ -16,6 +16,10 @@ import {
 } from "@/lib/icons";
 import { Button } from "@/components/ui/button";
 import { PaymentRecord, PaymentDetailModal } from "./PaymentDetailModal";
+import { ConfirmPaymentModal } from "./ConfirmPaymentModal";
+import { LatePaymentReasonModal } from "./LatePaymentReasonModal";
+import axiosInstance from "@/service/api";
+import { useToast } from "@/hooks/use-toast";
 
 interface PaymentTableProps {
   payments: PaymentRecord[];
@@ -62,6 +66,7 @@ export function PaymentTable({
   isExporting,
   onUpdate,
 }: PaymentTableProps) {
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<TabFilter>("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [activeSearch, setActiveSearch] = useState("");
@@ -69,6 +74,11 @@ export function PaymentTable({
     null
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // ── New modal states ─────────────────────────────────────────────────────
+  const [confirmPayment, setConfirmPayment] = useState<PaymentRecord | null>(null);
+  const [latePayment, setLatePayment]       = useState<PaymentRecord | null>(null);
+  const [isPatching, setIsPatching]         = useState(false);
 
   const handleSearch = () => {
     setActiveSearch(searchTerm.trim().toLowerCase());
@@ -78,6 +88,33 @@ export function PaymentTable({
     if (e.key === "Enter") {
       handleSearch();
     }
+  };
+
+  // ── Patch helpers ────────────────────────────────────────────────────────────────────
+  const patchStatus = async (payment: PaymentRecord, newStatus: string) => {
+    if (!payment.id) return;
+    setIsPatching(true);
+    try {
+      await axiosInstance.patch(`/finance/payments/${payment.id}/status`, { status: newStatus });
+      toast({ title: "Estado atualizado", description: `Pagamento marcado como "${newStatus}".` });
+      if (onUpdate) onUpdate();
+    } catch {
+      toast({ title: "Erro", description: "Não foi possível atualizar o estado.", variant: "destructive" });
+    } finally {
+      setIsPatching(false);
+    }
+  };
+
+  const handleConfirmPayment = async (_type: string) => {
+    if (!confirmPayment) return;
+    await patchStatus(confirmPayment, "confirmed");
+    setConfirmPayment(null);
+  };
+
+  const handleLatePayment = async () => {
+    if (!latePayment) return;
+    await patchStatus(latePayment, "atrasado");
+    setLatePayment(null);
   };
 
   const filteredPayments = useMemo(() => {
@@ -134,7 +171,7 @@ export function PaymentTable({
         );
       case "atrasado":
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded label-caps bg-[#B45309] text-white border border-[#B45309] font-bold">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded label-caps font-bold" style={{ backgroundColor: '#dc2626', color: '#ffffff', border: 'none' }}>
             <AlertTriangle className="w-3 h-3" />
             Em Atraso
           </span>
@@ -336,16 +373,43 @@ export function PaymentTable({
 
                   {/* Actions */}
                   <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => handleOpenDetail(payment)}
-                      className="h-7.5 px-2.5 bg-transparent border border-[#414042] text-[#e5e2e1] hover:border-[#C0C2C5] hover:bg-[#201f1f] rounded text-xs gap-1.5 cursor-pointer transition-all inline-flex items-center"
-                      title="Ver telemetria detalhada"
-                    >
-                      <Eye className="w-3.5 h-3.5 text-[#8B5CF6]" />
-                      <span>Detalhes</span>
-                    </Button>
+                    <div className="flex items-center justify-center gap-1.5">
+                      {/* Atraso — always visible unless already overdue */}
+                      {normalizeStatus(payment.status) !== "atrasado" && (
+                        <button
+                          onClick={() => setLatePayment(payment)}
+                          disabled={isPatching}
+                          title="Registar atraso"
+                          className="h-7 px-2 rounded border border-amber-700/60 bg-amber-900/20 text-amber-400 text-[10px] font-bold hover:bg-amber-900/40 disabled:opacity-40 cursor-pointer transition-colors inline-flex items-center gap-1"
+                        >
+                          <AlertTriangle className="w-3 h-3" /> Atraso
+                        </button>
+                      )}
+
+                      {/* Confirmar — only when status is pending */}
+                      {normalizeStatus(payment.status) === "pending" && (
+                        <button
+                          onClick={() => setConfirmPayment(payment)}
+                          disabled={isPatching}
+                          title="Confirmar receção de pagamento"
+                          className="h-7 px-2 rounded border border-emerald-700/60 bg-emerald-900/20 text-emerald-400 text-[10px] font-bold hover:bg-emerald-900/40 disabled:opacity-40 cursor-pointer transition-colors inline-flex items-center gap-1"
+                        >
+                          <CheckCircle className="w-3 h-3" /> Confirmar
+                        </button>
+                      )}
+
+                      {/* Details */}
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => handleOpenDetail(payment)}
+                        className="h-7 px-2.5 bg-transparent border border-[#414042] text-[#e5e2e1] hover:border-[#C0C2C5] hover:bg-[#201f1f] rounded text-xs gap-1.5 cursor-pointer transition-all inline-flex items-center"
+                        title="Ver telemetria detalhada"
+                      >
+                        <Eye className="w-3.5 h-3.5 text-[#8B5CF6]" />
+                        <span>Detalhes</span>
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               );
@@ -455,6 +519,29 @@ export function PaymentTable({
         }}
         onUpdate={onUpdate}
       />
+
+      {/* Confirm Payment Modal */}
+      {confirmPayment && (
+        <ConfirmPaymentModal
+          isOpen={!!confirmPayment}
+          onClose={() => setConfirmPayment(null)}
+          studentName={confirmPayment.student?.name || confirmPayment.studentName || "Aluno"}
+          paymentType={confirmPayment.type}
+          proofUrl={confirmPayment.proofUrl}
+          amount={confirmPayment.amount}
+          onConfirm={handleConfirmPayment}
+        />
+      )}
+
+      {/* Late Payment Reason Modal */}
+      {latePayment && (
+        <LatePaymentReasonModal
+          isOpen={!!latePayment}
+          onClose={() => setLatePayment(null)}
+          studentName={latePayment.student?.name || latePayment.studentName || "Aluno"}
+          onConfirm={handleLatePayment}
+        />
+      )}
     </div>
   );
 }

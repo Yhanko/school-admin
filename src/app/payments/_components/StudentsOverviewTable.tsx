@@ -3,12 +3,9 @@
 import React, { useState, useMemo } from "react";
 import {
   Search,
-  Download,
   CheckCircle,
   Clock,
   AlertCircle,
-  Eye,
-  FileSpreadsheet,
   Loader2,
   Filter,
   Paperclip,
@@ -17,9 +14,10 @@ import {
   ChevronRight,
   User,
 } from "@/lib/icons";
-import { Button } from "@/components/ui/button";
 import axiosInstance from "@/service/api";
 import { useToast } from "@/hooks/use-toast";
+import { ConfirmPaymentModal } from "./ConfirmPaymentModal";
+import { LatePaymentReasonModal } from "./LatePaymentReasonModal";
 
 interface StudentPayment {
   id: string;
@@ -65,33 +63,56 @@ const getTypeLabel = (t?: string) =>
 
 type TabFilter = "all" | "pago" | "pendente" | "atrasado" | "sem_pagamento";
 
-const STATUS_BADGE: Record<string, React.ReactElement> = {
-  pago: (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-900/40 text-emerald-400 border border-emerald-700">
-      <CheckCircle className="w-3 h-3" /> Pago
-    </span>
-  ),
-  pendente: (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-violet-900/40 text-violet-300 border border-violet-700">
-      <Clock className="w-3 h-3" /> Pendente / Aguarda validação
-    </span>
-  ),
-  atrasado: (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-900/40 text-amber-400 border border-amber-700">
-      <AlertTriangle className="w-3 h-3" /> Em Atraso
-    </span>
-  ),
-  sem_pagamento: (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-[#353534] text-[#9d8f78] border border-[#414042]">
-      <AlertCircle className="w-3 h-3" /> Sem Pagamento
-    </span>
-  ),
-};
+function StatusBadge({ status }: { status: string }) {
+  switch (status) {
+    case "pago":
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-900/40 text-emerald-400 border border-emerald-700">
+          <CheckCircle className="w-3 h-3" /> Pago
+        </span>
+      );
+    case "pendente":
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-violet-900/40 text-violet-300 border border-violet-700">
+          <Clock className="w-3 h-3" /> Pendente / Aguarda validação
+        </span>
+      );
+    case "atrasado":
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-900/40 text-amber-400 border border-amber-700">
+          <AlertTriangle className="w-3 h-3" /> Em Atraso
+        </span>
+      );
+    default:
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-[#353534] text-[#9d8f78] border border-[#414042]">
+          <AlertCircle className="w-3 h-3" /> Sem Pagamento
+        </span>
+      );
+  }
+}
+
+function paymentNormalizedStatus(status: string): string {
+  if (status === "confirmed" || status === "pago") return "pago";
+  if (status === "atrasado" || status === "overdue" || status === "cancelled") return "atrasado";
+  return "pendente";
+}
+
 
 interface Props {
   students: StudentOverview[];
   onUpdate: () => void;
   isLoading: boolean;
+}
+
+// ── Shape for the modal trigger context ───────────────────────────────────
+interface ModalContext {
+  studentId: string;
+  studentName: string;
+  paymentId: string | null;
+  paymentType?: string;
+  proofUrl?: string | null;
+  amount?: number;
 }
 
 export function StudentsOverviewTable({ students, onUpdate, isLoading }: Props) {
@@ -100,6 +121,10 @@ export function StudentsOverviewTable({ students, onUpdate, isLoading }: Props) 
   const [search, setSearch] = useState("");
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [updating, setUpdating] = useState<string | null>(null);
+
+  // ── Modal state ────────────────────────────────────────────────────────
+  const [confirmCtx, setConfirmCtx] = useState<ModalContext | null>(null);
+  const [lateCtx, setLateCtx] = useState<ModalContext | null>(null);
 
   const toggleExpand = (id: string) =>
     setExpandedIds((prev) => {
@@ -157,6 +182,22 @@ export function StudentsOverviewTable({ students, onUpdate, isLoading }: Props) 
     } finally {
       setUpdating(null);
     }
+  };
+
+  // ── Modal handlers ─────────────────────────────────────────────────────
+  const handleOpenConfirm = (ctx: ModalContext) => setConfirmCtx(ctx);
+  const handleOpenLate    = (ctx: ModalContext) => setLateCtx(ctx);
+
+  const handleConfirmPayment = async (resolvedType: string) => {
+    if (!confirmCtx) return;
+    await markStatus(confirmCtx.studentId, confirmCtx.paymentId, "confirmed");
+    setConfirmCtx(null);
+  };
+
+  const handleLatePayment = async () => {
+    if (!lateCtx) return;
+    await markStatus(lateCtx.studentId, lateCtx.paymentId, "atrasado");
+    setLateCtx(null);
   };
 
   const TABS: { key: TabFilter; label: string; color: string }[] = [
@@ -307,29 +348,48 @@ export function StudentsOverviewTable({ students, onUpdate, isLoading }: Props) 
                       </td>
 
                       {/* Overall Status */}
-                      <td className="py-3 px-4 text-center">{STATUS_BADGE[s.overallStatus]}</td>
+                      <td className="py-3 px-4 text-center"><StatusBadge status={s.overallStatus} /></td>
 
                       {/* Quick Actions */}
                       <td className="py-3 px-4 text-center" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-center gap-1.5 flex-wrap">
-                          {/* Mark overdue */}
+                          {/* Mark overdue — always shown unless already overdue */}
                           <button
                             disabled={isUpdating || s.overallStatus === "atrasado"}
-                            onClick={() => markStatus(s.studentId, latestPayment?.id ?? null, "atrasado")}
-                            title="Marcar em atraso"
-                            className="px-2 py-1 rounded bg-amber-900/30 border border-amber-700 text-amber-400 text-[10px] font-bold hover:bg-amber-900/60 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                            onClick={() =>
+                              handleOpenLate({
+                                studentId: s.studentId,
+                                studentName: s.studentName,
+                                paymentId: latestPayment?.id ?? null,
+                                paymentType: latestPayment?.type,
+                              })
+                            }
+                            title="Registar atraso"
+                            className="px-2 py-1 rounded bg-amber-900 border border-amber-700 text-amber-400 text-[10px] font-bold hover:bg-amber-900/60 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
                           >
                             {isUpdating ? <Loader2 className="w-3 h-3 animate-spin" /> : "⚠ Atraso"}
                           </button>
-                          {/* Confirm paid */}
-                          <button
-                            disabled={isUpdating || s.overallStatus === "pago"}
-                            onClick={() => markStatus(s.studentId, latestPayment?.id ?? null, "confirmed")}
-                            title="Confirmar pagamento"
-                            className="px-2 py-1 rounded bg-emerald-900/30 border border-emerald-700 text-emerald-400 text-[10px] font-bold hover:bg-emerald-900/60 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
-                          >
-                            ✓ Confirmar
-                          </button>
+
+                          {/* Confirm paid — only when status is pendente */}
+                          {s.overallStatus === "pendente" && (
+                            <button
+                              disabled={isUpdating}
+                              onClick={() =>
+                                handleOpenConfirm({
+                                  studentId: s.studentId,
+                                  studentName: s.studentName,
+                                  paymentId: latestPayment?.id ?? null,
+                                  paymentType: latestPayment?.type,
+                                  proofUrl: latestPayment?.proofUrl,
+                                  amount: latestPayment?.amount,
+                                })
+                              }
+                              title="Confirmar pagamento recebido"
+                              className="px-2 py-1 rounded bg-emerald-900 border border-emerald-700 text-emerald-400 text-[10px] font-bold hover:bg-emerald-900/60 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                            >
+                              ✓ Confirmar
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -359,9 +419,7 @@ export function StudentsOverviewTable({ students, onUpdate, isLoading }: Props) 
                                       {p.amount.toLocaleString()} Kz
                                     </td>
                                     <td className="py-2 pr-4 text-center">
-                                      {STATUS_BADGE[p.status === "confirmed" || p.status === "pago" ? "pago"
-                                        : p.status === "atrasado" || p.status === "overdue" || p.status === "cancelled" ? "atrasado"
-                                        : "pendente"]}
+                                      <StatusBadge status={paymentNormalizedStatus(p.status)} />
                                     </td>
                                     <td className="py-2 pr-4 text-center">
                                       {p.proofUrl ? (
@@ -382,20 +440,39 @@ export function StudentsOverviewTable({ students, onUpdate, isLoading }: Props) 
                                     </td>
                                     <td className="py-2 text-center">
                                       <div className="flex items-center justify-center gap-1">
+                                        {/* Atraso — always shown unless already overdue */}
                                         <button
-                                          onClick={() => markStatus(s.studentId, p.id, "atrasado")}
+                                          onClick={() =>
+                                            handleOpenLate({
+                                              studentId: s.studentId,
+                                              studentName: s.studentName,
+                                              paymentId: p.id,
+                                              paymentType: p.type,
+                                            })
+                                          }
                                           disabled={p.status === "atrasado" || p.status === "overdue"}
                                           className="px-1.5 py-0.5 rounded bg-amber-900/30 border border-amber-700/50 text-amber-400 text-[10px] hover:bg-amber-900/50 disabled:opacity-30 cursor-pointer"
                                         >
                                           Atraso
                                         </button>
-                                        <button
-                                          onClick={() => markStatus(s.studentId, p.id, "confirmed")}
-                                          disabled={p.status === "confirmed" || p.status === "pago"}
-                                          className="px-1.5 py-0.5 rounded bg-emerald-900/30 border border-emerald-700/50 text-emerald-400 text-[10px] hover:bg-emerald-900/50 disabled:opacity-30 cursor-pointer"
-                                        >
-                                          Confirmar
-                                        </button>
+                                        {/* Confirmar — only when payment is pending */}
+                                        {(p.status === "pending" || p.status === "pendente") && (
+                                          <button
+                                            onClick={() =>
+                                              handleOpenConfirm({
+                                                studentId: s.studentId,
+                                                studentName: s.studentName,
+                                                paymentId: p.id,
+                                                paymentType: p.type,
+                                                proofUrl: p.proofUrl,
+                                                amount: p.amount,
+                                              })
+                                            }
+                                            className="px-1.5 py-0.5 rounded bg-emerald-900/30 border border-emerald-700/50 text-emerald-400 text-[10px] hover:bg-emerald-900/50 cursor-pointer"
+                                          >
+                                            Confirmar
+                                          </button>
+                                        )}
                                       </div>
                                     </td>
                                   </tr>
@@ -420,8 +497,31 @@ export function StudentsOverviewTable({ students, onUpdate, isLoading }: Props) 
           A exibir <strong className="text-[#DDD6FE]">{filtered.length}</strong> de{" "}
           <strong className="text-[#e5e2e1]">{students.length}</strong> alunos
         </span>
-        <span className="label-caps text-[#9d8f78] hidden sm:inline">yhankoEduca • Gestão por Aluno</span>
+        <span className="label-caps text-[#9d8f78] hidden sm:inline">• Gestão por Aluno</span>
       </div>
+
+      {/* ── Confirm Payment Modal ─────────────────────────────────────── */}
+      {confirmCtx && (
+        <ConfirmPaymentModal
+          isOpen={!!confirmCtx}
+          onClose={() => setConfirmCtx(null)}
+          studentName={confirmCtx.studentName}
+          paymentType={confirmCtx.paymentType}
+          proofUrl={confirmCtx.proofUrl}
+          amount={confirmCtx.amount}
+          onConfirm={handleConfirmPayment}
+        />
+      )}
+
+      {/* ── Late Payment Reason Modal ─────────────────────────────────── */}
+      {lateCtx && (
+        <LatePaymentReasonModal
+          isOpen={!!lateCtx}
+          onClose={() => setLateCtx(null)}
+          studentName={lateCtx.studentName}
+          onConfirm={handleLatePayment}
+        />
+      )}
     </div>
   );
 }

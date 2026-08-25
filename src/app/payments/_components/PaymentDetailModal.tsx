@@ -28,7 +28,7 @@ import { ShareWhatsappDialog } from "@/components/whatsapp/ShareWhatsappDialog";
 export interface PaymentRecord {
   id?: string;
   student?: { name?: string; email?: string; id?: string };
-  studentName?: string;
+  studentName?: string; // flat name fallback (some API responses omit nested student)
   type?: string;
   description?: string;
   amount?: number;
@@ -263,7 +263,8 @@ export function PaymentDetailModal({
               size="sm"
               onClick={() => handleStatusUpdate('cancelled')}
               disabled={isUpdating || payment.status === 'cancelled'}
-              className="border-[#9B2226] text-[#9B2226] hover:bg-[#9B2226]/10 rounded text-xs"
+              style={{ backgroundColor: '#dc2626', color: '#ffffff', border: 'none' }}
+              className="rounded text-xs font-semibold hover:opacity-90"
             >
               Marcar Atraso
             </Button>
@@ -281,7 +282,8 @@ export function PaymentDetailModal({
               size="sm"
               onClick={() => handleStatusUpdate('confirmed')}
               disabled={isUpdating || payment.status === 'confirmed'}
-              className="bg-[#2D6A4F] text-white hover:bg-[#2D6A4F]/90 border-transparent rounded text-xs"
+              style={{ backgroundColor: '#ffffff', color: '#16a34a', border: '1.5px solid #16a34a' }}
+              className="rounded text-xs font-semibold hover:opacity-90"
             >
               Confirmar Pagamento
             </Button>
