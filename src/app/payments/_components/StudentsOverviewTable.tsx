@@ -65,7 +65,7 @@ const getTypeLabel = (t?: string) =>
 
 type TabFilter = "all" | "pago" | "pendente" | "atrasado" | "sem_pagamento";
 
-const STATUS_BADGE: Record<string, JSX.Element> = {
+const STATUS_BADGE: Record<string, React.ReactElement> = {
   pago: (
     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-900/40 text-emerald-400 border border-emerald-700">
       <CheckCircle className="w-3 h-3" /> Pago
