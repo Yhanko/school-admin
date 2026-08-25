@@ -11,6 +11,8 @@ import {
   FileSpreadsheet,
   Loader2,
   Filter,
+  Paperclip,
+  AlertTriangle,
 } from "@/lib/icons";
 import { Button } from "@/components/ui/button";
 import { PaymentRecord, PaymentDetailModal } from "./PaymentDetailModal";
@@ -22,7 +24,37 @@ interface PaymentTableProps {
   onUpdate?: () => void;
 }
 
-type TabFilter = "all" | "confirmed" | "pending" | "cancelled";
+type TabFilter = "all" | "confirmed" | "pending" | "atrasado" | "cancelled";
+
+// Normalize status to a canonical value
+const normalizeStatus = (status?: string): string => {
+  switch (status) {
+    case "confirmed": case "pago": return "confirmed";
+    case "pending": case "pendente": return "pending";
+    case "atrasado": case "overdue": return "atrasado";
+    case "cancelled": return "cancelled";
+    default: return status || "pending";
+  }
+};
+
+// Human-readable payment type labels
+const TYPE_LABELS: Record<string, string> = {
+  tuition:         "Propina",
+  enrollment:      "Matrícula",
+  confirmation:    "Confirmação",
+  material:        "Material Escolar",
+  uniform:         "Bata / Uniforme",
+  exam_sheet:      "Folha de Prova",
+  activity:        "Atividade",
+  mensalidade:     "Propina",
+  matricula:       "Matrícula",
+  confirmacao:     "Confirmação",
+  bata:            "Bata / Uniforme",
+  folha_prova:     "Folha de Prova",
+};
+
+const getTypeLabel = (type?: string): string =>
+  type ? (TYPE_LABELS[type.toLowerCase()] || type) : "Pagamento";
 
 export function PaymentTable({
   payments,
@@ -50,15 +82,17 @@ export function PaymentTable({
 
   const filteredPayments = useMemo(() => {
     return payments.filter((payment) => {
+      const normalized = normalizeStatus(payment.status);
+
       // Tab filter
-      if (activeTab !== "all" && payment.status !== activeTab) {
+      if (activeTab !== "all" && normalized !== activeTab) {
         return false;
       }
 
       // Search filter
       if (activeSearch) {
         const studentName = payment.student?.name?.toLowerCase() || "";
-        const type = payment.type?.toLowerCase() || "";
+        const type = getTypeLabel(payment.type).toLowerCase();
         const id = payment.id?.toLowerCase() || "";
         const matchesSearch =
           studentName.includes(activeSearch) ||
@@ -74,19 +108,21 @@ export function PaymentTable({
   const counts = useMemo(() => {
     return {
       all: payments.length,
-      confirmed: payments.filter((p) => p.status === "confirmed").length,
-      pending: payments.filter((p) => p.status === "pending").length,
-      cancelled: payments.filter((p) => p.status === "cancelled").length,
+      confirmed: payments.filter((p) => normalizeStatus(p.status) === "confirmed").length,
+      pending:   payments.filter((p) => normalizeStatus(p.status) === "pending").length,
+      atrasado:  payments.filter((p) => normalizeStatus(p.status) === "atrasado").length,
+      cancelled: payments.filter((p) => normalizeStatus(p.status) === "cancelled").length,
     };
   }, [payments]);
 
   const getStatusBadge = (status?: string) => {
-    switch (status) {
+    const n = normalizeStatus(status);
+    switch (n) {
       case "confirmed":
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded label-caps bg-[#2D6A4F] text-[#e5e2e1] border border-[#2D6A4F]">
             <CheckCircle className="w-3 h-3" />
-            Pago
+            Pago / Confirmado
           </span>
         );
       case "pending":
@@ -94,6 +130,13 @@ export function PaymentTable({
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded label-caps bg-[#8B5CF6] text-[#000000] border border-[#8B5CF6] font-bold">
             <Clock className="w-3 h-3" />
             Pendente
+          </span>
+        );
+      case "atrasado":
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded label-caps bg-[#B45309] text-white border border-[#B45309] font-bold">
+            <AlertTriangle className="w-3 h-3" />
+            Em Atraso
           </span>
         );
       case "cancelled":
@@ -174,64 +217,29 @@ export function PaymentTable({
 
         {/* Tabs System */}
         <div className="flex items-center justify-start border-b border-[#414042] pt-2 overflow-x-auto gap-1">
-          <button
-            onClick={() => setActiveTab("all")}
-            className={`inline-flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold transition-all border-b-2 cursor-pointer whitespace-nowrap ${
-              activeTab === "all"
-                ? "text-[#8B5CF6] border-[#8B5CF6] shadow-[0_4px_4px_-2px_rgba(139, 92, 246,0.5)]"
-                : "text-[#d5c4ac] border-transparent hover:text-[#e5e2e1]"
-            }`}
-          >
-            <span>Todos os Registos</span>
-            <span className="data-mono px-1.5 py-0.2 rounded bg-[#201f1f] text-xs text-[#d5c4ac] border border-[#414042]">
-              {counts.all}
-            </span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab("confirmed")}
-            className={`inline-flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold transition-all border-b-2 cursor-pointer whitespace-nowrap ${
-              activeTab === "confirmed"
-                ? "text-[#8B5CF6] border-[#8B5CF6] shadow-[0_4px_4px_-2px_rgba(139, 92, 246,0.5)]"
-                : "text-[#d5c4ac] border-transparent hover:text-[#e5e2e1]"
-            }`}
-          >
-            <CheckCircle className="w-3.5 h-3.5 text-[#2D6A4F]" />
-            <span>Confirmados (Pagos)</span>
-            <span className="data-mono px-1.5 py-0.2 rounded bg-[#201f1f] text-xs text-[#2D6A4F] border border-[#2D6A4F]/40">
-              {counts.confirmed}
-            </span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab("pending")}
-            className={`inline-flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold transition-all border-b-2 cursor-pointer whitespace-nowrap ${
-              activeTab === "pending"
-                ? "text-[#8B5CF6] border-[#8B5CF6] shadow-[0_4px_4px_-2px_rgba(139, 92, 246,0.5)]"
-                : "text-[#d5c4ac] border-transparent hover:text-[#e5e2e1]"
-            }`}
-          >
-            <Clock className="w-3.5 h-3.5 text-[#8B5CF6]" />
-            <span>Pendentes</span>
-            <span className="data-mono px-1.5 py-0.2 rounded bg-[#201f1f] text-xs text-[#8B5CF6] border border-[#8B5CF6]/40">
-              {counts.pending}
-            </span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab("cancelled")}
-            className={`inline-flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold transition-all border-b-2 cursor-pointer whitespace-nowrap ${
-              activeTab === "cancelled"
-                ? "text-[#8B5CF6] border-[#8B5CF6] shadow-[0_4px_4px_-2px_rgba(139, 92, 246,0.5)]"
-                : "text-[#d5c4ac] border-transparent hover:text-[#e5e2e1]"
-            }`}
-          >
-            <AlertCircle className="w-3.5 h-3.5 text-[#9B2226]" />
-            <span>Cancelados / Atrasados</span>
-            <span className="data-mono px-1.5 py-0.2 rounded bg-[#201f1f] text-xs text-[#ffb4ab] border border-[#9B2226]/40">
-              {counts.cancelled}
-            </span>
-          </button>
+          {([
+            { key: "all",       label: "Todos",           count: counts.all,       icon: null,                                       color: "text-[#d5c4ac]" },
+            { key: "confirmed", label: "Pagos/Confirmados",count: counts.confirmed, icon: <CheckCircle className="w-3.5 h-3.5" />,   color: "text-[#2D6A4F]" },
+            { key: "pending",   label: "Pendentes",       count: counts.pending,   icon: <Clock className="w-3.5 h-3.5" />,          color: "text-[#8B5CF6]" },
+            { key: "atrasado",  label: "Em Atraso",       count: counts.atrasado,  icon: <AlertTriangle className="w-3.5 h-3.5" />,  color: "text-[#B45309]" },
+            { key: "cancelled", label: "Cancelados",      count: counts.cancelled, icon: <AlertCircle className="w-3.5 h-3.5" />,   color: "text-[#9B2226]" },
+          ] as const).map(({ key, label, count, icon, color }) => (
+            <button
+              key={key}
+              onClick={() => setActiveTab(key as TabFilter)}
+              className={`inline-flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold transition-all border-b-2 cursor-pointer whitespace-nowrap ${
+                activeTab === key
+                  ? "text-[#8B5CF6] border-[#8B5CF6] shadow-[0_4px_4px_-2px_rgba(139,92,246,0.5)]"
+                  : "text-[#d5c4ac] border-transparent hover:text-[#e5e2e1]"
+              }`}
+            >
+              {icon && <span className={color}>{icon}</span>}
+              <span>{label}</span>
+              <span className={`data-mono px-1.5 py-0.5 rounded bg-[#201f1f] text-xs border border-[#414042] ${color}`}>
+                {count}
+              </span>
+            </button>
+          ))}
         </div>
       </div>
 
@@ -240,27 +248,14 @@ export function PaymentTable({
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="bg-[#1c1b1b] border-b border-[#414042]">
-              <th className="py-3 px-4 label-caps text-[#d5c4ac]">
-                Ref / Transação
-              </th>
-              <th className="py-3 px-4 label-caps text-[#d5c4ac]">
-                Aluno / Titular
-              </th>
-              <th className="py-3 px-4 label-caps text-[#d5c4ac]">
-                Tipo de Pagamento
-              </th>
-              <th className="py-3 px-4 label-caps text-[#d5c4ac] text-right">
-                Valor (Kz)
-              </th>
-              <th className="py-3 px-4 label-caps text-[#d5c4ac] text-center">
-                Status
-              </th>
-              <th className="py-3 px-4 label-caps text-[#d5c4ac]">
-                Data Liquidação
-              </th>
-              <th className="py-3 px-4 label-caps text-[#d5c4ac] text-center">
-                Ações
-              </th>
+              <th className="py-3 px-4 label-caps text-[#d5c4ac]">Ref / Transação</th>
+              <th className="py-3 px-4 label-caps text-[#d5c4ac]">Aluno / Titular</th>
+              <th className="py-3 px-4 label-caps text-[#d5c4ac]">Tipo de Pagamento</th>
+              <th className="py-3 px-4 label-caps text-[#d5c4ac] text-right">Valor (Kz)</th>
+              <th className="py-3 px-4 label-caps text-[#d5c4ac] text-center">Status</th>
+              <th className="py-3 px-4 label-caps text-[#d5c4ac]">Data</th>
+              <th className="py-3 px-4 label-caps text-[#d5c4ac] text-center">Comprovativo</th>
+              <th className="py-3 px-4 label-caps text-[#d5c4ac] text-center">Ações</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#414042]/50 bg-[#121212]">
@@ -301,16 +296,14 @@ export function PaymentTable({
                   {/* Type */}
                   <td className="py-3.5 px-4 text-xs text-[#d5c4ac] whitespace-nowrap">
                     <span className="px-2.5 py-0.5 rounded bg-[#1c1b1b] border border-[#414042]">
-                      {payment.type || "Mensalidade"}
+                      {getTypeLabel(payment.type)}
                     </span>
                   </td>
 
                   {/* Amount */}
                   <td className="py-3.5 px-4 text-right data-mono font-bold text-[#DDD6FE] whitespace-nowrap">
                     {(payment.amount || 0).toLocaleString()}{" "}
-                    <span className="text-[10px] text-[#9d8f78] font-normal">
-                      Kz
-                    </span>
+                    <span className="text-[10px] text-[#9d8f78] font-normal">Kz</span>
                   </td>
 
                   {/* Status */}
@@ -322,7 +315,23 @@ export function PaymentTable({
                   <td className="py-3.5 px-4 data-mono text-xs text-[#d5c4ac] whitespace-nowrap">
                     {payment.paymentDate
                       ? new Date(payment.paymentDate).toLocaleDateString("pt-PT")
-                      : "-"}
+                      : (payment.createdAt ? new Date(payment.createdAt).toLocaleDateString("pt-PT") : "—")}
+                  </td>
+
+                  {/* Proof */}
+                  <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                    {payment.proofUrl ? (
+                      <button
+                        onClick={() => window.open(payment.proofUrl, "_blank")}
+                        title="Ver comprovativo"
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded bg-[#8B5CF6]/15 border border-[#8B5CF6]/40 text-[#8B5CF6] hover:bg-[#8B5CF6]/25 transition-colors text-[10px] font-bold cursor-pointer"
+                      >
+                        <Paperclip className="w-3 h-3" />
+                        Ver
+                      </button>
+                    ) : (
+                      <span className="text-[10px] text-[#414042] italic">Sem anexo</span>
+                    )}
                   </td>
 
                   {/* Actions */}
@@ -345,7 +354,7 @@ export function PaymentTable({
             {filteredPayments.length === 0 && (
               <tr>
                 <td
-                  colSpan={7}
+                  colSpan={8}
                   className="py-12 text-center text-sm text-[#9d8f78] space-y-2"
                 >
                   <Filter className="w-8 h-8 text-[#414042] mx-auto mb-2" />
