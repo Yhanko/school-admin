@@ -75,9 +75,7 @@ export function DashboardLayout() {
   const totalPayments = confirmedPayments.length;
 
   const recentStudentsList = [...students].reverse().slice(0, 5);
-  const recentPaymentsList = payments
-    .filter((p: Record<string, unknown>) => p.status === "pending" || p.status === "pendente")
-    .slice(0, 5);
+  const recentPaymentsList = [...payments].slice(0, 5);
 
   if (loading) {
     return (
