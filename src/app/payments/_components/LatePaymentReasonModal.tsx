@@ -92,7 +92,7 @@ export function LatePaymentReasonModal({
                 className={`flex items-center gap-2.5 px-3 py-3 rounded-lg border text-sm font-semibold transition-all cursor-pointer text-left ${
                   selectedReason === r.value
                     ? "border-amber-600 text-black shadow-[0_0_10px_rgba(251,191,36,0.15)]"
-                    : "bg-[#1c1b1b] border-[#414042] text-[#fff] hover:border-[#C0C2C5] hover:text-[#e5e2e1]"
+                    : "bg-[#1c1b1b] border-[#414042] text-[#C0C2C5] hover:border-[#C0C2C5] hover:text-[#e5e2e1]"
                 }`}
               >
                 <span className="text-base leading-none">{r.emoji}</span>

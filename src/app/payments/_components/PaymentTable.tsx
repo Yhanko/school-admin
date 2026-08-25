@@ -32,12 +32,14 @@ type TabFilter = "all" | "confirmed" | "pending" | "atrasado" | "cancelled";
 
 // Normalize status to a canonical value
 const normalizeStatus = (status?: string): string => {
-  switch (status) {
+  const s = status?.toLowerCase()?.trim();
+  switch (s) {
     case "confirmed": case "pago": return "confirmed";
     case "pending": case "pendente": return "pending";
+    case "processing": case "em validação": case "em validacao": case "aguarda validação": case "aguarda validacao": return "processing"; 
     case "atrasado": case "overdue": return "atrasado";
-    case "cancelled": return "cancelled";
-    default: return status || "pending";
+    case "cancelled": case "cancelado": return "cancelled";
+    default: return s || "pending";
   }
 };
 
@@ -167,6 +169,13 @@ export function PaymentTable({
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded label-caps bg-[#8B5CF6] text-[#000000] border border-[#8B5CF6] font-bold">
             <Clock className="w-3 h-3" />
             Pendente
+          </span>
+        );
+      case "processing":
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded label-caps font-bold" style={{ backgroundColor: '#0369a1', color: '#ffffff', border: '1px solid #0284c7' }}>
+            <Clock className="w-3 h-3" />
+            Em Validação
           </span>
         );
       case "atrasado":
@@ -386,13 +395,14 @@ export function PaymentTable({
                         </button>
                       )}
 
-                      {/* Confirmar — only when status is pending */}
-                      {normalizeStatus(payment.status) === "pending" && (
+                      {/* Confirmar — visível quando pending OU processing (aluno submeteu comprovativo) */}
+                      {["pending", "processing"].includes(normalizeStatus(payment.status)) && (
                         <button
                           onClick={() => setConfirmPayment(payment)}
                           disabled={isPatching}
                           title="Confirmar receção de pagamento"
-                          className="h-7 px-2 rounded border border-emerald-700/60 bg-emerald-900/20 text-emerald-400 text-[10px] font-bold hover:bg-emerald-900/40 disabled:opacity-40 cursor-pointer transition-colors inline-flex items-center gap-1"
+                          style={{ backgroundColor: '#ffffff', color: '#16a34a', border: '1.5px solid #16a34a' }}
+                          className="h-7 px-2 rounded text-[10px] font-bold hover:opacity-80 disabled:opacity-40 cursor-pointer transition-all inline-flex items-center gap-1"
                         >
                           <CheckCircle className="w-3 h-3" /> Confirmar
                         </button>
@@ -476,14 +486,39 @@ export function PaymentTable({
                     : "-"}
                 </span>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleOpenDetail(payment)}
-                className="border-[#414042] text-[#e5e2e1] hover:bg-[#201f1f] hover:text-[#8B5CF6] rounded h-8 px-2.5 text-xs"
-              >
-                <Eye className="w-3.5 h-3.5 mr-1" /> Detalhes
-              </Button>
+              <div className="flex items-center gap-1.5">
+                {normalizeStatus(payment.status) !== "atrasado" && (
+                  <button
+                    onClick={() => setLatePayment(payment)}
+                    disabled={isPatching}
+                    title="Registar atraso"
+                    className="h-8 px-2 rounded border border-amber-700/60 bg-amber-900/20 text-amber-400 text-[10px] font-bold hover:bg-amber-900/40 disabled:opacity-40 cursor-pointer transition-colors inline-flex items-center gap-1"
+                  >
+                    <AlertTriangle className="w-3 h-3" /> Atraso
+                  </button>
+                )}
+
+                {["pending", "processing"].includes(normalizeStatus(payment.status)) && (
+                  <button
+                    onClick={() => setConfirmPayment(payment)}
+                    disabled={isPatching}
+                    title="Confirmar receção de pagamento"
+                    style={{ backgroundColor: '#ffffff', color: '#16a34a', border: '1.5px solid #16a34a' }}
+                    className="h-8 px-2 rounded text-[10px] font-bold hover:opacity-80 disabled:opacity-40 cursor-pointer transition-all inline-flex items-center gap-1"
+                  >
+                    <CheckCircle className="w-3 h-3" /> Confirmar
+                  </button>
+                )}
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleOpenDetail(payment)}
+                  className="border-[#414042] text-[#e5e2e1] hover:bg-[#201f1f] hover:text-[#8B5CF6] rounded h-8 px-2.5 text-xs"
+                >
+                  <Eye className="w-3.5 h-3.5 mr-1" /> Detalhes
+                </Button>
+              </div>
             </div>
           </div>
         ))}
