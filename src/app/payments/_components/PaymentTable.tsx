@@ -20,6 +20,9 @@ import { ConfirmPaymentModal } from "./ConfirmPaymentModal";
 import { LatePaymentReasonModal } from "./LatePaymentReasonModal";
 import axiosInstance from "@/service/api";
 import { useToast } from "@/hooks/use-toast";
+import { generateReceiptPDF } from "@/lib/receiptGenerator";
+import { useAuth } from "@/store/useAuth";
+import { FileText } from "lucide-react";
 
 interface PaymentTableProps {
   payments: PaymentRecord[];
@@ -66,6 +69,7 @@ export function PaymentTable({
   onUpdate,
 }: PaymentTableProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<TabFilter>("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [activeSearch, setActiveSearch] = useState("");
@@ -405,6 +409,28 @@ export function PaymentTable({
                         </button>
                       )}
 
+                      {/* Recibo — visível quando confirmado */}
+                      {normalizePaymentStatus(payment.status, payment.proofUrl) === "confirmed" && (
+                        <button
+                          onClick={() => {
+                            generateReceiptPDF({
+                              transactionId: payment.id || "TX-0000",
+                              studentName: payment.student?.name || payment.studentName || "Aluno Não Identificado",
+                              studentCourse: "Geral",
+                              amount: payment.amount || 0,
+                              paymentDate: payment.paymentDate || payment.createdAt || new Date().toISOString(),
+                              paymentType: payment.type || "Mensalidade",
+                              paymentMethod: payment.paymentMethod,
+                              tellerName: user?.name || "Funcionário",
+                            });
+                          }}
+                          title="Baixar Recibo PDF"
+                          className="h-7 px-2 rounded bg-sky-900/30 border border-sky-700/50 text-sky-400 text-[10px] font-bold hover:bg-sky-900/50 cursor-pointer transition-colors inline-flex items-center gap-1"
+                        >
+                          <FileText className="w-3 h-3" /> Recibo
+                        </button>
+                      )}
+
                       {/* Details */}
                       <Button
                         variant="secondary"
@@ -504,6 +530,27 @@ export function PaymentTable({
                     className="h-8 px-2 rounded text-[10px] font-bold hover:opacity-80 disabled:opacity-40 cursor-pointer transition-all inline-flex items-center gap-1"
                   >
                     <CheckCircle className="w-3 h-3" /> Confirmar
+                  </button>
+                )}
+
+                {normalizePaymentStatus(payment.status, payment.proofUrl) === "confirmed" && (
+                  <button
+                    onClick={() => {
+                      generateReceiptPDF({
+                        transactionId: payment.id || "TX-0000",
+                        studentName: payment.student?.name || payment.studentName || "Aluno Não Identificado",
+                        studentCourse: "Geral",
+                        amount: payment.amount || 0,
+                        paymentDate: payment.paymentDate || payment.createdAt || new Date().toISOString(),
+                        paymentType: payment.type || "Mensalidade",
+                        paymentMethod: payment.paymentMethod,
+                        tellerName: user?.name || "Funcionário",
+                      });
+                    }}
+                    title="Baixar Recibo PDF"
+                    className="h-8 px-2 rounded bg-sky-900/30 border border-sky-700/50 text-sky-400 text-[10px] font-bold hover:bg-sky-900/50 cursor-pointer transition-colors inline-flex items-center gap-1"
+                  >
+                    <FileText className="w-3 h-3" /> Recibo
                   </button>
                 )}
 

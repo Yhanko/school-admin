@@ -18,6 +18,9 @@ import axiosInstance from "@/service/api";
 import { useToast } from "@/hooks/use-toast";
 import { ConfirmPaymentModal } from "./ConfirmPaymentModal";
 import { LatePaymentReasonModal } from "./LatePaymentReasonModal";
+import { generateReceiptPDF } from "@/lib/receiptGenerator";
+import { useAuth } from "@/store/useAuth";
+import { FileText } from "lucide-react";
 
 interface StudentPayment {
   id: string;
@@ -132,6 +135,7 @@ interface ModalContext {
 
 export function StudentsOverviewTable({ students, onUpdate, isLoading }: Props) {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<TabFilter>("all");
   const [search, setSearch] = useState("");
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
@@ -490,6 +494,28 @@ export function StudentsOverviewTable({ students, onUpdate, isLoading }: Props) 
                                             className="px-1.5 py-0.5 rounded bg-emerald-900/30 border border-emerald-700/50 text-emerald-400 text-[10px] hover:bg-emerald-900/50 cursor-pointer"
                                           >
                                             Confirmar
+                                          </button>
+                                        )}
+                                        {/* Recibo — visível APENAS quando confirmado */}
+                                        {paymentNormalizedStatus(p.status, p.proofUrl) === "pago" && (
+                                          <button
+                                            onClick={() => {
+                                              generateReceiptPDF({
+                                                transactionId: p.id || "TX-0000",
+                                                studentName: s.studentName || "Aluno Não Identificado",
+                                                studentCode: s.studentCode || undefined,
+                                                studentCourse: s.className || "Geral",
+                                                amount: p.amount || 0,
+                                                paymentDate: p.paymentDate || p.createdAt || new Date().toISOString(),
+                                                paymentType: p.type || "Mensalidade",
+                                                paymentMethod: p.paymentMethod || undefined,
+                                                tellerName: user?.name || "Funcionário",
+                                              });
+                                            }}
+                                            title="Baixar Recibo PDF"
+                                            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-sky-900/30 border border-sky-700/50 text-sky-400 text-[10px] hover:bg-sky-900/50 cursor-pointer"
+                                          >
+                                            <FileText className="w-3 h-3" /> Recibo
                                           </button>
                                         )}
                                       </div>
