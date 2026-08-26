@@ -20,9 +20,9 @@ import { ConfirmPaymentModal } from "./ConfirmPaymentModal";
 import { LatePaymentReasonModal } from "./LatePaymentReasonModal";
 import axiosInstance from "@/service/api";
 import { useToast } from "@/hooks/use-toast";
-import { generateReceiptPDF } from "@/lib/receiptGenerator";
+import { generateReceiptPDF, shareReceiptPDF } from "@/lib/receiptGenerator";
 import { useAuth } from "@/store/useAuth";
-import { FileText } from "lucide-react";
+import { FileText, Share2 } from "lucide-react";
 
 interface PaymentTableProps {
   payments: PaymentRecord[];
@@ -422,12 +422,37 @@ export function PaymentTable({
                               paymentType: payment.type || "Mensalidade",
                               paymentMethod: payment.paymentMethod,
                               tellerName: user?.name || "Funcionário",
+                              institutionName: user?.institution?.name,
+                              institutionNif: user?.institution?.nif,
                             });
                           }}
                           title="Baixar Recibo PDF"
                           className="h-7 px-2 rounded bg-sky-900/30 border border-sky-700/50 text-sky-400 text-[10px] font-bold hover:bg-sky-900/50 cursor-pointer transition-colors inline-flex items-center gap-1"
                         >
                           <FileText className="w-3 h-3" /> Recibo
+                        </button>
+                      )}
+                      {normalizePaymentStatus(payment.status, payment.proofUrl) === "confirmed" && (
+                        <button
+                          onClick={() => {
+                            shareReceiptPDF({
+                              transactionId: payment.id || "TX-0000",
+                              studentName: payment.student?.name || payment.studentName || "Aluno Não Identificado",
+                              studentCourse: "Geral",
+                              amount: payment.amount || 0,
+                              paymentDate: payment.paymentDate || payment.createdAt || new Date().toISOString(),
+                              paymentType: payment.type || "Mensalidade",
+                              paymentMethod: payment.paymentMethod,
+                              tellerName: user?.name || "Funcionário",
+                              institutionName: user?.institution?.name,
+                              institutionNif: user?.institution?.nif,
+                              phone: payment.student?.employeeProfile?.phone || payment.student?.profile?.phone,
+                            });
+                          }}
+                          title="Partilhar no WhatsApp"
+                          className="h-7 px-2 rounded bg-emerald-900/30 border border-emerald-700/50 text-emerald-400 text-[10px] font-bold hover:bg-emerald-900/50 cursor-pointer transition-colors inline-flex items-center gap-1"
+                        >
+                          <Share2 className="w-3 h-3" /> Partilhar
                         </button>
                       )}
 
@@ -545,12 +570,37 @@ export function PaymentTable({
                         paymentType: payment.type || "Mensalidade",
                         paymentMethod: payment.paymentMethod,
                         tellerName: user?.name || "Funcionário",
+                        institutionName: user?.institution?.name,
+                        institutionNif: user?.institution?.nif,
                       });
                     }}
                     title="Baixar Recibo PDF"
                     className="h-8 px-2 rounded bg-sky-900/30 border border-sky-700/50 text-sky-400 text-[10px] font-bold hover:bg-sky-900/50 cursor-pointer transition-colors inline-flex items-center gap-1"
                   >
                     <FileText className="w-3 h-3" /> Recibo
+                  </button>
+                )}
+                {normalizePaymentStatus(payment.status, payment.proofUrl) === "confirmed" && (
+                  <button
+                    onClick={() => {
+                      shareReceiptPDF({
+                        transactionId: payment.id || "TX-0000",
+                        studentName: payment.student?.name || payment.studentName || "Aluno Não Identificado",
+                        studentCourse: "Geral",
+                        amount: payment.amount || 0,
+                        paymentDate: payment.paymentDate || payment.createdAt || new Date().toISOString(),
+                        paymentType: payment.type || "Mensalidade",
+                        paymentMethod: payment.paymentMethod,
+                        tellerName: user?.name || "Funcionário",
+                        institutionName: user?.institution?.name,
+                        institutionNif: user?.institution?.nif,
+                        phone: payment.student?.employeeProfile?.phone || payment.student?.profile?.phone,
+                      });
+                    }}
+                    title="Partilhar no WhatsApp"
+                    className="h-8 px-2 rounded bg-emerald-900/30 border border-emerald-700/50 text-emerald-400 text-[10px] font-bold hover:bg-emerald-900/50 cursor-pointer transition-colors inline-flex items-center gap-1"
+                  >
+                    <Share2 className="w-3 h-3" />
                   </button>
                 )}
 

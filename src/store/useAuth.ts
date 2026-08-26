@@ -7,6 +7,11 @@ export interface User {
   email: string;
   role: string;
   institutionId?: string;
+  institution?: {
+    id: string;
+    name: string;
+    nif?: string;
+  };
   photoUrl?: string;
   avatar?: string;
   profile?: {

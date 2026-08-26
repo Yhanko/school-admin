@@ -17,6 +17,7 @@ export interface ReceiptData {
   institutionSubName?: string;
   institutionNif?: string;
   via?: "1ª VIA" | "2ª VIA";
+  phone?: string;
 }
 
 const TYPE_LABELS: Record<string, string> = {
@@ -34,13 +35,13 @@ const TYPE_LABELS: Record<string, string> = {
   folha_prova: "Folha de Prova",
 };
 
-export function generateReceiptPDF(data: ReceiptData) {
+export function createReceiptDoc(data: ReceiptData): jsPDF {
   const doc = new jsPDF("landscape", "mm", "a4");
   const pageWidth = doc.internal.pageSize.getWidth();
   
-  const institutionName = data.institutionName || "Saber Angola - Prestação de Serviços, Lda.";
-  const institutionSubName = data.institutionSubName || "Universidade Lusíada de Angola";
-  const institutionNif = data.institutionNif || "5401125550";
+  const institutionName = data.institutionName || "Instituição de Ensino";
+  const institutionSubName = data.institutionSubName || "";
+  const institutionNif = data.institutionNif || "N/D";
   const dateObj = new Date(data.paymentDate || new Date().toISOString());
   const formattedDate = dateObj.toLocaleDateString("pt-PT");
   const weekday = dateObj.toLocaleDateString("pt-PT", { weekday: "long" });
@@ -173,5 +174,40 @@ export function generateReceiptPDF(data: ReceiptData) {
   doc.setFont("courier", "italic");
   doc.text("Documento processado por computador", 14, footerY + 30);
 
+  return doc;
+}
+
+export function generateReceiptPDF(data: ReceiptData) {
+  const doc = createReceiptDoc(data);
   doc.save(`Recibo_${data.transactionId.substring(0, 8)}.pdf`);
+}
+
+export async function shareReceiptPDF(data: ReceiptData) {
+  const doc = createReceiptDoc(data);
+  const blob = doc.output("blob");
+  const file = new File([blob], `Recibo_${data.transactionId.substring(0, 8)}.pdf`, { type: "application/pdf" });
+  const textMessage = `*Recibo de Pagamento*\nInstituição: ${data.institutionName || "Instituição de Ensino"}\nEstudante: ${data.studentName}\nValor: ${data.amount} Kz\nReferência: ${data.transactionId}\nData: ${new Date(data.paymentDate).toLocaleDateString('pt-PT')}`;
+
+  if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({
+        files: [file],
+        title: 'Recibo de Pagamento',
+        text: textMessage,
+      });
+      return;
+    } catch (err) {
+      console.error("Erro ao partilhar ficheiro:", err);
+    }
+  }
+
+  // Fallback to WhatsApp Web
+  const formattedPhone = data.phone ? data.phone.replace(/\D/g, '') : '';
+  let url = '';
+  if (formattedPhone) {
+    url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(textMessage)}`;
+  } else {
+    url = `https://wa.me/?text=${encodeURIComponent(textMessage)}`;
+  }
+  window.open(url, '_blank');
 }

@@ -18,9 +18,9 @@ import axiosInstance from "@/service/api";
 import { useToast } from "@/hooks/use-toast";
 import { ConfirmPaymentModal } from "./ConfirmPaymentModal";
 import { LatePaymentReasonModal } from "./LatePaymentReasonModal";
-import { generateReceiptPDF } from "@/lib/receiptGenerator";
+import { generateReceiptPDF, shareReceiptPDF } from "@/lib/receiptGenerator";
 import { useAuth } from "@/store/useAuth";
-import { FileText } from "lucide-react";
+import { FileText, Share2 } from "lucide-react";
 
 interface StudentPayment {
   id: string;
@@ -510,12 +510,39 @@ export function StudentsOverviewTable({ students, onUpdate, isLoading }: Props) 
                                                 paymentType: p.type || "Mensalidade",
                                                 paymentMethod: p.paymentMethod || undefined,
                                                 tellerName: user?.name || "Funcionário",
+                                                institutionName: user?.institution?.name,
+                                                institutionNif: user?.institution?.nif,
                                               });
                                             }}
                                             title="Baixar Recibo PDF"
                                             className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-sky-900/30 border border-sky-700/50 text-sky-400 text-[10px] hover:bg-sky-900/50 cursor-pointer"
                                           >
                                             <FileText className="w-3 h-3" /> Recibo
+                                          </button>
+                                        )}
+                                        {/* Partilhar Recibo */}
+                                        {paymentNormalizedStatus(p.status, p.proofUrl) === "pago" && (
+                                          <button
+                                            onClick={() => {
+                                              shareReceiptPDF({
+                                                transactionId: p.id || "TX-0000",
+                                                studentName: s.studentName || "Aluno Não Identificado",
+                                                studentCode: s.studentCode || undefined,
+                                                studentCourse: s.className || "Geral",
+                                                amount: p.amount || 0,
+                                                paymentDate: p.paymentDate || p.createdAt || new Date().toISOString(),
+                                                paymentType: p.type || "Mensalidade",
+                                                paymentMethod: p.paymentMethod || undefined,
+                                                tellerName: user?.name || "Funcionário",
+                                                institutionName: user?.institution?.name,
+                                                institutionNif: user?.institution?.nif,
+                                                phone: s.contact || s.parentContact, // Assumindo s.contact
+                                              });
+                                            }}
+                                            title="Partilhar Recibo"
+                                            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-900/30 border border-emerald-700/50 text-emerald-400 text-[10px] hover:bg-emerald-900/50 cursor-pointer"
+                                          >
+                                            <Share2 className="w-3 h-3" /> Partilhar
                                           </button>
                                         )}
                                       </div>
