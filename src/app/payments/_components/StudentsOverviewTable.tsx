@@ -536,7 +536,7 @@ export function StudentsOverviewTable({ students, onUpdate, isLoading }: Props) 
                                                 tellerName: user?.name || "Funcionário",
                                                 institutionName: user?.institution?.name,
                                                 institutionNif: user?.institution?.nif,
-                                                phone: s.contact || s.parentContact, // Assumindo s.contact
+                                                phone: (s as any).contact || (s as any).parentContact || (s as any).profile?.phone || (s as any).employeeProfile?.phone,
                                               });
                                             }}
                                             title="Partilhar Recibo"
