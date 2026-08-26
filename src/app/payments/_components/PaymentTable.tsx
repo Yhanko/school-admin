@@ -446,7 +446,7 @@ export function PaymentTable({
                               tellerName: user?.name || "Funcionário",
                               institutionName: user?.institution?.name,
                               institutionNif: user?.institution?.nif,
-                              phone: payment.student?.employeeProfile?.phone || payment.student?.profile?.phone,
+                              phone: (payment.student as any)?.employeeProfile?.phone || (payment.student as any)?.profile?.phone || (payment.student as any)?.contact,
                             });
                           }}
                           title="Partilhar no WhatsApp"
@@ -594,7 +594,7 @@ export function PaymentTable({
                         tellerName: user?.name || "Funcionário",
                         institutionName: user?.institution?.name,
                         institutionNif: user?.institution?.nif,
-                        phone: payment.student?.employeeProfile?.phone || payment.student?.profile?.phone,
+                        phone: (payment.student as any)?.employeeProfile?.phone || (payment.student as any)?.profile?.phone || (payment.student as any)?.contact,
                       });
                     }}
                     title="Partilhar no WhatsApp"
