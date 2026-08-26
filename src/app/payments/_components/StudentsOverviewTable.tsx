@@ -186,13 +186,13 @@ export function StudentsOverviewTable({ students, onUpdate, isLoading }: Props) 
         await axiosInstance.patch(`/finance/payments/${paymentId}/status`, { status: newStatus });
       } else {
         // Create a new synthetic payment record to mark the student
-        await axiosInstance.post("/finance/payments", {
+        const resp = await axiosInstance.post("/finance/payments", {
           studentId,
           type: "tuition",
           amount: 0,
-          status: newStatus,
           description: "Marcado manualmente pelo administrador",
         });
+        await axiosInstance.patch(`/finance/payments/${resp.data.id}/status`, { status: newStatus });
       }
       toast({ title: "Estado atualizado", description: `Marcado como "${newStatus}" com sucesso.` });
       onUpdate();
