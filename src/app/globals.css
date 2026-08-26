@@ -777,10 +777,17 @@ html:not(.dark) textarea::placeholder {
 
 /* Modais e Dialogs */
 html:not(.dark) [role="dialog"],
-html:not(.dark) [data-state="open"] > div {
+html:not(.dark) [data-state="open"]:not(.group) > div {
   background-color: #F4F6F8 !important;
   color: #090D16 !important;
   border-color: #CBD5E1 !important;
+}
+
+/* Correção específica para Toasts */
+html:not(.dark) .toaster [data-state="open"] > div,
+html:not(.dark) .bg-destructive[data-state="open"] > div {
+  background-color: transparent !important;
+  color: inherit !important;
 }
 
 /* Tabelas e Linhas de Dados - Garantia Total de Hover Claro */
