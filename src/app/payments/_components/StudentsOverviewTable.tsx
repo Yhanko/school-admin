@@ -71,16 +71,28 @@ function StatusBadge({ status }: { status: string }) {
           <CheckCircle className="w-3 h-3" /> Pago
         </span>
       );
+    case "em_validacao":
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-sky-900/40 text-sky-300 border border-sky-700">
+          <Clock className="w-3 h-3" /> Em Validação
+        </span>
+      );
     case "pendente":
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-violet-900/40 text-violet-300 border border-violet-700">
-          <Clock className="w-3 h-3" /> Pendente / Aguarda validação
+          <Clock className="w-3 h-3" /> Pendente
         </span>
       );
     case "atrasado":
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-900/40 text-amber-400 border border-amber-700">
           <AlertTriangle className="w-3 h-3" /> Em Atraso
+        </span>
+      );
+    case "cancelado":
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-red-900/40 text-red-400 border border-red-700">
+          <AlertCircle className="w-3 h-3" /> Cancelado
         </span>
       );
     default:
@@ -92,9 +104,12 @@ function StatusBadge({ status }: { status: string }) {
   }
 }
 
-function paymentNormalizedStatus(status: string): string {
-  if (status === "confirmed" || status === "pago") return "pago";
-  if (status === "atrasado" || status === "overdue" || status === "cancelled") return "atrasado";
+function paymentNormalizedStatus(status?: string, proofUrl?: string | null): string {
+  const s = status?.toLowerCase()?.trim() || "";
+  if (["confirmed", "pago", "paid", "concluido"].includes(s)) return "pago";
+  if (["cancelled", "cancelado", "rejected"].includes(s)) return "cancelado";
+  if (["atrasado", "overdue", "late"].includes(s)) return "atrasado";
+  if (["processing", "em validação", "em validacao", "aguarda validação", "aguarda validacao", "recebido", "submitted"].includes(s) || proofUrl) return "em_validacao";
   return "pendente";
 }
 
@@ -290,6 +305,7 @@ export function StudentsOverviewTable({ students, onUpdate, isLoading }: Props) 
                 const isExpanded = expandedIds.has(s.studentId);
                 const initials = s.studentName.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase();
                 const latestPayment = s.payments[0] ?? null;
+                const isLatestUnderValidation = latestPayment && paymentNormalizedStatus(latestPayment.status, latestPayment.proofUrl) === "em_validacao";
                 const isUpdating = updating === s.studentId;
 
                 return (
@@ -353,35 +369,37 @@ export function StudentsOverviewTable({ students, onUpdate, isLoading }: Props) 
                       {/* Quick Actions */}
                       <td className="py-3 px-4 text-center" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-center gap-1.5 flex-wrap">
-                          {/* Mark overdue — always shown unless already overdue */}
-                          <button
-                            disabled={isUpdating || s.overallStatus === "atrasado"}
-                            onClick={() =>
-                              handleOpenLate({
-                                studentId: s.studentId,
-                                studentName: s.studentName,
-                                paymentId: latestPayment?.id ?? null,
-                                paymentType: latestPayment?.type,
-                              })
-                            }
-                            title="Registar atraso"
-                            className="px-2 py-1 rounded bg-amber-900 border border-amber-700 text-amber-400 text-[10px] font-bold hover:bg-amber-900/60 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
-                          >
-                            {isUpdating ? <Loader2 className="w-3 h-3 animate-spin" /> : "⚠ Atraso"}
-                          </button>
+                          {/* Mark overdue — shown when there's an expected payment (not paid) but not when it's under validation */}
+                          {s.overallStatus !== "pago" && !isLatestUnderValidation && s.overallStatus !== "atrasado" && (
+                            <button
+                              disabled={isUpdating}
+                              onClick={() =>
+                                handleOpenLate({
+                                  studentId: s.studentId,
+                                  studentName: s.studentName,
+                                  paymentId: latestPayment?.id ?? null,
+                                  paymentType: latestPayment?.type,
+                                })
+                              }
+                              title="Registar atraso"
+                              className="px-2 py-1 rounded bg-amber-900 border border-amber-700 text-amber-400 text-[10px] font-bold hover:bg-amber-900/60 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                            >
+                              {isUpdating ? <Loader2 className="w-3 h-3 animate-spin" /> : "⚠ Atraso"}
+                            </button>
+                          )}
 
-                          {/* Confirm paid — only when status is pendente */}
-                          {s.overallStatus === "pendente" && (
+                          {/* Confirm paid — visível APENAS quando o aluno tem um pagamento submetido (em validação) */}
+                          {isLatestUnderValidation && (
                             <button
                               disabled={isUpdating}
                               onClick={() =>
                                 handleOpenConfirm({
                                   studentId: s.studentId,
                                   studentName: s.studentName,
-                                  paymentId: latestPayment?.id ?? null,
-                                  paymentType: latestPayment?.type,
-                                  proofUrl: latestPayment?.proofUrl,
-                                  amount: latestPayment?.amount,
+                                  paymentId: latestPayment!.id,
+                                  paymentType: latestPayment!.type,
+                                  proofUrl: latestPayment!.proofUrl,
+                                  amount: latestPayment!.amount,
                                 })
                               }
                               title="Confirmar pagamento recebido"
@@ -419,7 +437,7 @@ export function StudentsOverviewTable({ students, onUpdate, isLoading }: Props) 
                                       {p.amount.toLocaleString()} Kz
                                     </td>
                                     <td className="py-2 pr-4 text-center">
-                                      <StatusBadge status={paymentNormalizedStatus(p.status)} />
+                                      <StatusBadge status={paymentNormalizedStatus(p.status, p.proofUrl)} />
                                     </td>
                                     <td className="py-2 pr-4 text-center">
                                       {p.proofUrl ? (
@@ -440,23 +458,24 @@ export function StudentsOverviewTable({ students, onUpdate, isLoading }: Props) 
                                     </td>
                                     <td className="py-2 text-center">
                                       <div className="flex items-center justify-center gap-1">
-                                        {/* Atraso — always shown unless already overdue */}
-                                        <button
-                                          onClick={() =>
-                                            handleOpenLate({
-                                              studentId: s.studentId,
-                                              studentName: s.studentName,
-                                              paymentId: p.id,
-                                              paymentType: p.type,
-                                            })
-                                          }
-                                          disabled={p.status === "atrasado" || p.status === "overdue"}
-                                          className="px-1.5 py-0.5 rounded bg-amber-900/30 border border-amber-700/50 text-amber-400 text-[10px] hover:bg-amber-900/50 disabled:opacity-30 cursor-pointer"
-                                        >
-                                          Atraso
-                                        </button>
-                                        {/* Confirmar — only when payment is pending */}
-                                        {(p.status === "pending" || p.status === "pendente") && (
+                                        {/* Atraso — only shown if payment is pending (not paid and not under validation) */}
+                                        {paymentNormalizedStatus(p.status, p.proofUrl) === "pendente" && (
+                                          <button
+                                            onClick={() =>
+                                              handleOpenLate({
+                                                studentId: s.studentId,
+                                                studentName: s.studentName,
+                                                paymentId: p.id,
+                                                paymentType: p.type,
+                                              })
+                                            }
+                                            className="px-1.5 py-0.5 rounded bg-amber-900/30 border border-amber-700/50 text-amber-400 text-[10px] hover:bg-amber-900/50 cursor-pointer"
+                                          >
+                                            Atraso
+                                          </button>
+                                        )}
+                                        {/* Confirmar — visible ONLY when payment is submitted/processing (em_validacao) */}
+                                        {paymentNormalizedStatus(p.status, p.proofUrl) === "em_validacao" && (
                                           <button
                                             onClick={() =>
                                               handleOpenConfirm({

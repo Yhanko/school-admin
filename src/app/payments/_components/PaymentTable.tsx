@@ -31,16 +31,13 @@ interface PaymentTableProps {
 type TabFilter = "all" | "confirmed" | "pending" | "atrasado" | "cancelled";
 
 // Normalize status to a canonical value
-const normalizeStatus = (status?: string): string => {
+const normalizePaymentStatus = (status?: string, proofUrl?: string | null): string => {
   const s = status?.toLowerCase()?.trim();
-  switch (s) {
-    case "confirmed": case "pago": return "confirmed";
-    case "pending": case "pendente": return "pending";
-    case "processing": case "em validação": case "em validacao": case "aguarda validação": case "aguarda validacao": return "processing"; 
-    case "atrasado": case "overdue": return "atrasado";
-    case "cancelled": case "cancelado": return "cancelled";
-    default: return s || "pending";
-  }
+  if (["confirmed", "pago", "paid", "concluido"].includes(s || "")) return "confirmed";
+  if (["cancelled", "cancelado", "rejected"].includes(s || "")) return "cancelled";
+  if (["atrasado", "overdue", "late"].includes(s || "")) return "atrasado";
+  if (["processing", "em validação", "em validacao", "aguarda validação", "aguarda validacao", "recebido", "submitted"].includes(s || "") || proofUrl) return "processing";
+  return "pending";
 };
 
 // Human-readable payment type labels
@@ -121,7 +118,7 @@ export function PaymentTable({
 
   const filteredPayments = useMemo(() => {
     return payments.filter((payment) => {
-      const normalized = normalizeStatus(payment.status);
+      const normalized = normalizePaymentStatus(payment.status, payment.proofUrl);
 
       // Tab filter
       if (activeTab !== "all" && normalized !== activeTab) {
@@ -147,15 +144,15 @@ export function PaymentTable({
   const counts = useMemo(() => {
     return {
       all: payments.length,
-      confirmed: payments.filter((p) => normalizeStatus(p.status) === "confirmed").length,
-      pending:   payments.filter((p) => normalizeStatus(p.status) === "pending").length,
-      atrasado:  payments.filter((p) => normalizeStatus(p.status) === "atrasado").length,
-      cancelled: payments.filter((p) => normalizeStatus(p.status) === "cancelled").length,
+      confirmed: payments.filter((p) => normalizePaymentStatus(p.status, p.proofUrl) === "confirmed").length,
+      pending:   payments.filter((p) => normalizePaymentStatus(p.status, p.proofUrl) === "pending").length,
+      atrasado:  payments.filter((p) => normalizePaymentStatus(p.status, p.proofUrl) === "atrasado").length,
+      cancelled: payments.filter((p) => normalizePaymentStatus(p.status, p.proofUrl) === "cancelled").length,
     };
   }, [payments]);
 
-  const getStatusBadge = (status?: string) => {
-    const n = normalizeStatus(status);
+  const getStatusBadge = (status?: string, proofUrl?: string | null) => {
+    const n = normalizePaymentStatus(status, proofUrl);
     switch (n) {
       case "confirmed":
         return (
@@ -354,7 +351,7 @@ export function PaymentTable({
 
                   {/* Status */}
                   <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                    {getStatusBadge(payment.status)}
+                    {getStatusBadge(payment.status, payment.proofUrl)}
                   </td>
 
                   {/* Date */}
@@ -383,8 +380,8 @@ export function PaymentTable({
                   {/* Actions */}
                   <td className="py-3.5 px-4 text-center whitespace-nowrap">
                     <div className="flex items-center justify-center gap-1.5">
-                      {/* Atraso — always visible unless already overdue */}
-                      {normalizeStatus(payment.status) !== "atrasado" && (
+                      {/* Atraso — only when pending (not submitted/paid yet) */}
+                      {normalizePaymentStatus(payment.status, payment.proofUrl) === "pending" && (
                         <button
                           onClick={() => setLatePayment(payment)}
                           disabled={isPatching}
@@ -395,8 +392,8 @@ export function PaymentTable({
                         </button>
                       )}
 
-                      {/* Confirmar — visível quando pending OU processing (aluno submeteu comprovativo) */}
-                      {["pending", "processing"].includes(normalizeStatus(payment.status)) && (
+                      {/* Confirmar — visível APENAS quando o aluno submeteu o pagamento (processing/em validação) */}
+                      {normalizePaymentStatus(payment.status, payment.proofUrl) === "processing" && (
                         <button
                           onClick={() => setConfirmPayment(payment)}
                           disabled={isPatching}
@@ -464,7 +461,7 @@ export function PaymentTable({
                   {payment.type || "Mensalidade"}
                 </p>
               </div>
-              <div className="shrink-0">{getStatusBadge(payment.status)}</div>
+              <div className="shrink-0">{getStatusBadge(payment.status, payment.proofUrl)}</div>
             </div>
 
             <div className="flex items-center justify-between pt-2 border-t border-[#414042]/40 text-xs">
@@ -487,7 +484,7 @@ export function PaymentTable({
                 </span>
               </div>
               <div className="flex items-center gap-1.5">
-                {normalizeStatus(payment.status) !== "atrasado" && (
+                {normalizePaymentStatus(payment.status, payment.proofUrl) === "pending" && (
                   <button
                     onClick={() => setLatePayment(payment)}
                     disabled={isPatching}
@@ -498,7 +495,7 @@ export function PaymentTable({
                   </button>
                 )}
 
-                {["pending", "processing"].includes(normalizeStatus(payment.status)) && (
+                {normalizePaymentStatus(payment.status, payment.proofUrl) === "processing" && (
                   <button
                     onClick={() => setConfirmPayment(payment)}
                     disabled={isPatching}
