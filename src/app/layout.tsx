@@ -34,8 +34,24 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const clientEnv = {
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || process.env.API_BASE_URL || "",
+    NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || process.env.API_BASE_URL || "",
+    NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "",
+    NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET: process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "",
+    NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME || "Yhanko Educa",
+  };
+
   return (
     <html lang="pt-BR" suppressHydrationWarning>
+      <head>
+        <script
+          id="env-config"
+          dangerouslySetInnerHTML={{
+            __html: `window.__ENV__ = ${JSON.stringify(clientEnv)};`,
+          }}
+        />
+      </head>
       <body className={`${hankenGrotesk.variable} ${jetbrainsMono.variable} font-sans antialiased`}>
         <Providers>
           {children}

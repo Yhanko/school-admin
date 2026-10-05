@@ -41,8 +41,12 @@ export function ImageUploadButton({ onSuccess }: ImageUploadButtonProps) {
 
     try {
       let uploadedUrl = "";
-      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-      const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+      const cloudName =
+        (typeof window !== "undefined" && window.__ENV__?.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME) ||
+        process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+      const uploadPreset =
+        (typeof window !== "undefined" && window.__ENV__?.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET) ||
+        process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
       // Option A: Direct upload to Cloudinary if client env vars are provided
       if (cloudName && uploadPreset) {
